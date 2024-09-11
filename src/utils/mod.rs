@@ -1,7 +1,3 @@
-
-use sqlx::Sqlite;
-use welds::connections::sqlite::SqliteClient;
-use welds::connections::Transaction;
 use welds::model_traits::HasSchema;
 use welds::model_traits::TableColumns;
 use welds::model_traits::TableInfo;
@@ -34,9 +30,10 @@ where
         }
     }
 
-    Ok(!diff.is_empty())
+    Ok(diff.is_empty())
 }
 
+/// Return false if error exists
 pub async fn check_db_integrity(client: &dyn Client) -> Result<bool, WeldsError> {
     let users = check_table_diffs::<User>(client).await?;
     let listens = check_table_diffs::<Listen>(client).await?;

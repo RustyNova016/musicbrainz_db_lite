@@ -8,13 +8,23 @@ use super::listen::Listen;
 /// The fingerprint that identify a listened recording. This is the data scrobblers send to LB to tell that the user listened to a recording
 #[derive(Debug, WeldsModel)]
 #[welds(table = "messybrainz_submission")]
-#[welds(BelongsTo(user, User, "id"))]
+#[welds(BelongsTo(user, User, "id"))] 
 #[welds(HasMany(listens, Listen, "id"))]
 pub struct MessybrainzSubmission {
     #[welds(primary_key)]
     pub id: i32,
 
     pub msid: String,
+
+    pub recording: String,
+
+    pub artist_credit: String,
+
+    pub release: Option<String>,
+
+    pub track_number: Option<String>,
+
+    pub duration: Option<i32>
 }
 
 impl MessybrainzSubmission {

@@ -2,6 +2,7 @@
 name = "musicbrainz-db-lite"
 version = "0.1.0"
 edition = "2021"
+msrv = "1.75.0"
 
 [dependencies]
 async-trait = "0.1.82"
@@ -9,10 +10,19 @@ chrono = "0.4.38"
 extend = "1.2.0"
 listenbrainz = "0.8.0"
 musicbrainz_rs_nova = "0.7.0"
-sqlx = {version= "0.8.2", features = ["runtime-tokio", "macros"]}
-tokio = "1.40.0"
-welds = {version= "0.4.0", features = ["sqlite", "detect", "check", "migrations"]}
+sqlx = { version = "0.8.2", features = ["runtime-tokio", "macros"] }
+tokio = { version = "1.40.0", features = ["full"] }
+welds = { version = "0.4.0", features = [
+    "sqlite",
+    "detect",
+    "check",
+    "migrations",
+] }
 
 
 [dev-dependencies]
 serial_test = "3.1.1"
+
+[[test]]
+name = "all"
+path = "tests/tests.rs"

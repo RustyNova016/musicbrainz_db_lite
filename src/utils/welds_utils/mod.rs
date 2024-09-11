@@ -1,10 +1,5 @@
-use async_trait::async_trait;
 use welds::connections::sqlite::SqliteClient;
-use welds::connections::ExecuteResult;
-use welds::connections::Param;
 use welds::connections::Transaction;
-use welds::Client;
-use welds::WeldsError;
 
 pub enum ClientOrTransaction<'t> {
     Client(&'t SqliteClient),

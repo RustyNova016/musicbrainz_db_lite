@@ -1,7 +1,7 @@
 use welds::connections::sqlite::SqliteClient;
 use welds::connections::Transaction;
 use welds::TransactStart;
-use welds::{WeldsError};
+use welds::WeldsError;
 
 pub mod listenbrainz;
 
@@ -13,7 +13,7 @@ pub trait SaveToDatabase {
     /// Save the object into the database
     async fn save(&self, client: &SqliteClient) -> Result<(), WeldsError> {
         let trans = client.begin().await?;
-        self.save_in_transaction(&trans);
+        self.save_in_transaction(&trans).await?;
         trans.commit().await?;
         Ok(())
     }

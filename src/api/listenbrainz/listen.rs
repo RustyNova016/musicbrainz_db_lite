@@ -1,13 +1,10 @@
 use crate::Client;
 use listenbrainz::raw::response::UserListensListen;
-use welds::connections::sqlite::SqliteClient;
 use welds::connections::Transaction;
 use welds::prelude::DbState;
-use welds::TransactStart;
 use welds::WeldsError;
 
 use crate::models::listenbrainz::listen_user_metadata::MessybrainzSubmission;
-use crate::models::listenbrainz::listen_user_metadata::MessybrainzSubmissionRelation;
 use crate::{
     api::SaveToDatabase,
     models::{listenbrainz::listen::Listen, musicbrainz::user::User},
@@ -23,7 +20,7 @@ impl SaveToDatabase for UserListensListen {
 
         let mut data = Listen::new();
         data.listened_at = self.listened_at;
-        data.msid = messy.msid.clone();
+        data.recording_msid = messy.msid.clone();
         data.user = user.name.clone();
 
         data.save(client).await?;
@@ -50,4 +47,3 @@ impl MessybrainzSubmission {
         Ok(mess)
     }
 }
-

@@ -13,5 +13,7 @@ pub struct Listen {
 
     pub user: String,
 
-    pub msid: String,
+    pub recording_msid: String,
+
+    pub data: Option<String>,
 }

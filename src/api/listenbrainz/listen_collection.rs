@@ -34,7 +34,11 @@ pub impl UserListensPayload {
         let listens = self
             .listens
             .iter()
-            .filter(|l| l.listened_at > delete_range.0 && l.listened_at < delete_range.1)
+            .filter(|l| {
+                let var_name = l.listened_at < delete_range.0;
+                let var_namet = l.listened_at > delete_range.1;
+                var_name && 
+                var_namet})
             .cloned()
             .collect::<Vec<_>>();
 

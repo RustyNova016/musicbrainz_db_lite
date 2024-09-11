@@ -1,10 +1,5 @@
-
-
 use welds::{state::DbState, Client, WeldsError, WeldsModel};
-
 use crate::models::musicbrainz::user::User;
-
-use super::listen::Listen;
 use super::listen_user_metadata::MessybrainzSubmission;
 
 #[derive(Debug, WeldsModel)]
@@ -12,11 +7,10 @@ use super::listen_user_metadata::MessybrainzSubmission;
 //#[welds(BelongsTo(recording_mbid, User, "id"))]
 #[welds(BelongsTo(recording_msid, MessybrainzSubmission, "msid"))]
 #[welds(BelongsTo(user, User, "id"))]
-pub struct MsidMapping {
-    #[welds(primary_key)]
+pub struct MsidMapping { 
     pub recording_mbid: String,
 
-    pub recording_msid: String,
+    pub recording_msid: String, 
 
     pub user: i32,
 }
