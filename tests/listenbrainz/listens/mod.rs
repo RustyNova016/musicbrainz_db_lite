@@ -10,13 +10,18 @@ use crate::setup_file_database;
 #[tokio::test]
 #[serial_test::serial]
 async fn should_insert_dump() {
-    let client = setup_database().await.unwrap();
+    let client = setup_file_database().await.unwrap();
 
     let lb_client = Client::new();
-    let dump = lb_client.user_listens("RustyNova", None, Some(1726041017), Some(100)).unwrap();
+    let dump = lb_client
+        .user_listens("RustyNova", None, Some(1726041017), Some(100))
+        .unwrap();
 
     let trans = client.begin().await.unwrap();
-    dump.payload.save_listen_payload_in_transaction(&trans, 1726041017, 100).await.unwrap();
+    dump.payload
+        .save_listen_payload_in_transaction(&trans, 1726041017, 100)
+        .await
+        .unwrap();
     //println!("{:?}", trans);
     assert!(trans.commit().await.is_ok());
 

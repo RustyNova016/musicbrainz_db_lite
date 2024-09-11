@@ -1,16 +1,16 @@
-use welds::{state::DbState, Client, WeldsError, WeldsModel};
-use crate::models::musicbrainz::user::User;
 use super::listen_user_metadata::MessybrainzSubmission;
+use crate::models::musicbrainz::user::User;
+use welds::{state::DbState, Client, WeldsError, WeldsModel};
 
 #[derive(Debug, WeldsModel)]
 #[welds(table = "msid_mapping")]
 //#[welds(BelongsTo(recording_mbid, User, "id"))]
 #[welds(BelongsTo(recording_msid, MessybrainzSubmission, "msid"))]
 #[welds(BelongsTo(user, User, "id"))]
-pub struct MsidMapping { 
+pub struct MsidMapping {
     pub recording_mbid: String,
 
-    pub recording_msid: String, 
+    pub recording_msid: String,
 
     pub user: i32,
 }
@@ -41,12 +41,12 @@ impl MsidMapping {
         if let Some(mut mapping) = Self::find_by_user_msid(client, user_id, &msid).await? {
             if mapping.recording_mbid != mbid {
                 mapping.recording_mbid = mbid;
-                return mapping.save(client).await
+                return mapping.save(client).await;
             }
             return Ok(());
         }
 
-        let mut mapping  = MsidMapping::new();
+        let mut mapping = MsidMapping::new();
         mapping.user = user_id;
         mapping.recording_msid = msid;
         mapping.recording_mbid = mbid;

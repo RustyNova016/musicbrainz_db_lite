@@ -1,30 +1,38 @@
+use macon::Builder;
 use welds::{state::DbState, Client, WeldsError, WeldsModel};
 
 use crate::models::musicbrainz::user::User;
 
 use super::listen::Listen;
 
-
 /// The fingerprint that identify a listened recording. This is the data scrobblers send to LB to tell that the user listened to a recording
-#[derive(Debug, WeldsModel)]
+#[derive(Debug, WeldsModel, Builder)]
+#[builder(Default=!)]
+#[derive()]
 #[welds(table = "messybrainz_submission")]
-#[welds(BelongsTo(user, User, "id"))] 
+#[welds(BelongsTo(user, User, "id"))]
 #[welds(HasMany(listens, Listen, "id"))]
 pub struct MessybrainzSubmission {
     #[welds(primary_key)]
     pub id: i32,
 
+    #[builder(Default=!)]
     pub msid: String,
 
+    #[builder(Default=!)]
     pub recording: String,
 
+    #[builder(Default=!)]
     pub artist_credit: String,
 
+    #[builder(Default=!)]
     pub release: Option<String>,
 
+    #[builder(Default=!)]
     pub track_number: Option<String>,
 
-    pub duration: Option<i32>
+    #[builder(Default=!)]
+    pub duration: Option<i32>,
 }
 
 impl MessybrainzSubmission {
