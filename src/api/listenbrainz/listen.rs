@@ -1,3 +1,4 @@
+use crate::models::listenbrainz::msid_mapping::MsidMapping;
 use crate::Client;
 use listenbrainz::raw::response::UserListensListen;
 use welds::connections::Transaction;
@@ -13,10 +14,21 @@ use crate::{
 impl SaveToDatabase for UserListensListen {
     async fn save_in_transaction<'t>(&self, client: &Transaction<'t>) -> Result<(), WeldsError> {
         // First, get the user
-        User::get_or_create_user(client, &self.user_name).await?;
+        let user = User::get_or_create_user(client, &self.user_name).await?;
 
         // Then upsert the MSID.
         MessybrainzSubmission::upsert_listen_messybrainz_data(client, self).await?;
+
+        // Set the mapping if available
+        if let Some(mapping) = &self.track_metadata.mbid_mapping {
+            MsidMapping::set_user_mapping(
+                client,
+                user.id,
+                self.recording_msid.clone(),
+                mapping.recording_mbid.clone(),
+            )
+            .await?;
+        }
 
         let mut data = DbState::new_uncreated(Listen::from(self));
         data.save(client).await?;

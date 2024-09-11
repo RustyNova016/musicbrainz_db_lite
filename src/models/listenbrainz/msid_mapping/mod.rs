@@ -8,6 +8,9 @@ use welds::{state::DbState, Client, WeldsError, WeldsModel};
 #[welds(BelongsTo(recording_msid, MessybrainzSubmission, "msid"))]
 #[welds(BelongsTo(user, User, "id"))]
 pub struct MsidMapping {
+    #[welds(primary_key)]
+    pub id: i32,
+
     pub recording_mbid: String,
 
     pub recording_msid: String,

@@ -19,6 +19,7 @@ CREATE TABLE `messybrainz_submission` (
     `duration` INTEGER
 ) STRICT;
 CREATE TABLE IF NOT EXISTS \"msid_mapping\" (
+    `id` INTEGER PRIMARY KEY NOT NULL,
     `recording_msid` TEXT REFERENCES `messybrainz_submission`(`msid`),
     `recording_mbid` TEXT,
     `user` INTEGER NOT NULL REFERENCES `users`(`id`)
