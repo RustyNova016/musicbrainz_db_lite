@@ -1,7 +1,7 @@
 use std::fs;
 use std::fs::File;
 
-use musicbrainz_db_lite::database::tables::create_database;
+use musicbrainz_db_lite::database::create_database;
 use musicbrainz_db_lite::utils::check_db_integrity;
 use welds::connections::sqlite::SqliteClient;
 use welds::WeldsError;
@@ -31,8 +31,11 @@ pub async fn setup_file_database() -> Result<SqliteClient, WeldsError> {
 #[serial_test::serial]
 async fn should_setup_database() {
     let res = setup_database().await;
-
-    assert!(res.is_ok())
+    if res.is_err() {
+        res.unwrap();
+    } else {
+        assert!(res.is_ok())
+    }
 }
 
 #[tokio::test]

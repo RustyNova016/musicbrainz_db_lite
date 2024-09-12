@@ -2,7 +2,7 @@
 name = "musicbrainz-db-lite"
 version = "0.1.0"
 edition = "2021"
-msrv = "1.75.0"
+rust-version = "1.75.0"
 
 [dependencies]
 async-trait = "0.1.82"
