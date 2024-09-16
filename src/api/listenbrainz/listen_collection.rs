@@ -2,13 +2,10 @@ use crate::api::SaveToDatabase;
 use extend::ext;
 use listenbrainz::raw::response::UserListensListen;
 use listenbrainz::raw::response::UserListensPayload;
-use welds::connections::Transaction;
+use welds::Client;
 
 impl SaveToDatabase for Vec<UserListensListen> {
-    async fn save_in_transaction<'t>(
-        &self,
-        client: &Transaction<'t>,
-    ) -> Result<(), welds::WeldsError> {
+    async fn save_in_transaction(&self, client: &dyn Client) -> Result<(), welds::WeldsError> {
         for listen in self {
             listen.save_in_transaction(client).await?; //TODO: Multithread it
         }
@@ -20,12 +17,13 @@ impl SaveToDatabase for Vec<UserListensListen> {
 #[ext(name = SaveListenPayload)]
 pub impl UserListensPayload {
     /// Save the listens received from the api. Handles deleting the listens, and overlapping ends.
-    /// ⚠️ May not insert all the listens if the recieved count is equal to the asked count
+    ///
+    /// ⚠️ May not insert all the listens if the recieved count is equal to the asked count ⚠️
     ///
     /// Return the timestamp for the next fetch in sequence
-    async fn save_listen_payload_in_transaction<'t>(
+    async fn save_listen_payload_in_transaction(
         &self,
-        client: &Transaction<'t>,
+        client: &dyn Client,
         max_ts: i64,
         count: u64,
     ) -> Result<Option<i64>, welds::WeldsError> {
@@ -36,6 +34,7 @@ pub impl UserListensPayload {
             get_deletion_range_for_limit(self, max_ts)
         };
 
+        // Trim the listens we aren't inserting
         let listens = self
             .listens
             .iter()

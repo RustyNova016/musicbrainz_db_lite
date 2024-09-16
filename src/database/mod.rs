@@ -5,8 +5,8 @@ use welds::connections::sqlite::SqliteClient;
 use welds::TransactStart;
 use welds::WeldsError;
 
-mod triggers;
 mod tables;
+mod triggers;
 
 pub async fn create_database(client: &SqliteClient) -> Result<(), WeldsError> {
     let trans = client.begin().await?;

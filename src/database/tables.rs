@@ -22,8 +22,8 @@ CREATE TABLE `messybrainz_submission` (
 
 CREATE TABLE IF NOT EXISTS \"msid_mapping\" (
     `id` INTEGER PRIMARY KEY NOT NULL,
-    `recording_msid` TEXT REFERENCES `messybrainz_submission`(`msid`),
-    `recording_mbid` TEXT REFERENCES `recording_gid_redirect`(`gid`),
+    `recording_msid` TEXT NOT NULL REFERENCES `messybrainz_submission`(`msid`),
+    `recording_mbid` TEXT NOT NULL REFERENCES `recording_gid_redirect`(`gid`),
     `user` INTEGER NOT NULL REFERENCES `users`(`id`)
 ) STRICT;
 
@@ -45,20 +45,24 @@ PRAGMA foreign_keys = ON;", &[]).await?;
 }
 
 pub async fn create_musicbrainz_tables(client: &dyn Client) -> Result<(), WeldsError> {
-    client.execute("PRAGMA foreign_keys = OFF; 
+    client
+        .execute(
+            "PRAGMA foreign_keys = OFF; 
 
 
 -- Tables
 CREATE TABLE `recording_gid_redirect` (
-    `id` INTEGER PRIMARY KEY NOT NULL, 
-    `gid` TEXT NOT NULL, 
+    `gid` TEXT PRIMARY KEY NOT NULL, 
     `new_id` TEXT
 ) STRICT;
 
 -- Indexes
-CREATE UNIQUE INDEX `idx_recording_gid_redirect` ON `recording_gid_redirect` (`gid`);
+--CREATE UNIQUE INDEX `idx_recording_gid_redirect` ON `recording_gid_redirect` (`gid`);
 
 
-PRAGMA foreign_keys = ON;", &[]).await?;
+PRAGMA foreign_keys = ON;",
+            &[],
+        )
+        .await?;
     Ok(())
 }

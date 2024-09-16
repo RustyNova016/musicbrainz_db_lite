@@ -1,7 +1,10 @@
 use std::fs;
 use std::fs::File;
 
+use ::listenbrainz::raw::Client;
 use musicbrainz_db_lite::database::create_database;
+use musicbrainz_db_lite::models::listenbrainz::listen::selects::ListenMappingFilter;
+use musicbrainz_db_lite::models::listenbrainz::listen::selects::ListenQuery;
 use musicbrainz_db_lite::utils::check_db_integrity;
 use welds::connections::sqlite::SqliteClient;
 use welds::WeldsError;
@@ -44,4 +47,19 @@ async fn model_should_match_db() {
     let client = setup_database().await.unwrap();
 
     assert!(check_db_integrity(&client).await.is_ok_and(|v| v))
+}
+
+#[tokio::test]
+#[serial_test::serial]
+async fn model_should_match_ddsdb() {
+    let client = setup_file_database().await.unwrap();
+
+    let query = ListenQuery {
+        user: "RustyNova".to_string(),
+        unmapped: ListenMappingFilter::Any,
+        fetch_latest_listens: true,
+    };
+
+    let res = query.run(&client).await.unwrap();
+    assert!(!res.is_empty())
 }

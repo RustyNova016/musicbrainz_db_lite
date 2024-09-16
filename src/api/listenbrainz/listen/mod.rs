@@ -1,7 +1,8 @@
+mod fetching;
 use crate::models::listenbrainz::msid_mapping::MsidMapping;
+use crate::models::musicbrainz::recording::redirect::RecordingGidRedirect;
 use crate::Client;
 use listenbrainz::raw::response::UserListensListen;
-use welds::connections::Transaction;
 use welds::prelude::DbState;
 use welds::WeldsError;
 
@@ -12,7 +13,7 @@ use crate::{
 };
 
 impl SaveToDatabase for UserListensListen {
-    async fn save_in_transaction<'t>(&self, client: &Transaction<'t>) -> Result<(), WeldsError> {
+    async fn save_in_transaction(&self, client: &dyn Client) -> Result<(), WeldsError> {
         // First, get the user
         let user = User::get_or_create_user(client, &self.user_name).await?;
 
@@ -21,6 +22,9 @@ impl SaveToDatabase for UserListensListen {
 
         // Set the mapping if available
         if let Some(mapping) = &self.track_metadata.mbid_mapping {
+            // First insert the mbid
+            RecordingGidRedirect::add_mbid(client, &mapping.recording_mbid).await?;
+
             MsidMapping::set_user_mapping(
                 client,
                 user.id,
@@ -61,11 +65,13 @@ impl MessybrainzSubmission {
             MessybrainzSubmission::find_by_msid(client, &listen.recording_msid).await?
         {
             // Messybrainz data is static. So skip the update!
+            println!("{:#?}", msid_in_db);
             return Ok(msid_in_db);
         }
 
         let mut data = DbState::new_uncreated(MessybrainzSubmission::from(listen));
         data.save(client).await?;
+        println!("{:#?}", data);
         Ok(data)
     }
 }
