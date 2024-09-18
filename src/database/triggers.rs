@@ -5,6 +5,10 @@ pub async fn create_listenbrainz_triggers(client: &dyn Client) -> Result<(), Wel
     client
         .execute(
             "
+CREATE TRIGGER `trigger_after_insert_recordings` AFTER INSERT ON `recordings` BEGIN
+    -- NEW references are valid
+    INSERT OR REPLACE INTO recording_gid_redirect VALUES (new.mbid, new.id);
+END;
 
     ",
             &[],

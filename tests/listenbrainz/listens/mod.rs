@@ -22,7 +22,6 @@ async fn should_insert_dump() {
         .save_listen_payload_in_transaction(&trans, 1726041017, 100)
         .await
         .unwrap();
-    //println!("{:?}", trans);
     assert!(trans.commit().await.is_ok());
 
     assert_eq!(Listen::all().count(&client).await.unwrap(), 99)
@@ -43,6 +42,5 @@ async fn should_retrive_user_listens() {
         .save_listen_payload_in_transaction(&trans, 1726041017, 100)
         .await
         .unwrap();
-    //println!("{:?}", trans);
     assert!(trans.commit().await.is_ok());
 }

@@ -48,13 +48,21 @@ pub async fn create_musicbrainz_tables(client: &dyn Client) -> Result<(), WeldsE
     client
         .execute(
             "PRAGMA foreign_keys = OFF; 
-
-
 -- Tables
 CREATE TABLE `recording_gid_redirect` (
     `gid` TEXT PRIMARY KEY NOT NULL, 
-    `new_id` TEXT
+    `new_id` TEXT REFERENCES `recordings`(`mbid`)
 ) STRICT;
+
+CREATE TABLE IF NOT EXISTS `recordings` (
+    `id` INTEGER PRIMARY KEY  NOT NULL, 
+    `mbid` TEXT UNIQUE NOT NULL, 
+    `title` TEXT NOT NULL, 
+    `length` INTEGER, 
+    `disambiguation` TEXT, 
+    `annotation` TEXT
+) STRICT;
+
 
 -- Indexes
 --CREATE UNIQUE INDEX `idx_recording_gid_redirect` ON `recording_gid_redirect` (`gid`);

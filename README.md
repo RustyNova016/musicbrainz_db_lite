@@ -1,6 +1,6 @@
 # Musicbrainz DB Lite
 
-⚠️ Alpha crate! Don't expect anything just yet! ⚠️
+⚠️ Alpha crate! Don't expect anything just yet! (Maybe dragons though...) ⚠️
 
 A rewrite of Musicbrainz's and Listenbrainz's databases in SQLite, with Rust bindings
 
@@ -15,8 +15,8 @@ That's what this crate is the best for. It use SQLite to store data, allowing to
 ## Do I need it?
 
 It all depends on your use case. If you need to cache Musicbrainz data on the user's computer, and don't mind working with sqlite's limitations, go for it.
-But if you need caching on a server, or loaf sqlite, the official database is fine enough.
+But if you need caching on a server, or loave sqlite, the official database is fine enough.
 
 ## It isn't the same schema!
 
-It is close enough™️. The official schema as been used as base, but has been simplified a bit to fit in the constraint of SQLite, and remove fields that are impossible to fetch through the API.
+It is close enough™️. The official schema as been used as base, but has been simplified a bit to fit in the constraint of SQLite, and remove fields that are impossible to fetch through the API. Fields are also based on the API's name, as they are more commonly known than the official ones.

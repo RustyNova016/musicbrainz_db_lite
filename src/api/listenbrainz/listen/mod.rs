@@ -13,7 +13,7 @@ use crate::{
 };
 
 impl SaveToDatabase for UserListensListen {
-    async fn save_in_transaction(&self, client: &dyn Client) -> Result<(), WeldsError> {
+    async fn save(&self, client: &dyn Client) -> Result<(), WeldsError> {
         // First, get the user
         let user = User::get_or_create_user(client, &self.user_name).await?;
 
@@ -65,13 +65,11 @@ impl MessybrainzSubmission {
             MessybrainzSubmission::find_by_msid(client, &listen.recording_msid).await?
         {
             // Messybrainz data is static. So skip the update!
-            println!("{:#?}", msid_in_db);
             return Ok(msid_in_db);
         }
 
         let mut data = DbState::new_uncreated(MessybrainzSubmission::from(listen));
         data.save(client).await?;
-        println!("{:#?}", data);
         Ok(data)
     }
 }

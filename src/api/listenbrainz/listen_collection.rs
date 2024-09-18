@@ -5,9 +5,9 @@ use listenbrainz::raw::response::UserListensPayload;
 use welds::Client;
 
 impl SaveToDatabase for Vec<UserListensListen> {
-    async fn save_in_transaction(&self, client: &dyn Client) -> Result<(), welds::WeldsError> {
+    async fn save(&self, client: &dyn Client) -> Result<(), welds::WeldsError> {
         for listen in self {
-            listen.save_in_transaction(client).await?; //TODO: Multithread it
+            listen.save(client).await?; //TODO: Multithread it
         }
 
         Ok(())
@@ -46,7 +46,7 @@ pub impl UserListensPayload {
             .cloned()
             .collect::<Vec<_>>();
 
-        listens.save_in_transaction(client).await?;
+        listens.save(client).await?;
 
         if count == self.listens.len() as u64 {
             Ok(Some(delete_range.1))
