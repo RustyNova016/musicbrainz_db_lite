@@ -13,7 +13,9 @@ use crate::{
 };
 
 impl SaveToDatabase for UserListensListen {
-    async fn save(&self, client: &dyn Client) -> Result<(), WeldsError> {
+    type ReturnedData = DbState<Listen>;
+
+    async fn save(&self, client: &dyn Client) -> Result<Self::ReturnedData, WeldsError> {
         // First, get the user
         let user = User::get_or_create_user(client, &self.user_name).await?;
 
@@ -36,7 +38,7 @@ impl SaveToDatabase for UserListensListen {
 
         let mut data = DbState::new_uncreated(Listen::from(self));
         data.save(client).await?;
-        Ok(())
+        Ok(data)
     }
 }
 

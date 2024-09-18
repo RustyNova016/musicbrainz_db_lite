@@ -1,4 +1,4 @@
-use welds::{Client, WeldsError, WeldsModel};
+use welds::{connections::sqlite::SqliteClient, Client, WeldsError, WeldsModel};
 
 #[derive(Debug, WeldsModel)]
 #[welds(table = "recording_gid_redirect")]
@@ -28,5 +28,17 @@ impl RecordingGidRedirect {
         data.save(client).await
     }
 
-    //pub async fn assign_mbid(client: &dyn Client, original_mbid: String, new_mbid: String) // TODO
+    pub async fn assign_mbid(
+        client: &SqliteClient,
+        original_mbid: &str,
+        new_id: i64,
+    ) -> Result<sqlx::sqlite::SqliteQueryResult, sqlx::Error> {
+        sqlx::query!(
+            "INSERT OR REPLACE INTO recording_gid_redirect VALUES (?, ?)",
+            original_mbid,
+            new_id
+        )
+        .execute(client.as_sqlx_pool())
+        .await
+    }
 }

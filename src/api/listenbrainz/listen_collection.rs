@@ -5,6 +5,8 @@ use listenbrainz::raw::response::UserListensPayload;
 use welds::Client;
 
 impl SaveToDatabase for Vec<UserListensListen> {
+    type ReturnedData = ();
+
     async fn save(&self, client: &dyn Client) -> Result<(), welds::WeldsError> {
         for listen in self {
             listen.save(client).await?; //TODO: Multithread it
@@ -27,7 +29,7 @@ pub impl UserListensPayload {
         max_ts: i64,
         count: u64,
     ) -> Result<Option<i64>, welds::WeldsError> {
-        // If the  count retrived is the count we asked, then there's an high change that it is a partial fetch.
+        // If the count retrived is the count we asked, then there's an high change that it is a partial fetch.
         let delete_range = if count == self.listens.len() as u64 {
             get_deletion_range_for_part(self, max_ts)
         } else {
