@@ -6,12 +6,15 @@ use welds::WeldsError;
 
 use crate::models::listenbrainz::listen::Listen;
 use crate::models::listenbrainz::listen_user_metadata::MessybrainzSubmission;
+use crate::models::musicbrainz::recording::redirect::RecordingGidRedirect;
+use crate::models::musicbrainz::recording::Recording;
 use crate::models::musicbrainz::user::User;
 
 pub mod extensions;
 pub mod welds_utils;
 
-pub async fn check_table_diffs<T>(client: &dyn Client) -> Result<bool, WeldsError>
+// Return True if the schema is correct
+pub async fn check_table_schema<T>(client: &dyn Client) -> Result<bool, WeldsError>
 where
     T: Send + HasSchema,
     <T as HasSchema>::Schema: TableInfo + TableColumns,
@@ -33,11 +36,13 @@ where
     Ok(diff.is_empty())
 }
 
-/// Return false if error exists
+// Return True if the schema is correct
 pub async fn check_db_integrity(client: &dyn Client) -> Result<bool, WeldsError> {
-    let users = check_table_diffs::<User>(client).await?;
-    let listens = check_table_diffs::<Listen>(client).await?;
-    let messybrainz = check_table_diffs::<MessybrainzSubmission>(client).await?;
+    let users = check_table_schema::<User>(client).await?;
+    let listens = check_table_schema::<Listen>(client).await?;
+    let messybrainz = check_table_schema::<MessybrainzSubmission>(client).await?;
+    let record_redirect = check_table_schema::<RecordingGidRedirect>(client).await?;
+    let recordings = check_table_schema::<Recording>(client).await?;
 
-    Ok(users || listens || messybrainz)
+    Ok(users && listens && messybrainz && record_redirect && recordings)
 }

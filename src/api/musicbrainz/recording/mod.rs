@@ -21,10 +21,10 @@ impl From<&MSRecording> for Recording {
     fn from(value: &MSRecording) -> Self {
         Self {
             id: Default::default(),
-            gid: value.id.clone(),
+            mbid: value.id.clone(),
             annotation: value.annotation.clone(),
             disambiguation: value.disambiguation.clone(),
-            length: value.length.clone(),
+            length: value.length.clone().map(|val| val as i64),
             title: value.title.clone()
         }
     }

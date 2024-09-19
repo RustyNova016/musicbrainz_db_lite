@@ -1,4 +1,4 @@
-pub mod musicbrainz;
+
 use async_trait::async_trait;
 use welds::connections::sqlite::SqliteClient;
 use welds::Client;
@@ -6,6 +6,7 @@ use welds::TransactStart;
 use welds::WeldsError;
 
 pub mod listenbrainz;
+pub mod musicbrainz;
 
 /// This trait is implemented by all the entities that are able to be saved to the database
 pub trait SaveToDatabase {

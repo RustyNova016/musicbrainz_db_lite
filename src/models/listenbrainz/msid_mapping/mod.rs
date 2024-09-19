@@ -1,12 +1,12 @@
 use super::listen_user_metadata::MessybrainzSubmission;
-use crate::models::musicbrainz::user::User;
+use crate::models::musicbrainz::{recording::redirect::RecordingGidRedirect, user::User};
 use welds::{state::DbState, Client, WeldsError, WeldsModel};
 
 #[derive(Debug, WeldsModel)]
 #[welds(table = "msid_mapping")]
-//#[welds(BelongsTo(recording_mbid, User, "id"))]
-#[welds(BelongsTo(recording_msid, MessybrainzSubmission, "msid"))]
-#[welds(BelongsTo(user, User, "id"))]
+#[welds(BelongsTo(recording_mbid, RecordingGidRedirect, "recording_mbid"))]
+#[welds(BelongsTo(messybrainz_submission, MessybrainzSubmission, "recording_msid"))]
+#[welds(BelongsTo(user, User, "user"))]
 pub struct MsidMapping {
     #[welds(primary_key)]
     pub id: i32,

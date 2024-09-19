@@ -1,4 +1,4 @@
-mod fetching;
+pub mod fetching;
 use crate::models::listenbrainz::msid_mapping::MsidMapping;
 use crate::models::musicbrainz::recording::redirect::RecordingGidRedirect;
 use crate::Client;

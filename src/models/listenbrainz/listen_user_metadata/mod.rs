@@ -3,15 +3,15 @@ use welds::{state::DbState, Client, WeldsError, WeldsModel};
 
 use crate::models::musicbrainz::user::User;
 
-use super::listen::Listen;
+use super::{listen::Listen, msid_mapping::MsidMapping};
 
 /// The fingerprint that identify a listened recording. This is the data scrobblers send to LB to tell that the user listened to a recording
 #[derive(Debug, WeldsModel, Builder)]
 #[builder(Default=!)]
 #[derive()]
 #[welds(table = "messybrainz_submission")]
-#[welds(BelongsTo(user, User, "id"))]
-#[welds(HasMany(listens, Listen, "id"))]
+#[welds(HasMany(listen, Listen, "recording_msid"))]
+#[welds(HasMany(mapping, MsidMapping, "recording_msid"))]
 pub struct MessybrainzSubmission {
     #[welds(primary_key)]
     pub id: i32,

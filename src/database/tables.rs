@@ -51,11 +51,12 @@ pub async fn create_musicbrainz_tables(client: &dyn Client) -> Result<(), WeldsE
 -- Tables
 CREATE TABLE `recording_gid_redirect` (
     `gid` TEXT PRIMARY KEY NOT NULL, 
-    `new_id` TEXT REFERENCES `recordings`(`mbid`)
+    `new_id` TEXT REFERENCES `recordings`(`id`),
+    `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
 
 CREATE TABLE IF NOT EXISTS `recordings` (
-    `id` INTEGER PRIMARY KEY  NOT NULL, 
+    `id` INTEGER PRIMARY KEY NOT NULL, 
     `mbid` TEXT UNIQUE NOT NULL, 
     `title` TEXT NOT NULL, 
     `length` INTEGER, 

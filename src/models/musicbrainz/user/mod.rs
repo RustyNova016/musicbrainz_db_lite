@@ -18,7 +18,7 @@ impl User {
         client: &dyn Client,
         name: &str,
     ) -> Result<DbState<User>, WeldsError> {
-        if let Some(user) = Self::get_user(client, name).await? {
+        if let Some(user) = Self::find_by_name(client, name).await? {
             return Ok(user);
         }
 
@@ -28,8 +28,8 @@ impl User {
         Ok(user)
     }
 
-    /// Fetch an user from the database
-    pub async fn get_user(
+    /// Finds an user by its name
+    pub async fn find_by_name(
         client: &dyn Client,
         name: &str,
     ) -> Result<Option<DbState<User>>, WeldsError> {

@@ -1,8 +1,12 @@
+use std::sync::Arc;
+
 use crate::{
     api::SaveToDatabase,
     models::musicbrainz::recording::{redirect::RecordingGidRedirect, Recording},
     Error,
 };
+use async_stream::try_stream;
+use futures::{Stream, TryStream, TryStreamExt};
 use musicbrainz_rs_nova::{entity::recording::Recording as MSRecording, Fetch, FetchQuery};
 use welds::{connections::sqlite::SqliteClient, state::DbState, Client};
 
@@ -15,7 +19,7 @@ impl Recording {
     }
 
     /// Fetch a recording with all relationships. Then save to the db
-    pub async fn fetch_all_by_id_and_save(
+    pub async fn fetch_all_and_save(
         client: &SqliteClient,
         mbid: &str,
     ) -> Result<DbState<Recording>, Error> {
