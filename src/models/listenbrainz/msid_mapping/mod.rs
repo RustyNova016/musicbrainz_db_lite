@@ -1,5 +1,6 @@
 use super::listen_user_metadata::MessybrainzSubmission;
 use crate::models::musicbrainz::{recording::redirect::RecordingGidRedirect, user::User};
+use sqlx::{Executor, Sqlite, SqlitePool};
 use welds::{state::DbState, Client, WeldsError, WeldsModel};
 
 #[derive(Debug, WeldsModel)]
@@ -9,20 +10,20 @@ use welds::{state::DbState, Client, WeldsError, WeldsModel};
 #[welds(BelongsTo(user, User, "user"))]
 pub struct MsidMapping {
     #[welds(primary_key)]
-    pub id: i32,
+    pub id: i64,
 
     pub recording_mbid: String,
 
     pub recording_msid: String,
 
-    pub user: i32,
+    pub user: i64,
 }
 
 impl MsidMapping {
     /// Finds a mapping by its user's ID, and msid
     pub async fn find_by_user_msid(
         client: &dyn Client,
-        user_id: i32,
+        user_id: i64,
         msid: &str,
     ) -> Result<Option<DbState<Self>>, WeldsError> {
         Ok(MsidMapping::all()
@@ -36,23 +37,12 @@ impl MsidMapping {
 
     /// Set the MBID mapping for an msid for user
     pub async fn set_user_mapping(
-        client: &dyn Client,
-        user_id: i32,
+        client: impl Executor<'_, Database = Sqlite>,
+        user_id: i64,
         msid: String,
         mbid: String,
-    ) -> Result<(), WeldsError> {
-        if let Some(mut mapping) = Self::find_by_user_msid(client, user_id, &msid).await? {
-            if mapping.recording_mbid != mbid {
-                mapping.recording_mbid = mbid;
-                return mapping.save(client).await;
-            }
-            return Ok(());
-        }
-
-        let mut mapping = MsidMapping::new();
-        mapping.user = user_id;
-        mapping.recording_msid = msid;
-        mapping.recording_mbid = mbid;
-        mapping.save(client).await
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!("INSERT INTO `msid_mapping` VALUES (NULL, ?, ?, ?) ON CONFLICT DO UPDATE SET `recording_mbid` = ?", msid, mbid, user_id, mbid).execute(client).await?;
+        Ok(())
     }
 }

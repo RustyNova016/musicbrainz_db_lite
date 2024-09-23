@@ -2,3 +2,6 @@
 /.vscode
 Cargo.lock
 tests/test_db.db
+*.db
+*.db-shm
+*.db-wal

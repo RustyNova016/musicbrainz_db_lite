@@ -1,13 +1,17 @@
-use std::{fs::{self, File}, sync::Arc};
+use std::{
+    fs::{self, File},
+    sync::Arc,
+};
 
 use listenbrainz::raw::Client;
 use musicbrainz_db_lite::{
     api::listenbrainz::listen_collection::SaveListenPayload,
-    database::create_database,
+    database::{client::DBClient, create_database},
     models::{
         listenbrainz::listen::Listen,
         musicbrainz::{recording::Recording, user::User},
-    }, Error,
+    },
+    Error,
 };
 use tokio_stream::{self as stream};
 use welds::{connections::sqlite::SqliteClient, WeldsError};
@@ -19,30 +23,37 @@ pub async fn setup_file_database() -> Result<SqliteClient, Error> {
     }
 
     File::create_new("./examples/load_recordings_of_listens/db.db").unwrap();
-    let client = welds::connections::sqlite::connect("sqlite:./examples/load_recordings_of_listens/db.db").await?;
+    let client =
+        welds::connections::sqlite::connect("sqlite:./examples/load_recordings_of_listens/db.db")
+            .await?;
     create_database(&client).await?;
     Ok(client)
 }
 
 #[tokio::main]
 async fn main() {
-    let client = Arc::new(setup_file_database().await.unwrap());
-
-    // Get some listens
-    let lb_client = Client::new();
-    lb_client
-        .user_listens("RustyNova", None, Some(1726041017), Some(500))
-        .unwrap()
-        .payload
-        .save_listen_payload_in_transaction(client.as_ref(), 1726041017, 500)
+    setup_file_database().await.unwrap();
+    let client = DBClient::connect("./examples/load_recordings_of_listens/db.db")
         .await
         .unwrap();
 
+    // Get some listens
+    println!("Getting some listens");
+    let lb_client = Client::new();
+    lb_client
+        .user_listens("RustyNova", None, Some(1726041017), Some(500))
+        .inspect(|_| println!("Saving listens"))
+        .unwrap()
+        .payload
+        .save_listen_payload_in_transaction(client.as_welds_client(), 1726041017, 500)
+        .await
+        .unwrap();
 
     // Now get the missing recordings
+    println!("Getting the recordings");
     let recordings = Listen::get_unfetched_recordings_of_user(
-        &client,
-        &User::find_by_name(client.as_ref(), "RustyNova")
+        client.as_welds_client(),
+        &User::find_by_name(client.as_welds_client().as_sqlx_pool(), "RustyNova")
             .await
             .unwrap()
             .unwrap(),
@@ -52,8 +63,12 @@ async fn main() {
 
     let mut result = Vec::new();
     for recording in recordings {
-        result.push(Recording::fetch_all_and_save(&client, &recording).await.unwrap());
+        result.push(
+            Recording::fetch_all_and_save(client.as_welds_client(), &recording)
+                .await
+                .unwrap(),
+        );
     }
-    
+
     // The recordings are now ready
 }

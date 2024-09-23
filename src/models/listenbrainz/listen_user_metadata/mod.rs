@@ -1,5 +1,6 @@
 use macon::Builder;
-use welds::{state::DbState, Client, WeldsError, WeldsModel};
+use sqlx::{sqlite::SqliteJournalMode, Executor, Sqlite, SqlitePool};
+use welds::{connections::sqlite::SqliteClient, state::DbState, Client, WeldsError, WeldsModel};
 
 use crate::models::musicbrainz::user::User;
 
@@ -47,5 +48,21 @@ impl MessybrainzSubmission {
             .run(client)
             .await?
             .pop())
+    }
+
+    /// 
+    pub async fn insert_or_ignore(&self, client: impl Executor<'_, Database = Sqlite>) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "INSERT OR IGNORE INTO `messybrainz_submission` VALUES (NULL, ?, ?, ?, ?, ?, ?)",
+            self.msid,
+            self.recording,
+            self.artist_credit,
+            self.release,
+            self.track_number,
+            self.duration
+        )
+        .execute(client)
+        .await?;
+        Ok(())
     }
 }

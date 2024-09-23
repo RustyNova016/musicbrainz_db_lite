@@ -1,44 +1,61 @@
 pub mod fetching;
 use crate::models::listenbrainz::msid_mapping::MsidMapping;
 use crate::models::musicbrainz::recording::redirect::RecordingGidRedirect;
-use crate::Client;
+use crate::Error;
 use listenbrainz::raw::response::UserListensListen;
+use sqlx::{Sqlite, Transaction};
 use welds::prelude::DbState;
-use welds::WeldsError;
 
 use crate::models::listenbrainz::listen_user_metadata::MessybrainzSubmission;
-use crate::{
-    api::SaveToDatabase,
-    models::{listenbrainz::listen::Listen, musicbrainz::user::User},
-};
+use crate::models::{listenbrainz::listen::Listen, musicbrainz::user::User};
 
-impl SaveToDatabase for UserListensListen {
-    type ReturnedData = DbState<Listen>;
+impl Listen {
+    pub async fn insert_api_listen(
+        client: &mut Transaction<'_, Sqlite>,
+        listen: &UserListensListen,
+    ) -> Result<DbState<Listen>, Error> {
 
-    async fn save(&self, client: &dyn Client) -> Result<Self::ReturnedData, WeldsError> {
         // First, get the user
-        let user = User::get_or_create_user(client, &self.user_name).await?;
+        User::insert_or_ignore(&mut **client, &listen.user_name).await?;
 
         // Then upsert the MSID.
-        MessybrainzSubmission::upsert_listen_messybrainz_data(client, self).await?;
+        MessybrainzSubmission::from(listen)
+            .insert_or_ignore(&mut **client)
+            .await?;
 
         // Set the mapping if available
-        if let Some(mapping) = &self.track_metadata.mbid_mapping {
+        if let Some(mapping) = &listen.track_metadata.mbid_mapping {
             // First insert the mbid
-            RecordingGidRedirect::add_mbid(client, &mapping.recording_mbid).await?;
+            RecordingGidRedirect::add_mbid(&mut **client, &mapping.recording_mbid).await?;
+
+            let user = User::find_by_name(&mut **client, &listen.user_name)
+                .await?
+                .expect("The user shall be inserted");
 
             MsidMapping::set_user_mapping(
-                client,
+                &mut **client,
                 user.id,
-                self.recording_msid.clone(),
+                listen.recording_msid.clone(),
                 mapping.recording_mbid.clone(),
             )
             .await?;
         }
 
-        let mut data = DbState::new_uncreated(Listen::from(self));
-        data.save(client).await?;
-        Ok(data)
+        let data = serde_json::to_string(&listen.track_metadata.additional_info)
+            .expect("Crashing from serializing a serde::Value isn't possible");
+
+        let listen_db = sqlx::query_as!(
+            Listen,
+            "INSERT INTO listens VALUES (NULL, ?, ?, ?, ?) RETURNING *",
+            listen.listened_at,
+            listen.user_name,
+            listen.recording_msid,
+            data
+        )
+        .fetch_one(&mut **client)
+        .await?;
+
+        Ok(DbState::new_uncreated(listen_db))
     }
 }
 
@@ -54,25 +71,6 @@ impl From<&UserListensListen> for Listen {
                     .expect("Crashing from serializing a serde::Value isn't possible"),
             ),
         }
-    }
-}
-
-impl MessybrainzSubmission {
-    /// Create or update a messybrainz submition from a listen
-    pub async fn upsert_listen_messybrainz_data(
-        client: &dyn Client,
-        listen: &UserListensListen,
-    ) -> Result<DbState<MessybrainzSubmission>, WeldsError> {
-        if let Some(msid_in_db) =
-            MessybrainzSubmission::find_by_msid(client, &listen.recording_msid).await?
-        {
-            // Messybrainz data is static. So skip the update!
-            return Ok(msid_in_db);
-        }
-
-        let mut data = DbState::new_uncreated(MessybrainzSubmission::from(listen));
-        data.save(client).await?;
-        Ok(data)
     }
 }
 

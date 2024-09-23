@@ -1,43 +1,38 @@
-use welds::{state::DbState, Client, WeldsError, WeldsModel};
+use sqlx::{Executor, Sqlite, SqlitePool};
+use welds::{connections::sqlite::SqliteClient, state::DbState, Client, WeldsError, WeldsModel};
 
-use crate::models::listenbrainz::listen::Listen;
+use crate::{models::listenbrainz::listen::Listen, Error};
 
-#[derive(Debug, WeldsModel)]
+#[derive(Debug, WeldsModel, sqlx::FromRow)]
 #[welds(table = "users")]
 #[welds(HasMany(listens, Listen, "id"))]
 pub struct User {
     #[welds(primary_key)]
-    pub id: i32,
+    pub id: i64,
 
     pub name: String,
 }
 
 impl User {
-    /// Get an user by name, and if not found, create it
-    pub async fn get_or_create_user(
-        client: &dyn Client,
-        name: &str,
-    ) -> Result<DbState<User>, WeldsError> {
-        if let Some(user) = Self::find_by_name(client, name).await? {
-            return Ok(user);
-        }
-
-        let mut user = User::new();
-        user.name = name.to_string();
-        user.save(client).await?;
-        Ok(user)
+    pub async fn insert_or_ignore(client: impl Executor<'_, Database = Sqlite>, name: &str) -> Result<(), sqlx::Error>  {
+        sqlx::query!("INSERT OR IGNORE INTO users VALUES (NULL, ?)", name)
+            .execute(client)
+            .await?;
+        Ok(())
     }
 
     /// Finds an user by its name
-    pub async fn find_by_name(
-        client: &dyn Client,
-        name: &str,
-    ) -> Result<Option<DbState<User>>, WeldsError> {
-        Ok(User::all()
-            .where_col(|c| c.name.equal(name))
-            .limit(1)
-            .run(client)
-            .await?
-            .pop())
+    pub async fn find_by_name(client: impl Executor<'_, Database = Sqlite>, name: &str) -> Result<Option<DbState<User>>, sqlx::Error>  {
+        let res = sqlx::query_as!(User, "SELECT * FROM users WHERE name = ?", name)
+            .fetch_one(client)
+            .await;
+
+        match res {
+            Ok(val) => Ok(Some(DbState::db_loaded(val) )),
+            Err(sqlx::Error::RowNotFound) => Ok(None),
+            Err(err) => Err(err)
+        }
     }
+
+
 }

@@ -1,20 +1,10 @@
-use crate::api::SaveToDatabase;
+use crate::models::listenbrainz::listen::Listen;
+use crate::Error;
 use extend::ext;
 use listenbrainz::raw::response::UserListensListen;
 use listenbrainz::raw::response::UserListensPayload;
-use welds::Client;
-
-impl SaveToDatabase for Vec<UserListensListen> {
-    type ReturnedData = ();
-
-    async fn save(&self, client: &dyn Client) -> Result<(), welds::WeldsError> {
-        for listen in self {
-            listen.save(client).await?; //TODO: Multithread it
-        }
-
-        Ok(())
-    }
-}
+use welds::connections::sqlite::SqliteClient;
+use welds::state::DbState;
 
 #[ext(name = SaveListenPayload)]
 pub impl UserListensPayload {
@@ -23,12 +13,13 @@ pub impl UserListensPayload {
     /// ⚠️ May not insert all the listens if the recieved count is equal to the asked count ⚠️
     ///
     /// Return the timestamp for the next fetch in sequence
+    ///
     async fn save_listen_payload_in_transaction(
         &self,
-        client: &dyn Client,
+        client: &SqliteClient,
         max_ts: i64,
         count: u64,
-    ) -> Result<Option<i64>, welds::WeldsError> {
+    ) -> Result<Option<i64>, Error> {
         // If the count retrived is the count we asked, then there's an high change that it is a partial fetch.
         let delete_range = if count == self.listens.len() as u64 {
             get_deletion_range_for_part(self, max_ts)
@@ -48,13 +39,29 @@ pub impl UserListensPayload {
             .cloned()
             .collect::<Vec<_>>();
 
-        listens.save(client).await?;
+        Self::save_listens(client, listens).await?;
 
         if count == self.listens.len() as u64 {
             Ok(Some(delete_range.1))
         } else {
             Ok(None)
         }
+    }
+
+    async fn save_listens(
+        client: &SqliteClient,
+        listens: Vec<UserListensListen>,
+    ) -> Result<Vec<DbState<Listen>>, Error> {
+        let mut trans = client.as_sqlx_pool().begin().await?;
+        let mut result = Vec::with_capacity(1000);
+
+        for listen in listens {
+            result.push(Listen::insert_api_listen(&mut trans, &listen).await?); 
+        }
+
+        trans.commit().await?;
+
+        Ok(result)
     }
 }
 
