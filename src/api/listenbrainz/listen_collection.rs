@@ -56,7 +56,7 @@ pub impl UserListensPayload {
         let mut result = Vec::with_capacity(1000);
 
         for listen in listens {
-            result.push(Listen::insert_api_listen(&mut trans, &listen).await?); 
+            result.push(Listen::insert_api_listen(&mut trans, &listen).await?);
         }
 
         trans.commit().await?;

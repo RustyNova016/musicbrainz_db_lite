@@ -14,7 +14,6 @@ impl Listen {
         client: &mut Transaction<'_, Sqlite>,
         listen: &UserListensListen,
     ) -> Result<DbState<Listen>, Error> {
-
         // First, get the user
         User::insert_or_ignore(&mut **client, &listen.user_name).await?;
 

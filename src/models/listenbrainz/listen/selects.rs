@@ -1,11 +1,10 @@
 use macon::Builder;
-use sqlx::{query_as, query_scalar};
+use sqlx::query_scalar;
 use welds::connections::sqlite::SqliteClient;
 use welds::prelude::DbState;
 use welds::WeldsError;
 
 use crate::models::musicbrainz::user::User;
-use crate::Error;
 
 use super::Listen;
 
@@ -78,17 +77,18 @@ impl Listen {
         client: &SqliteClient,
         user: &User,
     ) -> Result<Vec<String>, sqlx::Error> {
-/*         Ok(Listen::all().where_col(|c| c.user.equal(user))
-                .map_query(|r| r.msib_mapping)
-                .where_col(|c| c.user.equal(1))
-                .map_query(|r| r.recording_mbid)
-                .where_col(|c| c.deleted.equal(0))
-                .where_col(|c| c.new_id.equal(None))
-                .run(client)
-                .await?
-                .into_iter().map(|r| r.into_inner().gid).collect()) */
+        /*         Ok(Listen::all().where_col(|c| c.user.equal(user))
+        .map_query(|r| r.msib_mapping)
+        .where_col(|c| c.user.equal(1))
+        .map_query(|r| r.recording_mbid)
+        .where_col(|c| c.deleted.equal(0))
+        .where_col(|c| c.new_id.equal(None))
+        .run(client)
+        .await?
+        .into_iter().map(|r| r.into_inner().gid).collect()) */
 
-         query_scalar!(r#"SELECT
+        query_scalar!(
+            r#"SELECT
     recording_gid_redirect."gid"
 FROM
     users
@@ -101,6 +101,10 @@ WHERE
     AND recording_gid_redirect.new_id IS NULL
     AND msid_mapping.user = users.id
     AND users.id = ?
-    "#, user.id).fetch_all(client.as_sqlx_pool()).await
+    "#,
+            user.id
+        )
+        .fetch_all(client.as_sqlx_pool())
+        .await
     }
 }

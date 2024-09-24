@@ -1,5 +1,3 @@
-
-use async_trait::async_trait;
 use welds::connections::sqlite::SqliteClient;
 use welds::Client;
 use welds::TransactStart;
@@ -20,7 +18,10 @@ pub trait SaveToDatabase {
 
     /// Save the object into the database.
     /// This operation create a transaction, only commiting once all childrens have been inserted
-    async fn save_wrapped_in_transaction(&self, client: &SqliteClient) -> Result<Self::ReturnedData, WeldsError> {
+    async fn save_wrapped_in_transaction(
+        &self,
+        client: &SqliteClient,
+    ) -> Result<Self::ReturnedData, WeldsError> {
         let trans = client.begin().await?;
         let data = self.save(&trans).await?;
         trans.commit().await?;
@@ -29,7 +30,10 @@ pub trait SaveToDatabase {
 
     /// Save the object into the database.
     /// This operation will not create a transation, and all childrens are commited directly
-    async fn save_no_transactions(&self, client: &SqliteClient) -> Result<Self::ReturnedData, WeldsError> {
+    async fn save_no_transactions(
+        &self,
+        client: &SqliteClient,
+    ) -> Result<Self::ReturnedData, WeldsError> {
         self.save(client).await
     }
 }

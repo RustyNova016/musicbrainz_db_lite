@@ -1,14 +1,10 @@
-use std::sync::Arc;
-
 use crate::{
     api::SaveToDatabase,
     models::musicbrainz::recording::{redirect::RecordingGidRedirect, Recording},
     Error,
 };
-use async_stream::try_stream;
-use futures::{Stream, TryStream, TryStreamExt};
 use musicbrainz_rs_nova::{entity::recording::Recording as MSRecording, Fetch, FetchQuery};
-use welds::{connections::sqlite::SqliteClient, state::DbState, Client};
+use welds::{connections::sqlite::SqliteClient, state::DbState};
 
 impl Recording {
     /// Create a fetch querry to fetch a recording by ID

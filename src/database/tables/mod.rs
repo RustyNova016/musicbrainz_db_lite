@@ -1,10 +1,6 @@
 pub mod musicbrainz;
 use musicbrainz::generate_musicbrainz_database;
-use sqlx::Sqlite;
 use sqlx::SqlitePool;
-use sqlx::Transaction;
-use welds::Client;
-use welds::WeldsError;
 
 pub async fn create_listenbrainz_tables(client: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query!(r#"PRAGMA foreign_keys = OFF; 

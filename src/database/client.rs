@@ -1,8 +1,5 @@
 use sqlx::SqlitePool;
-use welds::{
-    connections::sqlite::{self, SqliteClient},
-    WeldsError,
-};
+use welds::connections::sqlite::{self, SqliteClient};
 
 use crate::Error;
 

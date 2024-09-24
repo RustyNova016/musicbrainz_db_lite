@@ -1,8 +1,6 @@
 use macon::Builder;
-use sqlx::{sqlite::SqliteJournalMode, Executor, Sqlite, SqlitePool};
-use welds::{connections::sqlite::SqliteClient, state::DbState, Client, WeldsError, WeldsModel};
-
-use crate::models::musicbrainz::user::User;
+use sqlx::{Executor, Sqlite};
+use welds::{state::DbState, Client, WeldsError, WeldsModel};
 
 use super::{listen::Listen, msid_mapping::MsidMapping};
 
@@ -50,8 +48,11 @@ impl MessybrainzSubmission {
             .pop())
     }
 
-    /// 
-    pub async fn insert_or_ignore(&self, client: impl Executor<'_, Database = Sqlite>) -> Result<(), sqlx::Error> {
+    ///
+    pub async fn insert_or_ignore(
+        &self,
+        client: impl Executor<'_, Database = Sqlite>,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query!(
             "INSERT OR IGNORE INTO `messybrainz_submission` VALUES (NULL, ?, ?, ?, ?, ?, ?)",
             self.msid,

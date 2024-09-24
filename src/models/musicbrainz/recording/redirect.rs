@@ -1,5 +1,5 @@
-use sqlx::{Executor, Sqlite, SqlitePool};
-use welds::{connections::sqlite::SqliteClient, Client, WeldsError, WeldsModel};
+use sqlx::{Executor, Sqlite};
+use welds::{connections::sqlite::SqliteClient, WeldsError, WeldsModel};
 
 use crate::models::listenbrainz::msid_mapping::MsidMapping;
 
@@ -21,7 +21,10 @@ pub struct RecordingGidRedirect {
 
 impl RecordingGidRedirect {
     /// Add an mbid in the redirect pool if it isn't in yet.
-    pub async fn add_mbid(client: impl Executor<'_, Database = Sqlite>, mbid: &str) -> Result<(), sqlx::Error> {
+    pub async fn add_mbid(
+        client: impl Executor<'_, Database = Sqlite>,
+        mbid: &str,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query!(
             "INSERT OR IGNORE INTO `recording_gid_redirect` VALUES (?, NULL, 0)",
             mbid

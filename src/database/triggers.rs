@@ -1,10 +1,5 @@
-use sqlx::pool::CloseEvent;
 use sqlx::query;
-use sqlx::Sqlite;
 use sqlx::SqlitePool;
-use welds::connections::sqlite::SqliteClient;
-use welds::Client;
-use welds::WeldsError;
 
 pub async fn create_listenbrainz_triggers(client: &SqlitePool) -> Result<(), sqlx::Error> {
     query!(r#"CREATE TRIGGER IF NOT EXISTS `trigger_after_insert_recordings` AFTER INSERT ON `recordings` FOR EACH ROW BEGIN

@@ -1,6 +1,6 @@
 use super::listen_user_metadata::MessybrainzSubmission;
 use crate::models::musicbrainz::{recording::redirect::RecordingGidRedirect, user::User};
-use sqlx::{Executor, Sqlite, SqlitePool};
+use sqlx::{Executor, Sqlite};
 use welds::{state::DbState, Client, WeldsError, WeldsModel};
 
 #[derive(Debug, WeldsModel)]

@@ -5,9 +5,9 @@ use welds::connections::sqlite::SqliteClient;
 
 use crate::Error;
 
+pub mod client;
 mod tables;
 mod triggers;
-pub mod client;
 
 pub async fn create_database(client: &SqliteClient) -> Result<(), Error> {
     let trans: sqlx::Transaction<'_, sqlx::Sqlite> = client.as_sqlx_pool().begin().await?;
@@ -16,10 +16,7 @@ pub async fn create_database(client: &SqliteClient) -> Result<(), Error> {
     create_listenbrainz_tables(&client.as_sqlx_pool()).await?;
     trans.commit().await?;
 
-
-
     create_listenbrainz_triggers(client.as_sqlx_pool()).await?;
 
-    
     Ok(())
 }

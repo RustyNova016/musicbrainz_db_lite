@@ -29,7 +29,7 @@ impl Listen {
             || (latest_listen_ts.is_some_and(|a| pull_ts.is_some_and(|b| a <= b)))
         {
             pull_ts =
-                Self::execute_listen_fetch(&client, &lb_client, user, pull_ts.unwrap()).await?;
+                Self::execute_listen_fetch(client, &lb_client, user, pull_ts.unwrap()).await?;
         }
 
         Ok(())
