@@ -2,9 +2,9 @@ pub mod fetching;
 use musicbrainz_rs_nova::entity::recording::Recording as MSRecording;
 use welds::state::DbState;
 
-use crate::{api::SaveToDatabase, models::musicbrainz::recording::Recording};
+use crate::{api::SaveToDatabaseOld, models::musicbrainz::recording::Recording};
 
-impl SaveToDatabase for MSRecording {
+impl SaveToDatabaseOld for MSRecording {
     type ReturnedData = DbState<Recording>;
 
     async fn save(

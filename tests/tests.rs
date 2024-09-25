@@ -5,9 +5,11 @@ use ::listenbrainz::raw::Client;
 use musicbrainz_db_lite::database::create_database;
 use musicbrainz_db_lite::models::listenbrainz::listen::selects::ListenMappingFilter;
 use musicbrainz_db_lite::models::listenbrainz::listen::selects::ListenQuery;
+use musicbrainz_db_lite::models::musicbrainz::artists::Artist;
 use musicbrainz_db_lite::utils::check_db_integrity;
 use musicbrainz_db_lite::Error;
 use welds::connections::sqlite::SqliteClient;
+use welds::state::DbState;
 use welds::WeldsError;
 
 mod listenbrainz;

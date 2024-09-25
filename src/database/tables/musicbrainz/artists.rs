@@ -7,14 +7,15 @@ pub(super) async fn create_artist_tables(client: &SqlitePool) -> Result<(), sqlx
         r#"CREATE TABLE IF NOT EXISTS
     `artists` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        `mbid` TEXT NOT NULL,
+        `mbid` TEXT UNIQUE NOT NULL ,
         `name` TEXT NOT NULL,
         `sort_name` TEXT NOT NULL,
         `disambiguation` TEXT NOT NULL,
-        `rating` TEXT,
         `country` TEXT,
         `annotation` TEXT
     ) STRICT;
+
+     
 "#
     )
     .execute(client)

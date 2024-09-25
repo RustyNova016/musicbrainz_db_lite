@@ -1,3 +1,4 @@
+pub mod sqlx_utils;
 use welds::model_traits::HasSchema;
 use welds::model_traits::TableColumns;
 use welds::model_traits::TableInfo;
@@ -6,6 +7,7 @@ use welds::WeldsError;
 
 use crate::models::listenbrainz::listen::Listen;
 use crate::models::listenbrainz::listen_user_metadata::MessybrainzSubmission;
+use crate::models::musicbrainz::artists::Artist;
 use crate::models::musicbrainz::recording::redirect::RecordingGidRedirect;
 use crate::models::musicbrainz::recording::Recording;
 use crate::models::musicbrainz::user::User;
@@ -43,6 +45,7 @@ pub async fn check_db_integrity(client: &dyn Client) -> Result<bool, WeldsError>
     let messybrainz = check_table_schema::<MessybrainzSubmission>(client).await?;
     let record_redirect = check_table_schema::<RecordingGidRedirect>(client).await?;
     let recordings = check_table_schema::<Recording>(client).await?;
+    let artists = check_table_schema::<Artist>(client).await?;
 
-    Ok(users && listens && messybrainz && record_redirect && recordings)
+    Ok(users && listens && messybrainz && record_redirect && recordings && artists)
 }

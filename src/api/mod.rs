@@ -1,3 +1,5 @@
+use sqlx::SqliteConnection;
+use sqlx::SqliteExecutor;
 use welds::connections::sqlite::SqliteClient;
 use welds::Client;
 use welds::TransactStart;
@@ -7,7 +9,7 @@ pub mod listenbrainz;
 pub mod musicbrainz;
 
 /// This trait is implemented by all the entities that are able to be saved to the database
-pub trait SaveToDatabase {
+pub trait SaveToDatabaseOld {
     type ReturnedData;
 
     /// Save the object into the database, with a Client or transaction (without commit)
@@ -36,4 +38,15 @@ pub trait SaveToDatabase {
     ) -> Result<Self::ReturnedData, WeldsError> {
         self.save(client).await
     }
+}
+
+/// This trait is implemented by all the entities that are able to be saved to the database
+pub trait SaveToDatabase {
+    type ReturnedData;
+
+    /// Save the object into the database, with a Client or transaction (without commit)
+    fn save(
+        &self,
+        client: &mut SqliteConnection,
+    ) -> impl std::future::Future<Output = Result<Self::ReturnedData, sqlx::Error>> + Send;
 }

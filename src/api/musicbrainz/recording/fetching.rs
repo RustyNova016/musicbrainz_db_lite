@@ -1,5 +1,5 @@
 use crate::{
-    api::SaveToDatabase,
+    api::SaveToDatabaseOld,
     models::musicbrainz::recording::{redirect::RecordingGidRedirect, Recording},
     Error,
 };
