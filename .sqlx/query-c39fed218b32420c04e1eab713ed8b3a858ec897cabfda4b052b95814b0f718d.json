@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "PRAGMA foreign_keys = OFF; \n-- Tables\nCREATE TABLE IF NOT EXISTS `recording_gid_redirect` (\n    `gid` TEXT PRIMARY KEY NOT NULL, \n    `new_id` TEXT REFERENCES `recordings`(`id`),\n    `deleted` INTEGER DEFAULT 0 NOT NULL\n) STRICT;\n\nCREATE TABLE IF NOT EXISTS `recordings` (\n    `id` INTEGER PRIMARY KEY NOT NULL, \n    `mbid` TEXT UNIQUE NOT NULL, \n    `title` TEXT NOT NULL, \n    `length` INTEGER, \n    `disambiguation` TEXT, \n    `annotation` TEXT\n) STRICT;\n\n\n-- Indexes\n--CREATE UNIQUE INDEX `idx_recording_gid_redirect` ON `recording_gid_redirect` (`gid`);\n\n\nPRAGMA foreign_keys = ON;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "c39fed218b32420c04e1eab713ed8b3a858ec897cabfda4b052b95814b0f718d"
+}

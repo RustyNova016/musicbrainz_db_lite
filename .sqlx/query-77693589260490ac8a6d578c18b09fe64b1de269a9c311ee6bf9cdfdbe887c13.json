@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "CREATE TRIGGER IF NOT EXISTS `trigger_after_insert_recordings` AFTER INSERT ON `recordings` FOR EACH ROW BEGIN\n    INSERT OR REPLACE INTO recording_gid_redirect VALUES (new.mbid, new.id, 0);\nEND;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "77693589260490ac8a6d578c18b09fe64b1de269a9c311ee6bf9cdfdbe887c13"
+}

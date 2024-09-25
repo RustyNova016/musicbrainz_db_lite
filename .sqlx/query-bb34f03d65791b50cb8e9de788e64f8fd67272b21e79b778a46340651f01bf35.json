@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT\n    recording_gid_redirect.\"gid\"\nFROM\n    users\n    INNER JOIN listens ON users.name = listens.user\n    INNER JOIN messybrainz_submission ON listens.recording_msid = messybrainz_submission.msid\n    INNER JOIN msid_mapping ON messybrainz_submission.msid = msid_mapping.recording_msid\n    INNER JOIN recording_gid_redirect ON msid_mapping.recording_mbid = recording_gid_redirect.gid\nWHERE\n    recording_gid_redirect.deleted = 0\n    AND recording_gid_redirect.new_id IS NULL\n    AND msid_mapping.user = users.id\n    AND users.id = ?\n    ",
+  "describe": {
+    "columns": [
+      {
+        "name": "gid",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "bb34f03d65791b50cb8e9de788e64f8fd67272b21e79b778a46340651f01bf35"
+}
