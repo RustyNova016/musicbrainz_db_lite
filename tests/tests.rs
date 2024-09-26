@@ -1,5 +1,7 @@
 use std::fs;
 use std::fs::File;
+use std::io::Write;
+use std::process::Command;
 
 use ::listenbrainz::raw::Client;
 use musicbrainz_db_lite::database::create_database;
@@ -44,10 +46,30 @@ async fn should_setup_database() {
     }
 }
 
+/// Connect and setup a DB to test on. Use this if you actually need to see values for debugging
+pub async fn setup_schema_database() -> Result<SqliteClient, Error> {
+    if std::fs::exists("./schema.db").unwrap() {
+        fs::remove_file("./schema.db").unwrap();
+    }
+
+    File::create_new("./schema.db").unwrap();
+    let client = welds::connections::sqlite::connect("sqlite:./schema.db").await?;
+    create_database(&client).await?;
+    Ok(client)
+}
+
 #[tokio::test]
 #[serial_test::serial]
 async fn model_should_match_db() {
-    let client = setup_file_database().await.unwrap();
+    let client = setup_schema_database().await.unwrap();
 
-    assert!(check_db_integrity(&client).await.is_ok_and(|v| v))
+    assert!(check_db_integrity(&client).await.is_ok_and(|v| v));
+
+    let out = Command::new("sqlite3")
+        .arg("./schema.db")
+        .arg(".dump ")
+        .output()
+        .unwrap();
+
+    File::create("./schema.sql").unwrap().write_all(&out.stdout);
 }

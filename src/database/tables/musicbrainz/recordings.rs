@@ -3,7 +3,8 @@ use sqlx::SqlitePool;
 use super::gid_redirect_tables::generate_redirect_table;
 
 pub(super) async fn create_recordings_tables(client: &SqlitePool) -> Result<(), sqlx::Error> {
-    sqlx::query!(r#"
+    sqlx::query!(
+        r#"
         CREATE TABLE IF NOT EXISTS `recordings` (
             `id` INTEGER PRIMARY KEY NOT NULL, 
             `mbid` TEXT UNIQUE NOT NULL, 
