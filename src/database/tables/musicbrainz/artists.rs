@@ -14,8 +14,18 @@ pub(super) async fn create_artist_tables(client: &SqlitePool) -> Result<(), sqlx
         `country` TEXT,
         `annotation` TEXT
     ) STRICT;
-
      
+    CREATE TABLE IF NOT EXISTS `artist_credits_item` (
+        `artist_credit` INTEGER REFERENCES `artist_credits` (`id`),
+        `position` INTEGER NOT NULL,
+        `name` TEXT NOT NULL,
+        `artist_gid` TEXT NOT NULL REFERENCES `artists_gid_redirect` (`gid`),
+        `join_phrase` TEXT NOT NULL,
+
+        PRIMARY KEY (`artist_credit`, `position`)
+    ) STRICT;
+
+    CREATE TABLE IF NOT EXISTS `artist_credits` (`id` INTEGER PRIMARY KEY AUTOINCREMENT) STRICT;
 "#
     )
     .execute(client)

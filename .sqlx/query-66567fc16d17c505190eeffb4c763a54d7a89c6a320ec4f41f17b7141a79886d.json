@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT OR IGNORE INTO `recordings_gid_redirect` VALUES (?, NULL, 0)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "66567fc16d17c505190eeffb4c763a54d7a89c6a320ec4f41f17b7141a79886d"
+}

@@ -23,7 +23,10 @@ impl Artist {
     }
 
     /// Add an mbid in the redirect pool if it isn't in yet.
-    pub async fn add_mbid(conn: &mut SqliteConnection, mbid: &str) -> Result<(), sqlx::Error> {
+    pub async fn add_redirect_mbid(
+        conn: &mut SqliteConnection,
+        mbid: &str,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query!(
             "INSERT OR IGNORE INTO `artists_gid_redirect` VALUES (?, NULL, 0)",
             mbid

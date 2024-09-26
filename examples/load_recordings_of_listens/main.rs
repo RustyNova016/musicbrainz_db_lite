@@ -61,13 +61,25 @@ async fn main() {
     .await
     .unwrap();
 
+    println!("Fetching {} recordings", recordings.len());
+
     let mut result = Vec::new();
     for recording in recordings {
-        result.push(
-            Recording::fetch_all_and_save(client.as_welds_client(), &recording)
-                .await
-                .unwrap(),
+        println!("Looking up: {recording}");
+
+        let conn = &mut *client.as_sqlx_pool().acquire().await.unwrap();
+
+        let recording = Recording::fetch_all_and_save(conn, &recording)
+            .await
+            .unwrap();
+
+        println!(
+            "Got: {} by {}",
+            recording.title,
+            recording.get_artist_credits(conn).await.unwrap().unwrap()
         );
+
+        result.push(recording);
     }
 
     // The recordings are now ready

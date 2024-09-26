@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `messybrainz_submission` (
 CREATE TABLE IF NOT EXISTS "msid_mapping" (
     `id` INTEGER PRIMARY KEY NOT NULL,
     `recording_msid` TEXT NOT NULL REFERENCES `messybrainz_submission`(`msid`),
-    `recording_mbid` TEXT NOT NULL REFERENCES `recording_gid_redirect`(`gid`),
+    `recording_mbid` TEXT NOT NULL REFERENCES `recordings_gid_redirect`(`gid`),
     `user` INTEGER NOT NULL REFERENCES `users`(`id`)
 ) STRICT;
 
@@ -48,34 +48,6 @@ PRAGMA foreign_keys = ON;"#)
 }
 
 pub async fn create_musicbrainz_tables(client: &SqlitePool) -> Result<(), sqlx::Error> {
-    sqlx::query!(
-        "PRAGMA foreign_keys = OFF; 
--- Tables
-CREATE TABLE IF NOT EXISTS `recording_gid_redirect` (
-    `gid` TEXT PRIMARY KEY NOT NULL, 
-    `new_id` TEXT REFERENCES `recordings`(`id`),
-    `deleted` INTEGER DEFAULT 0 NOT NULL
-) STRICT;
-
-CREATE TABLE IF NOT EXISTS `recordings` (
-    `id` INTEGER PRIMARY KEY NOT NULL, 
-    `mbid` TEXT UNIQUE NOT NULL, 
-    `title` TEXT NOT NULL, 
-    `length` INTEGER, 
-    `disambiguation` TEXT, 
-    `annotation` TEXT
-) STRICT;
-
-
--- Indexes
---CREATE UNIQUE INDEX `idx_recording_gid_redirect` ON `recording_gid_redirect` (`gid`);
-
-
-PRAGMA foreign_keys = ON;"
-    )
-    .execute(client)
-    .await?;
-
     generate_musicbrainz_database(&client).await?;
     Ok(())
 }

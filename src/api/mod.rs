@@ -47,6 +47,6 @@ pub trait SaveToDatabase {
     /// Save the object into the database, with a Client or transaction (without commit)
     fn save(
         &self,
-        client: &mut SqliteConnection,
+        conn: &mut SqliteConnection,
     ) -> impl std::future::Future<Output = Result<Self::ReturnedData, sqlx::Error>> + Send;
 }

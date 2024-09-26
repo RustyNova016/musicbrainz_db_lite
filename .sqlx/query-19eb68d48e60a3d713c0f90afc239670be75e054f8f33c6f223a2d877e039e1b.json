@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO recordings_gid_redirect VALUES (?, ?, 0) ON CONFLICT DO UPDATE SET `new_id` = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "19eb68d48e60a3d713c0f90afc239670be75e054f8f33c6f223a2d877e039e1b"
+}

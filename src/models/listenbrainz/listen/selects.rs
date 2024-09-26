@@ -87,21 +87,21 @@ impl Listen {
         .await?
         .into_iter().map(|r| r.into_inner().gid).collect()) */
 
-        query_scalar!(
-            r#"SELECT
-    recording_gid_redirect."gid"
-FROM
-    users
-    INNER JOIN listens ON users.name = listens.user
-    INNER JOIN messybrainz_submission ON listens.recording_msid = messybrainz_submission.msid
-    INNER JOIN msid_mapping ON messybrainz_submission.msid = msid_mapping.recording_msid
-    INNER JOIN recording_gid_redirect ON msid_mapping.recording_mbid = recording_gid_redirect.gid
-WHERE
-    recording_gid_redirect.deleted = 0
-    AND recording_gid_redirect.new_id IS NULL
-    AND msid_mapping.user = users.id
-    AND users.id = ?
-    "#,
+        query_scalar!(r#"
+            SELECT DISTINCT
+                recordings_gid_redirect."gid"
+            FROM
+                users
+                INNER JOIN listens ON users.name = listens.user
+                INNER JOIN messybrainz_submission ON listens.recording_msid = messybrainz_submission.msid
+                INNER JOIN msid_mapping ON messybrainz_submission.msid = msid_mapping.recording_msid
+                INNER JOIN recordings_gid_redirect ON msid_mapping.recording_mbid = recordings_gid_redirect.gid
+            WHERE
+                recordings_gid_redirect.deleted = 0
+                AND recordings_gid_redirect.new_id IS NULL
+                AND msid_mapping.user = users.id
+                AND users.id = ?
+                "#,
             user.id
         )
         .fetch_all(client.as_sqlx_pool())

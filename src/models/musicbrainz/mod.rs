@@ -1,3 +1,4 @@
-pub mod artists;
+pub mod artist_credit;
+pub mod artist;
 pub mod recording;
 pub mod user;

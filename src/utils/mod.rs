@@ -7,7 +7,7 @@ use welds::WeldsError;
 
 use crate::models::listenbrainz::listen::Listen;
 use crate::models::listenbrainz::listen_user_metadata::MessybrainzSubmission;
-use crate::models::musicbrainz::artists::Artist;
+use crate::models::musicbrainz::artist::Artist;
 use crate::models::musicbrainz::recording::redirect::RecordingGidRedirect;
 use crate::models::musicbrainz::recording::Recording;
 use crate::models::musicbrainz::user::User;

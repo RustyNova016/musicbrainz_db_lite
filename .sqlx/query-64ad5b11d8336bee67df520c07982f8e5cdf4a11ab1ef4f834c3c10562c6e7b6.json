@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "CREATE TABLE IF NOT EXISTS\n    `artists` (\n        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n        `mbid` TEXT UNIQUE NOT NULL ,\n        `name` TEXT NOT NULL,\n        `sort_name` TEXT NOT NULL,\n        `disambiguation` TEXT NOT NULL,\n        `country` TEXT,\n        `annotation` TEXT\n    ) STRICT;\n     \n    CREATE TABLE IF NOT EXISTS `artist_credits_item` (\n        `artist_credit` INTEGER REFERENCES `artist_credits` (`id`),\n        `position` INTEGER NOT NULL,\n        `name` TEXT NOT NULL,\n        `artist_gid` TEXT NOT NULL REFERENCES `artists_gid_redirect` (`gid`),\n        `join_phrase` TEXT NOT NULL,\n\n        PRIMARY KEY (`artist_credit`, `position`)\n    ) STRICT;\n\n    CREATE TABLE IF NOT EXISTS `artist_credits` (`id` INTEGER PRIMARY KEY AUTOINCREMENT) STRICT;\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "64ad5b11d8336bee67df520c07982f8e5cdf4a11ab1ef4f834c3c10562c6e7b6"
+}

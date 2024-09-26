@@ -1,3 +1,5 @@
+pub mod crud;
+pub mod relations;
 use redirect::RecordingGidRedirect;
 use welds::{state::DbState, Client, WeldsError, WeldsModel};
 
@@ -19,6 +21,8 @@ pub struct Recording {
     pub disambiguation: Option<String>,
 
     pub annotation: Option<String>,
+
+    pub(crate) artist_credit: Option<i64>
 }
 
 impl Recording {

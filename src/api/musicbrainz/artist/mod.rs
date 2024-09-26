@@ -5,7 +5,7 @@ use welds::state::DbState;
 
 use crate::{
     api::{SaveToDatabase, SaveToDatabaseOld},
-    models::musicbrainz::artists::Artist,
+    models::musicbrainz::artist::Artist,
 };
 
 impl From<&MBArtist> for Artist {

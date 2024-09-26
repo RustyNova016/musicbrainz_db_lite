@@ -4,7 +4,7 @@ use sqlx::sqlite::SqliteError;
 use sqlx::{Acquire, Sqlite, SqliteConnection, SqliteExecutor, SqlitePool};
 
 use crate::api::SaveToDatabase;
-use crate::models::musicbrainz::artists::Artist;
+use crate::models::musicbrainz::artist::Artist;
 use crate::utils::sqlx_utils::{SqliteAquire, SqliteAquireRef};
 use crate::Error;
 

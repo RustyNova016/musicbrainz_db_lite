@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "PRAGMA foreign_keys = OFF; \n\n-- Tables\nCREATE TABLE IF NOT EXISTS \"users\" (\n    `id` INTEGER PRIMARY KEY UNIQUE NOT NULL,\n    `name` TEXT UNIQUE NOT NULL\n) STRICT;\n\nCREATE TABLE IF NOT EXISTS `messybrainz_submission` (\n    `id` INTEGER PRIMARY KEY NOT NULL,\n    `msid` TEXT UNIQUE NOT NULL,\n    `recording` TEXT NOT NULL,\n    `artist_credit` TEXT NOT NULL,\n    `release` TEXT,\n    `track_number` TEXT,\n    `duration` INTEGER\n) STRICT;\n\nCREATE TABLE IF NOT EXISTS \"msid_mapping\" (\n    `id` INTEGER PRIMARY KEY NOT NULL,\n    `recording_msid` TEXT NOT NULL REFERENCES `messybrainz_submission`(`msid`),\n    `recording_mbid` TEXT NOT NULL REFERENCES `recordings_gid_redirect`(`gid`),\n    `user` INTEGER NOT NULL REFERENCES `users`(`id`)\n) STRICT;\n\nCREATE TABLE IF NOT EXISTS \"listens\" (\n    `id` INTEGER PRIMARY KEY NOT NULL,\n    `listened_at` INTEGER NOT NULL,\n    `user` TEXT NOT NULL REFERENCES `users`(`name`),\n    `recording_msid` TEXT NOT NULL REFERENCES `messybrainz_submission`(`msid`),\n    `data` TEXT\n) STRICT;\n\n-- Indexes\nCREATE UNIQUE INDEX IF NOT EXISTS `idx_msid_mapping_2` ON `msid_mapping` (`recording_msid`, `recording_mbid`, `user`);\nCREATE UNIQUE INDEX IF NOT EXISTS`idx_listens` ON `listens` (`listened_at`, `user`, `recording_msid`);\n\n\nPRAGMA foreign_keys = ON;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "50c3da82f100ff0d23ba2284c2ad07eb432ab6d705b40dde3467fa565399c4d3"
+}

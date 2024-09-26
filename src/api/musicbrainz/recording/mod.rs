@@ -1,23 +1,25 @@
 pub mod fetching;
 use musicbrainz_rs_nova::entity::recording::Recording as MSRecording;
-use welds::state::DbState;
+use sqlx::SqliteConnection;
 
-use crate::{api::SaveToDatabaseOld, models::musicbrainz::recording::Recording};
+use crate::{
+    api::SaveToDatabase,
+    models::musicbrainz::{artist_credit::ArtistCredits, recording::Recording},
+};
 
-impl SaveToDatabaseOld for MSRecording {
-    type ReturnedData = DbState<Recording>;
+impl SaveToDatabase for MSRecording {
+    type ReturnedData = Recording;
 
-    async fn save(
-        &self,
-        client: &dyn welds::Client,
-    ) -> Result<Self::ReturnedData, welds::WeldsError> {
+    async fn save(&self, conn: &mut SqliteConnection) -> Result<Self::ReturnedData, sqlx::Error> {
         // Save the recording
-        let recording = Recording::find_by_mbid(client, &self.id)
-            .await?
-            .unwrap_or_else(Recording::new);
-        let mut recording = Recording::replace(recording, Recording::from(self));
+        let mut recording = Recording::from(self).upsert(conn).await?;
 
-        recording.save(client).await?;
+        // Save relations
+        if let Some(artist_credits) = &self.artist_credit {
+            let credits = ArtistCredits::save_api_response(conn, artist_credits).await?;
+            recording.set_artist_credits(conn, credits.0).await?;
+        }
+
         Ok(recording)
     }
 }
@@ -31,6 +33,7 @@ impl From<&MSRecording> for Recording {
             disambiguation: value.disambiguation.clone(),
             length: value.length.clone().map(|val| val as i64),
             title: value.title.clone(),
+            artist_credit: None,
         }
     }
 }

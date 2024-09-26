@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        CREATE TABLE IF NOT EXISTS `recordings` (\n            `id` INTEGER PRIMARY KEY NOT NULL, \n            `mbid` TEXT UNIQUE NOT NULL, \n            `title` TEXT NOT NULL, \n            `length` INTEGER, \n            `disambiguation` TEXT, \n            `annotation` TEXT,\n\n            -- Foreign keys\n            `artist_credit` INTEGER REFERENCES `artist_credits`(`id`)\n        ) STRICT;\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "59a42d4d4cfabb67216d1297604c4b4025c3bf4204ff902e9b168bba13d61ead"
+}

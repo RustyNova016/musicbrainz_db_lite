@@ -1,4 +1,4 @@
-use sqlx::{Executor, Sqlite};
+use sqlx::{Executor, Sqlite, SqliteConnection};
 use welds::{connections::sqlite::SqliteClient, WeldsError, WeldsModel};
 
 use crate::models::listenbrainz::msid_mapping::MsidMapping;
@@ -6,7 +6,7 @@ use crate::models::listenbrainz::msid_mapping::MsidMapping;
 use super::Recording;
 
 #[derive(Debug, WeldsModel)]
-#[welds(table = "recording_gid_redirect")]
+#[welds(table = "recordings_gid_redirect")]
 #[welds(BelongsTo(recording, Recording, "new_id"))]
 #[welds(HasMany(messybrainz_mapping, MsidMapping, "recording_mbid"))]
 pub struct RecordingGidRedirect {
@@ -22,31 +22,31 @@ pub struct RecordingGidRedirect {
 impl RecordingGidRedirect {
     /// Add an mbid in the redirect pool if it isn't in yet.
     pub async fn add_mbid(
-        client: impl Executor<'_, Database = Sqlite>,
+        conn: &mut SqliteConnection,
         mbid: &str,
     ) -> Result<(), sqlx::Error> {
         sqlx::query!(
-            "INSERT OR IGNORE INTO `recording_gid_redirect` VALUES (?, NULL, 0)",
+            "INSERT OR IGNORE INTO `recordings_gid_redirect` VALUES (?, NULL, 0)",
             mbid
         )
-        .execute(client)
+        .execute(conn)
         .await?;
         Ok(())
     }
 
     /// Assign an mbid to a Recording's ID.
     pub async fn assign_mbid(
-        client: &SqliteClient,
+        conn: &mut SqliteConnection,
         original_mbid: &str,
         new_id: i64,
     ) -> Result<sqlx::sqlite::SqliteQueryResult, sqlx::Error> {
         sqlx::query!(
-            "INSERT INTO recording_gid_redirect VALUES (?, ?, 0) ON CONFLICT DO UPDATE SET `new_id` = ?",
+            "INSERT INTO recordings_gid_redirect VALUES (?, ?, 0) ON CONFLICT DO UPDATE SET `new_id` = ?",
             original_mbid,
             new_id,
             new_id
         )
-        .execute(client.as_sqlx_pool())
+        .execute(conn)
         .await
     }
 
