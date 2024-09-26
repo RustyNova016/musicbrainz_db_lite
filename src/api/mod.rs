@@ -45,7 +45,24 @@ pub trait SaveToDatabase {
 
     /// Save the object into the database, with a Client or transaction (without commit)
     fn save(
+        self,
+        conn: &mut SqliteConnection,
+    ) -> impl std::future::Future<Output = Result<Self::ReturnedData, sqlx::Error>> + Send;
+}
+
+pub trait SaveFromAPIToDatabase {
+    type ReturnedData;
+
+    /// Upsert the full data, overiding possibly unfetched fields
+    fn full_upsert(
+        &self,
+        conn: &mut SqliteConnection,
+    ) -> impl std::future::Future<Output = Result<Self::ReturnedData, sqlx::Error>> + Send;
+
+    /// Upsert fields by merging the data if absent
+    fn soft_upsert(
         &self,
         conn: &mut SqliteConnection,
     ) -> impl std::future::Future<Output = Result<Self::ReturnedData, sqlx::Error>> + Send;
 }
+

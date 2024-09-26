@@ -1,11 +1,9 @@
 use musicbrainz_rs_nova::entity::artist::Artist as MBArtist;
 use musicbrainz_rs_nova::Fetch;
-use sqlx::sqlite::SqliteError;
-use sqlx::{Acquire, Sqlite, SqliteConnection, SqliteExecutor, SqlitePool};
+use sqlx::SqliteConnection;
 
 use crate::api::SaveToDatabase;
 use crate::models::musicbrainz::artist::Artist;
-use crate::utils::sqlx_utils::{SqliteAquire, SqliteAquireRef};
 use crate::Error;
 
 impl Artist {
@@ -29,22 +27,15 @@ impl Artist {
             .with_url_relations()
             .with_work_relations()
             .with_works()
+            .with_medias()
             .execute()
             .await?
             .save(conn)
             .await?;
 
-        Artist::add_redirection(conn, mbid, artist.id).await?;
+        Artist::set_redirection(conn, mbid, artist.id).await?;
 
         Ok(artist)
     }
-
-    pub async fn get_or_fetch(conn: &mut SqliteConnection, mbid: &str) -> Result<Artist, Error> {
-        let artist = Artist::find_by_mbid(conn, mbid).await?;
-
-        match artist {
-            Some(val) => Ok(val),
-            None => Self::fetch_and_save(conn, mbid).await,
-        }
-    }
 }
+

@@ -13,7 +13,6 @@ use musicbrainz_db_lite::{
     },
     Error,
 };
-use tokio_stream::{self as stream};
 use welds::{connections::sqlite::SqliteClient, WeldsError};
 
 /// Connect and setup a DB to test on
@@ -32,6 +31,10 @@ pub async fn setup_file_database() -> Result<SqliteClient, Error> {
 
 #[tokio::main]
 async fn main() {
+    //let mut clog = colog::default_builder();
+    //clog.filter(None, log::LevelFilter::Trace);
+    //clog.init();
+
     setup_file_database().await.unwrap();
     let client = DBClient::connect("./examples/load_recordings_of_listens/db.db")
         .await
@@ -69,9 +72,7 @@ async fn main() {
 
         let conn = &mut *client.as_sqlx_pool().acquire().await.unwrap();
 
-        let recording = Recording::fetch_all_and_save(conn, &recording)
-            .await
-            .unwrap();
+        let recording = Recording::fetch_and_save(conn, &recording).await.unwrap();
 
         println!(
             "Got: {} by {}",

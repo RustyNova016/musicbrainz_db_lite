@@ -40,6 +40,48 @@ CREATE TABLE `recordings_gid_redirect` (
     `new_id` TEXT REFERENCES `recordings`(`id`),
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
+CREATE TABLE `releases` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+                `gid` TEXT UNIQUE NOT NULL,
+                `title` TEXT NOT NULL,
+                `date` INTEGER,
+                `country` TEXT,
+                `quality` TEXT,
+                `status` TEXT,
+                `barcode` TEXT,
+                `disambiguation` TEXT,
+                `packaging` TEXT,
+                `annotation` TEXT,
+
+                -- Foreign Keys
+                `artist_credit` INTEGER REFERENCES `artist_credits` (`id`)
+            ) STRICT;
+CREATE TABLE `medias` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+                `title` TEXT,
+                `position` INTEGER,
+                `disc_count` INTEGER,
+                `format` TEXT,
+
+                -- Foreign Keys
+                `release` INTEGER NOT NULL REFERENCES `releases` (`id`)
+            ) STRICT;
+CREATE TABLE `tracks` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+                `gid` TEXT UNIQUE NOT NULL,
+                `title` TEXT NOT NULL,
+                `number` TEXT NOT NULL,
+                `position` INTEGER NOT NULL,
+
+                -- Foreign Keys
+                `recording` INTEGER NOT NULL REFERENCES `recordings` (`id`),
+                `media` INTEGER NOT NULL REFERENCES `medias` (`id`)
+            ) STRICT;
+CREATE TABLE `releases_gid_redirect` (
+    `gid` TEXT PRIMARY KEY NOT NULL, 
+    `new_id` TEXT REFERENCES `releases`(`id`),
+    `deleted` INTEGER DEFAULT 0 NOT NULL
+) STRICT;
 CREATE TABLE IF NOT EXISTS "users" (
     `id` INTEGER PRIMARY KEY UNIQUE NOT NULL,
     `name` TEXT UNIQUE NOT NULL
@@ -75,6 +117,9 @@ CREATE TRIGGER `trigger_after_insert_artists` AFTER INSERT ON `artists` FOR EACH
 END;
 CREATE TRIGGER `trigger_after_insert_recordings` AFTER INSERT ON `recordings` FOR EACH ROW BEGIN
     INSERT OR REPLACE INTO recordings_gid_redirect VALUES (new.mbid, new.id, 0);
+END;
+CREATE TRIGGER `trigger_after_insert_releases` AFTER INSERT ON `releases` FOR EACH ROW BEGIN
+    INSERT OR REPLACE INTO releases_gid_redirect VALUES (new.mbid, new.id, 0);
 END;
 CREATE UNIQUE INDEX `idx_msid_mapping_2` ON `msid_mapping` (`recording_msid`, `recording_mbid`, `user`);
 CREATE UNIQUE INDEX `idx_listens` ON `listens` (`listened_at`, `user`, `recording_msid`);

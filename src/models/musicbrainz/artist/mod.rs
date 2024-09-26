@@ -1,8 +1,11 @@
-pub mod crud;
-pub mod redirection;
+use musicbrainz_db_lite_macros::Upsert;
+use sqlx::prelude::FromRow;
 use welds::WeldsModel;
 
-#[derive(Debug, WeldsModel, Clone)]
+use crate::utils::macros::{get_and_fetch::impl_get_and_fetch, impl_redirections};
+
+#[derive(Debug, WeldsModel, Default, Clone, FromRow, Upsert)]
+#[database(name="artists", null_fields(id), ignore_update_keys(id, mbid))]
 #[welds(table = "artists")]
 pub struct Artist {
     #[welds(primary_key)]
@@ -15,4 +18,5 @@ pub struct Artist {
     pub annotation: Option<String>,
 }
 
-impl Artist {}
+impl_redirections!(Artist, "artists");
+impl_get_and_fetch!(Artist);

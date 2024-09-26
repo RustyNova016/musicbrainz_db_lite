@@ -2,6 +2,7 @@ use darling::FromMeta;
 use syn::Fields;
 use syn::Path;
 use darling::util::PathList;
+use crate::utils::field_in_pathlist;
 
 pub(crate) fn get_insert_fields_from_idents(fields: &Fields) -> String {
     let mut names = Vec::new();
@@ -13,11 +14,18 @@ pub(crate) fn get_insert_fields_from_idents(fields: &Fields) -> String {
     format!("({})", names.join(", "))
 }
 
-pub(crate) fn get_insert_values_fields_from_idents(fields: &Fields) -> String {
-    let mut values = vec!["NULL"];
+pub(crate) fn get_insert_values_fields_from_idents(fields: &Fields, ignored_keys: &PathList) -> String {
+    let mut values = vec![];
 
+    for field in fields {
+        if field_in_pathlist(field, ignored_keys) {
+            values.push("NULL");
+        } else {
+            values.push("?");
+        }
+    }
     for _i in 1..fields.len() {
-        values.push("?");
+
     }
 
     format!("({})", values.join(", "))
