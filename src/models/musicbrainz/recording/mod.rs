@@ -1,11 +1,13 @@
-pub mod crud;
 pub mod relations;
+use musicbrainz_db_lite_macros::Upsert;
 use redirect::RecordingGidRedirect;
+use sqlx::prelude::FromRow;
 use welds::{state::DbState, Client, WeldsError, WeldsModel};
 
 pub mod redirect;
 
-#[derive(Debug, WeldsModel)]
+#[derive(Debug, WeldsModel, FromRow, Upsert)]
+#[database(name="recordings", ignore_update_keys(id, mbid))]
 #[welds(table = "recordings")]
 #[welds(HasMany(mbid, RecordingGidRedirect, "new_id"))]
 pub struct Recording {
@@ -22,7 +24,7 @@ pub struct Recording {
 
     pub annotation: Option<String>,
 
-    pub(crate) artist_credit: Option<i64>
+    pub(crate) artist_credit: Option<i64>,
 }
 
 impl Recording {
