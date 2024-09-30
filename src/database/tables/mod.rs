@@ -40,6 +40,11 @@ CREATE TABLE IF NOT EXISTS "listens" (
 CREATE UNIQUE INDEX IF NOT EXISTS `idx_msid_mapping_2` ON `msid_mapping` (`recording_msid`, `recording_mbid`, `user`);
 CREATE UNIQUE INDEX IF NOT EXISTS`idx_listens` ON `listens` (`listened_at`, `user`, `recording_msid`);
 
+CREATE TABLE IF NOT EXISTS `metadata` (
+    schema_version INTEGER NOT NULL
+) STRICT;
+
+--INSERT INTO `metadata` VALUES (1); 
 
 PRAGMA foreign_keys = ON;"#)
 .execute( client)

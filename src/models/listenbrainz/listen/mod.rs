@@ -1,3 +1,4 @@
+pub mod deletes;
 pub mod selects;
 use welds::WeldsModel;
 

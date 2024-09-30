@@ -1,5 +1,5 @@
 pub(super) fn generate_redirect_table(table_name: &str) -> String {
-    format!("CREATE TABLE `{table_name}_gid_redirect` (
+    format!("CREATE TABLE IF NOT EXISTS `{table_name}_gid_redirect` (
     `gid` TEXT PRIMARY KEY NOT NULL, 
     `new_id` TEXT REFERENCES `{table_name}`(`id`),
     `deleted` INTEGER DEFAULT 0 NOT NULL

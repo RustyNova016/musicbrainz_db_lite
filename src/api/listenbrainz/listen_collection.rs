@@ -3,6 +3,7 @@ use crate::Error;
 use extend::ext;
 use listenbrainz::raw::response::UserListensListen;
 use listenbrainz::raw::response::UserListensPayload;
+use sqlx::SqliteConnection;
 use welds::connections::sqlite::SqliteClient;
 use welds::state::DbState;
 
@@ -39,7 +40,14 @@ pub impl UserListensPayload {
             .cloned()
             .collect::<Vec<_>>();
 
-        Self::save_listens(client, listens).await?;
+        let mut trans = client.as_sqlx_pool().begin().await?;
+
+        // Delete the old listens. we want to remove all the old data to not miss any removed listens
+        Listen::delete_listen_range(&mut *trans, delete_range.1, delete_range.0).await?;
+
+        Self::save_listens(&mut trans, listens).await?;
+
+        trans.commit().await?;
 
         if count == self.listens.len() as u64 {
             Ok(Some(delete_range.1))
@@ -49,17 +57,14 @@ pub impl UserListensPayload {
     }
 
     async fn save_listens(
-        client: &SqliteClient,
+        client: &mut SqliteConnection,
         listens: Vec<UserListensListen>,
     ) -> Result<Vec<DbState<Listen>>, Error> {
-        let mut trans = client.as_sqlx_pool().begin().await?;
         let mut result = Vec::with_capacity(1000);
 
         for listen in listens {
-            result.push(Listen::insert_api_listen(&mut trans, &listen).await?);
+            result.push(Listen::insert_api_listen(&mut *client, &listen).await?);
         }
-
-        trans.commit().await?;
 
         Ok(result)
     }

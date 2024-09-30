@@ -66,6 +66,9 @@ CREATE TABLE IF NOT EXISTS "listens" (
     `recording_msid` TEXT NOT NULL REFERENCES `messybrainz_submission`(`msid`),
     `data` TEXT
 ) STRICT;
+CREATE TABLE `metadata` (
+    schema_version INTEGER NOT NULL
+) STRICT;
 DELETE FROM sqlite_sequence;
 CREATE TRIGGER `trigger_after_insert_artists` AFTER INSERT ON `artists` FOR EACH ROW BEGIN
     INSERT OR REPLACE INTO artists_gid_redirect VALUES (new.mbid, new.id, 0);

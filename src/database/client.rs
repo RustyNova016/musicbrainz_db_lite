@@ -3,6 +3,8 @@ use welds::connections::sqlite::{self, SqliteClient};
 
 use crate::Error;
 
+use super::create_database;
+
 pub struct DBClient {
     connection: SqliteClient,
 }
@@ -25,6 +27,12 @@ impl DBClient {
         let connection = sqlite::connect(&format!("sqlite:{}", path)).await?;
         Ok(Self { connection })
     }
+
+    pub async fn create_database(&self) -> Result<(), Error> {
+        create_database(self.as_welds_client()).await
+    } 
+
+
 
     pub fn as_welds_client(&self) -> &SqliteClient {
         &self.connection

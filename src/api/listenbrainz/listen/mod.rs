@@ -3,7 +3,7 @@ use crate::models::listenbrainz::msid_mapping::MsidMapping;
 use crate::models::musicbrainz::recording::redirect::RecordingGidRedirect;
 use crate::Error;
 use listenbrainz::raw::response::UserListensListen;
-use sqlx::{Sqlite, Transaction};
+use sqlx::{Sqlite, SqliteConnection, Transaction};
 use welds::prelude::DbState;
 
 use crate::models::listenbrainz::listen_user_metadata::MessybrainzSubmission;
@@ -11,28 +11,28 @@ use crate::models::{listenbrainz::listen::Listen, musicbrainz::user::User};
 
 impl Listen {
     pub async fn insert_api_listen(
-        client: &mut Transaction<'_, Sqlite>,
+        client: &mut SqliteConnection,
         listen: &UserListensListen,
     ) -> Result<DbState<Listen>, Error> {
         // First, get the user
-        User::insert_or_ignore(&mut **client, &listen.user_name).await?;
+        User::insert_or_ignore(&mut *client, &listen.user_name).await?;
 
         // Then upsert the MSID.
         MessybrainzSubmission::from(listen)
-            .insert_or_ignore(&mut **client)
+            .insert_or_ignore(&mut *client)
             .await?;
 
         // Set the mapping if available
         if let Some(mapping) = &listen.track_metadata.mbid_mapping {
             // First insert the mbid
-            RecordingGidRedirect::add_mbid(&mut **client, &mapping.recording_mbid).await?;
+            RecordingGidRedirect::add_mbid(&mut *client, &mapping.recording_mbid).await?;
 
-            let user = User::find_by_name(&mut **client, &listen.user_name)
+            let user = User::find_by_name(&mut *client, &listen.user_name)
                 .await?
                 .expect("The user shall be inserted");
 
             MsidMapping::set_user_mapping(
-                &mut **client,
+                &mut *client,
                 user.id,
                 listen.recording_msid.clone(),
                 mapping.recording_mbid.clone(),
@@ -42,16 +42,16 @@ impl Listen {
 
         let data = serde_json::to_string(&listen.track_metadata.additional_info)
             .expect("Crashing from serializing a serde::Value isn't possible");
-
+        
         let listen_db = sqlx::query_as!(
             Listen,
-            "INSERT INTO listens VALUES (NULL, ?, ?, ?, ?) RETURNING *",
+            "INSERT OR IGNORE INTO listens VALUES (NULL, ?, ?, ?, ?) RETURNING *",
             listen.listened_at,
             listen.user_name,
             listen.recording_msid,
             data
         )
-        .fetch_one(&mut **client)
+        .fetch_one(&mut *client)
         .await?;
 
         Ok(DbState::new_uncreated(listen_db))

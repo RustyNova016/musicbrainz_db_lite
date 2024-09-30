@@ -1,5 +1,4 @@
 use sqlx::SqliteConnection;
-use sqlx::SqliteExecutor;
 use welds::connections::sqlite::SqliteClient;
 use welds::Client;
 use welds::TransactStart;

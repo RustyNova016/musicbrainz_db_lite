@@ -36,7 +36,7 @@ impl Listen {
     }
 
     /// Fetch listens for the user and save them in the database
-    async fn execute_listen_fetch(
+    pub async fn execute_listen_fetch(
         client: &SqliteClient,
         lb_client: &Client,
         user: &str,
