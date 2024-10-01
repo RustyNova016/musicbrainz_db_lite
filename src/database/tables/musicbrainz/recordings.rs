@@ -1,10 +1,10 @@
-use sqlx::SqlitePool;
+
+use sqlx::SqliteConnection;
 
 use super::gid_redirect_tables::generate_redirect_table;
 
-pub(super) async fn create_recordings_tables(client: &SqlitePool) -> Result<(), sqlx::Error> {
-    sqlx::query!(
-        r#"
+pub(super) async fn create_recordings_tables(conn: &mut SqliteConnection) -> Result<(), sqlx::Error> {
+    sqlx::query(r#"
         CREATE TABLE IF NOT EXISTS `recordings` (
             `id` INTEGER PRIMARY KEY NOT NULL, 
             `mbid` TEXT UNIQUE NOT NULL, 
@@ -18,11 +18,11 @@ pub(super) async fn create_recordings_tables(client: &SqlitePool) -> Result<(), 
         ) STRICT;
 "#
     )
-    .execute(client)
+    .execute(&mut *conn)
     .await?;
 
     sqlx::query(&generate_redirect_table("recordings"))
-        .execute(client)
+        .execute(conn)
         .await?;
 
     Ok(())

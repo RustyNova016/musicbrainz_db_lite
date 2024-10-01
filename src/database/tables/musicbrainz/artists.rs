@@ -1,9 +1,9 @@
-use sqlx::{query as query_mac, SqlitePool};
+use sqlx::SqliteConnection;
 
 use super::gid_redirect_tables::generate_redirect_table;
 
-pub(super) async fn create_artist_tables(client: &SqlitePool) -> Result<(), sqlx::Error> {
-    query_mac!(
+pub(super) async fn create_artist_tables(conn: &mut SqliteConnection) -> Result<(), sqlx::Error> {
+    sqlx::query(
         r#"CREATE TABLE IF NOT EXISTS
     `artists` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -28,11 +28,11 @@ pub(super) async fn create_artist_tables(client: &SqlitePool) -> Result<(), sqlx
     CREATE TABLE IF NOT EXISTS `artist_credits` (`id` INTEGER PRIMARY KEY AUTOINCREMENT) STRICT;
 "#
     )
-    .execute(client)
+    .execute(&mut *conn)
     .await?;
 
     sqlx::query(&generate_redirect_table("artists"))
-        .execute(client)
+        .execute(conn)
         .await?;
 
     Ok(())

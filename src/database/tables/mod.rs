@@ -1,9 +1,9 @@
 pub mod musicbrainz;
 use musicbrainz::generate_musicbrainz_database;
-use sqlx::SqlitePool;
+use sqlx::SqliteConnection;
 
-pub async fn create_listenbrainz_tables(client: &SqlitePool) -> Result<(), sqlx::Error> {
-    sqlx::query!(r#"PRAGMA foreign_keys = OFF; 
+pub async fn create_listenbrainz_tables(conn: &mut SqliteConnection) -> Result<(), sqlx::Error> {
+    sqlx::query(r#"PRAGMA foreign_keys = OFF; 
 
 -- Tables
 CREATE TABLE IF NOT EXISTS "users" (
@@ -47,12 +47,12 @@ CREATE TABLE IF NOT EXISTS `metadata` (
 --INSERT INTO `metadata` VALUES (1); 
 
 PRAGMA foreign_keys = ON;"#)
-.execute( client)
+.execute( conn)
 .await?;
     Ok(())
 }
 
-pub async fn create_musicbrainz_tables(client: &SqlitePool) -> Result<(), sqlx::Error> {
-    generate_musicbrainz_database(&client).await?;
+pub async fn create_musicbrainz_tables(conn: &mut SqliteConnection) -> Result<(), sqlx::Error> {
+    generate_musicbrainz_database(conn).await?;
     Ok(())
 }
