@@ -43,6 +43,7 @@ impl Release {
             title: new.title,
             quality: self.quality, //TODO: Quality to string
             status: self.status,   //TODO: Status to string
+            full_update_date: self.full_update_date,
         }
     }
 

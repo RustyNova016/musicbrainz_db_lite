@@ -13,12 +13,13 @@ use musicbrainz_db_lite::{
     },
     Error,
 };
+use musicbrainz_rs_nova::entity::release;
 use welds::{connections::sqlite::SqliteClient, WeldsError};
 
 /// Connect and setup a DB to test on
 pub async fn setup_file_database() -> Result<SqliteClient, Error> {
     if std::fs::exists("./examples/load_recordings_of_listens/db.db").unwrap() {
-        fs::remove_file("./examples/load_recordings_of_listens/db.db").unwrap();
+      fs::remove_file("./examples/load_recordings_of_listens/db.db").unwrap();
     }
 
     File::create_new("./examples/load_recordings_of_listens/db.db").unwrap();
@@ -54,7 +55,7 @@ async fn main() {
 
     // Now get the missing recordings
     println!("Getting the recordings");
-    let recordings = Listen::get_unfetched_recordings_of_user(
+    let recordings = Listen::get_recordings_of_user(
         client.as_welds_client(),
         &User::find_by_name(client.as_welds_client().as_sqlx_pool(), "RustyNova")
             .await
@@ -68,18 +69,32 @@ async fn main() {
 
     let mut result = Vec::new();
     for recording in recordings {
+        println!();
+        println!(" === New Recording ===");
         println!("Looking up: {recording}");
 
+        //let mut trans = client.begin_transaction().await.unwrap();
+        //let conn = &mut *trans;
         let conn = &mut *client.as_sqlx_pool().acquire().await.unwrap();
 
-        let recording = Recording::fetch_and_save(conn, &recording).await.unwrap();
+        let recording = Recording::get_or_fetch_as_complete(conn, &recording).await.unwrap();
+
+        println!("Getting Releases...");
+        let releases = recording.get_releases_or_fetch(conn).await.unwrap();
+
+        for release in releases {
+            println!("Getting medias...");
+            let _medias = release.get_medias_or_fetch(conn).await.unwrap();
+        }
 
         println!(
             "Got: {} by {}",
             recording.title,
-            recording.get_artist_credits(conn).await.unwrap().unwrap()
+            recording.get_artist_credits_or_fetch(conn).await.unwrap()
         );
 
+        let _ = conn;
+        //trans.commit().await.unwrap();
         result.push(recording);
     }
 

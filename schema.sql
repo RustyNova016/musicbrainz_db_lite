@@ -7,7 +7,8 @@ CREATE TABLE `artists` (
         `sort_name` TEXT NOT NULL,
         `disambiguation` TEXT NOT NULL,
         `country` TEXT,
-        `annotation` TEXT
+        `annotation` TEXT,
+        `full_update_date` INTEGER
     ) STRICT;
 CREATE TABLE `artist_credits_item` (
         `artist_credit` INTEGER REFERENCES `artist_credits` (`id`),
@@ -21,7 +22,7 @@ CREATE TABLE `artist_credits_item` (
 CREATE TABLE `artist_credits` (`id` INTEGER PRIMARY KEY AUTOINCREMENT) STRICT;
 CREATE TABLE `artists_gid_redirect` (
     `gid` TEXT PRIMARY KEY NOT NULL, 
-    `new_id` TEXT REFERENCES `artists`(`id`),
+    `new_id` TEXT REFERENCES `artists`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
 CREATE TABLE `recordings` (
@@ -32,17 +33,19 @@ CREATE TABLE `recordings` (
             `disambiguation` TEXT, 
             `annotation` TEXT,
 
+            `full_update_date` INTEGER,
+
             -- Foreign keys
             `artist_credit` INTEGER REFERENCES `artist_credits`(`id`)
         ) STRICT;
 CREATE TABLE `recordings_gid_redirect` (
     `gid` TEXT PRIMARY KEY NOT NULL, 
-    `new_id` TEXT REFERENCES `recordings`(`id`),
+    `new_id` TEXT REFERENCES `recordings`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
 CREATE TABLE `releases` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-                `gid` TEXT UNIQUE NOT NULL,
+                `mbid` TEXT UNIQUE NOT NULL,
                 `title` TEXT NOT NULL,
                 `date` INTEGER,
                 `country` TEXT,
@@ -53,18 +56,21 @@ CREATE TABLE `releases` (
                 `packaging` TEXT,
                 `annotation` TEXT,
 
+                `full_update_date` INTEGER,
+
                 -- Foreign Keys
                 `artist_credit` INTEGER REFERENCES `artist_credits` (`id`)
             ) STRICT;
 CREATE TABLE `medias` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+                `track_count` INTEGER NOT NULL,
                 `title` TEXT,
                 `position` INTEGER,
                 `disc_count` INTEGER,
                 `format` TEXT,
 
                 -- Foreign Keys
-                `release` INTEGER NOT NULL REFERENCES `releases` (`id`)
+                `release` INTEGER NOT NULL REFERENCES `releases` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
             ) STRICT;
 CREATE TABLE `tracks` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,12 +80,12 @@ CREATE TABLE `tracks` (
                 `position` INTEGER NOT NULL,
 
                 -- Foreign Keys
-                `recording` INTEGER NOT NULL REFERENCES `recordings` (`id`),
-                `media` INTEGER NOT NULL REFERENCES `medias` (`id`)
+                `media` INTEGER NOT NULL REFERENCES `medias` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+                `recording` TEXT REFERENCES `recordings_gid_redirect` (`gid`) ON UPDATE CASCADE ON DELETE CASCADE
             ) STRICT;
 CREATE TABLE `releases_gid_redirect` (
     `gid` TEXT PRIMARY KEY NOT NULL, 
-    `new_id` TEXT REFERENCES `releases`(`id`),
+    `new_id` TEXT REFERENCES `releases`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
 CREATE TABLE IF NOT EXISTS "users" (
@@ -113,13 +119,15 @@ CREATE TABLE `metadata` (
 ) STRICT;
 DELETE FROM sqlite_sequence;
 CREATE TRIGGER `trigger_after_insert_artists` AFTER INSERT ON `artists` FOR EACH ROW BEGIN
-    INSERT OR REPLACE INTO artists_gid_redirect VALUES (new.mbid, new.id, 0);
+    INSERT INTO artists_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
 CREATE TRIGGER `trigger_after_insert_recordings` AFTER INSERT ON `recordings` FOR EACH ROW BEGIN
-    INSERT OR REPLACE INTO recordings_gid_redirect VALUES (new.mbid, new.id, 0);
+    INSERT INTO recordings_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
+CREATE UNIQUE INDEX `idx_medias` ON `medias` (`release`, `position`);
+CREATE UNIQUE INDEX `idx_tracks` ON `tracks` (`media`, `position`);
 CREATE TRIGGER `trigger_after_insert_releases` AFTER INSERT ON `releases` FOR EACH ROW BEGIN
-    INSERT OR REPLACE INTO releases_gid_redirect VALUES (new.mbid, new.id, 0);
+    INSERT INTO releases_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
 CREATE UNIQUE INDEX `idx_msid_mapping_2` ON `msid_mapping` (`recording_msid`, `recording_mbid`, `user`);
 CREATE UNIQUE INDEX `idx_listens` ON `listens` (`listened_at`, `user`, `recording_msid`);

@@ -8,7 +8,7 @@ use crate::Error;
 
 impl Artist {
     pub async fn fetch_and_save(conn: &mut SqliteConnection, mbid: &str) -> Result<Artist, Error> {
-        let artist = MBArtist::fetch()
+        let data = MBArtist::fetch()
             .id(mbid)
             .with_aliases()
             .with_annotations()
@@ -33,9 +33,11 @@ impl Artist {
             .save(conn)
             .await?;
 
-        Artist::set_redirection(conn, mbid, artist.id).await?;
+        Self::reset_full_update_date(conn, data.id).await?;
 
-        Ok(artist)
+        Artist::set_redirection(conn, mbid, data.id).await?;
+
+        Ok(data)
     }
 }
 

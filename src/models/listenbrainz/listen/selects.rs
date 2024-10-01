@@ -107,4 +107,28 @@ impl Listen {
         .fetch_all(client.as_sqlx_pool())
         .await
     }
+
+    pub async fn get_recordings_of_user(
+        client: &SqliteClient,
+        user: &User,
+    ) -> Result<Vec<String>, sqlx::Error> {
+        query_scalar!(r#"
+            SELECT DISTINCT
+                recordings_gid_redirect."gid"
+            FROM
+                users
+                INNER JOIN listens ON users.name = listens.user
+                INNER JOIN messybrainz_submission ON listens.recording_msid = messybrainz_submission.msid
+                INNER JOIN msid_mapping ON messybrainz_submission.msid = msid_mapping.recording_msid
+                INNER JOIN recordings_gid_redirect ON msid_mapping.recording_mbid = recordings_gid_redirect.gid
+            WHERE
+                recordings_gid_redirect.deleted = 0
+                AND msid_mapping.user = users.id
+                AND users.id = ?
+                "#,
+            user.id
+        )
+        .fetch_all(client.as_sqlx_pool())
+        .await
+    }
 }

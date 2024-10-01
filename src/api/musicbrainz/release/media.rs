@@ -13,7 +13,8 @@ impl Media {
                 format: media.format,
                 position: media.position.map(|n| n  as i64),
                 title: media.title,
-                release: release_id
+                release: release_id,
+                track_count: media.track_count as i64
             };
 
             let new_media = new_media.upsert(&mut *conn).await?;

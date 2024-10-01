@@ -19,6 +19,8 @@ pub(super) async fn create_release_tables(conn: &mut SqliteConnection) -> Result
                 `packaging` TEXT,
                 `annotation` TEXT,
 
+                `full_update_date` INTEGER,
+
                 -- Foreign Keys
                 `artist_credit` INTEGER REFERENCES `artist_credits` (`id`)
             ) STRICT;
@@ -26,6 +28,7 @@ pub(super) async fn create_release_tables(conn: &mut SqliteConnection) -> Result
         CREATE TABLE IF NOT EXISTS
             `medias` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+                `track_count` INTEGER NOT NULL,
                 `title` TEXT,
                 `position` INTEGER,
                 `disc_count` INTEGER,
