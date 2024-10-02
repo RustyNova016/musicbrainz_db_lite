@@ -12,7 +12,8 @@ pub(super) async fn create_artist_tables(conn: &mut SqliteConnection) -> Result<
         `sort_name` TEXT NOT NULL,
         `disambiguation` TEXT NOT NULL,
         `country` TEXT,
-        `annotation` TEXT
+        `annotation` TEXT,
+        `full_update_date` INTEGER
     ) STRICT;
      
     CREATE TABLE IF NOT EXISTS `artist_credits_item` (

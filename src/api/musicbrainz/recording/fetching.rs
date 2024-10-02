@@ -31,7 +31,9 @@ impl Recording {
             .save(conn)
             .await?;
 
-            Self::set_redirection(conn, mbid, data.id).await?;
+        Self::reset_full_update_date(conn, data.id).await?;
+        
+        Self::set_redirection(conn, mbid, data.id).await?;
 
         Ok(data)
     }

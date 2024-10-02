@@ -34,6 +34,7 @@ impl Recording {
             disambiguation: new.disambiguation.or(self.disambiguation),
             length: new.length.map(|n| n as i64).or(self.length),
             title: new.title,
+            full_update_date: self.full_update_date
         }
     }
 

@@ -1,3 +1,4 @@
+use chrono::Utc;
 use sqlx::{Executor, Sqlite, SqliteConnection};
 use welds::{connections::sqlite::SqliteClient, WeldsError, WeldsModel};
 
@@ -40,6 +41,8 @@ impl RecordingGidRedirect {
         original_mbid: &str,
         new_id: i64,
     ) -> Result<sqlx::sqlite::SqliteQueryResult, sqlx::Error> {
+        
+
         sqlx::query!(
             "INSERT INTO recordings_gid_redirect VALUES (?, ?, 0) ON CONFLICT DO UPDATE SET `new_id` = ?",
             original_mbid,

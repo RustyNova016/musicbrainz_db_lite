@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "INSERT INTO listens VALUES (NULL, ?, ?, ?, ?) RETURNING *",
+  "query": "INSERT OR IGNORE INTO listens VALUES (NULL, ?, ?, ?, ?) RETURNING *",
   "describe": {
     "columns": [
       {
@@ -40,5 +40,5 @@
       true
     ]
   },
-  "hash": "104e7667aa6a25fd704f346a40d961408341d5bc6abe7234775691f03d1ceaea"
+  "hash": "f0598a97efc6d18f0a824edd0c5868b2efcd68b3b08bcfd89620db2464bab8f8"
 }

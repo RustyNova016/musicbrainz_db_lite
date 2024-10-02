@@ -17,6 +17,7 @@ impl Artist {
             mbid: new.id,
             name: new.name,
             sort_name: new.sort_name,
+            full_update_date: self.full_update_date
         }
     }
 

@@ -32,13 +32,15 @@ impl DBClient {
         create_database(self.as_welds_client()).await
     } 
 
-
-
     pub fn as_welds_client(&self) -> &SqliteClient {
         &self.connection
     }
 
     pub fn as_sqlx_pool(&self) -> &SqlitePool {
         self.connection.as_sqlx_pool()
+    }
+
+    pub async fn begin_transaction(&self) -> Result<sqlx::Transaction<'_, sqlx::Sqlite>, sqlx::Error> {
+        self.as_sqlx_pool().begin().await
     }
 }

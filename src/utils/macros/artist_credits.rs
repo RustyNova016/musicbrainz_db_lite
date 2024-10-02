@@ -12,6 +12,20 @@ macro_rules! impl_artist_credits {
                 }
             }
 
+            pub async fn get_artist_credits_or_fetch(
+                &self,
+                conn: &mut sqlx::SqliteConnection,
+            ) -> Result<crate::models::musicbrainz::artist_credit::ArtistCredits, crate::Error> {
+
+                match self.artist_credit {
+                    Some(id) => Ok(crate::models::musicbrainz::artist_credit::ArtistCredits::find_by_id(conn, id).await?),
+                    None => {
+                        self.refetch(conn).await?;
+                        Ok(crate::models::musicbrainz::artist_credit::ArtistCredits::find_by_id(conn, self.artist_credit.unwrap()).await?)
+                    },
+                }
+            }
+
             pub async fn set_artist_credits(
                 &mut self,
                 conn: &mut sqlx::SqliteConnection,

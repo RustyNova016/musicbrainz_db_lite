@@ -13,6 +13,8 @@ pub(super) async fn create_recordings_tables(conn: &mut SqliteConnection) -> Res
             `disambiguation` TEXT, 
             `annotation` TEXT,
 
+            `full_update_date` INTEGER,
+
             -- Foreign keys
             `artist_credit` INTEGER REFERENCES `artist_credits`(`id`)
         ) STRICT;

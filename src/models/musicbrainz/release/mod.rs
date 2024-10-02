@@ -1,10 +1,11 @@
-use musicbrainz_db_lite_macros::Upsert;
+pub mod relations;
+use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use sqlx::FromRow;
 
 use crate::utils::macros::{artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections};
 
-#[derive(Debug, Default, Clone, FromRow, Upsert)]
-#[database(name="releases", null_fields(id), ignore_update_keys(id, mbid))]
+#[derive(Debug, Default, Clone, FromRow, Upsert, MainEntity)]
+#[database(table="releases", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id, mbid))]
 pub struct Release {
     pub id: i64,
     pub mbid: String,
@@ -17,6 +18,8 @@ pub struct Release {
     pub disambiguation: Option<String>,
     pub packaging: Option<String>,
     pub annotation: Option<String>,
+    pub full_update_date: Option<i64>,
+
     pub artist_credit: Option<i64>,
 }
 
@@ -25,9 +28,10 @@ impl_artist_credits!(Release, "releases");
 impl_get_and_fetch!(Release);
 
 #[derive(Debug, Default, Clone, FromRow, Upsert)]
-#[database(name="medias", null_fields(id), ignore_update_keys(id))]
+#[database(table="medias", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id))]
 pub struct Media {
     pub id: i64,
+    pub track_count: i64,
     pub title: Option<String>,
     pub position: Option<i64>,
     pub disc_count: Option<i64>,
@@ -37,7 +41,7 @@ pub struct Media {
 }
 
 #[derive(Debug, Default, Clone, FromRow, Upsert)]
-#[database(name="tracks", null_fields(id), ignore_update_keys(id, gid))]
+#[database(table="tracks", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id, gid))]
 pub struct Track {
     pub id: i64,
     pub gid: String,

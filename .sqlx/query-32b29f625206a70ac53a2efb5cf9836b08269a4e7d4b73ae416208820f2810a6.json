@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        CREATE TABLE IF NOT EXISTS\n            `releases` (\n                `id` INTEGER PRIMARY KEY AUTOINCREMENT,\n                `mbid` TEXT UNIQUE NOT NULL,\n                `title` TEXT NOT NULL,\n                `date` INTEGER,\n                `country` TEXT,\n                `quality` TEXT,\n                `status` TEXT,\n                `barcode` TEXT,\n                `disambiguation` TEXT,\n                `packaging` TEXT,\n                `annotation` TEXT,\n\n                `full_update_date` INTEGER,\n\n                -- Foreign Keys\n                `artist_credit` INTEGER REFERENCES `artist_credits` (`id`)\n            ) STRICT;\n\n        CREATE TABLE IF NOT EXISTS\n            `medias` (\n                `id` INTEGER PRIMARY KEY AUTOINCREMENT,\n                `track_count` INTEGER NOT NULL,\n                `title` TEXT,\n                `position` INTEGER,\n                `disc_count` INTEGER,\n                `format` TEXT,\n\n                -- Foreign Keys\n                `release` INTEGER NOT NULL REFERENCES `releases` (`id`) ON UPDATE CASCADE ON DELETE CASCADE\n            ) STRICT;\n\n        CREATE UNIQUE INDEX IF NOT EXISTS `idx_medias` ON `medias` (`release`, `position`);\n\n        CREATE TABLE IF NOT EXISTS\n            `tracks` (\n                `id` INTEGER PRIMARY KEY AUTOINCREMENT,\n                `gid` TEXT UNIQUE NOT NULL,\n                `title` TEXT NOT NULL,\n                `number` TEXT NOT NULL,\n                `position` INTEGER NOT NULL,\n\n                -- Foreign Keys\n                `media` INTEGER NOT NULL REFERENCES `medias` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,\n                `recording` TEXT REFERENCES `recordings_gid_redirect` (`gid`) ON UPDATE CASCADE ON DELETE CASCADE\n            ) STRICT;\n             \n        CREATE UNIQUE INDEX IF NOT EXISTS `idx_tracks` ON `tracks` (`media`, `position`)\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "32b29f625206a70ac53a2efb5cf9836b08269a4e7d4b73ae416208820f2810a6"
+}

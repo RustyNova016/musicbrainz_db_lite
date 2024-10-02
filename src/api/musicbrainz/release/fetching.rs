@@ -4,7 +4,7 @@ use sqlx::SqliteConnection;
 
 impl Release {
     pub async fn fetch_and_save(conn: &mut SqliteConnection, mbid: &str) -> Result<Self, Error> {
-        let artist = MBRelease::fetch()
+        let data = MBRelease::fetch()
             .id(mbid)
             .with_aliases()
             .with_annotations()
@@ -26,9 +26,11 @@ impl Release {
             .save(conn)
             .await?;
 
-        Self::set_redirection(conn, mbid, artist.id).await?;
+        Self::reset_full_update_date(conn, data.id).await?;
 
-        Ok(artist)
+        Self::set_redirection(conn, mbid, data.id).await?;
+
+        Ok(data)
     }
 }
 
