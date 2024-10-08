@@ -15,20 +15,29 @@ pub fn impl_update_date(struct_name: &Ident, table_name: &str, pk: &str) -> Toke
         }
 
         /// Get from the database and perform an update if the data isn't fully present
-        pub async fn get_or_fetch_as_complete(conn: &mut sqlx::SqliteConnection, mbid: &str) -> Result<Self, crate::Error> {
-            let db_data = Self::find_by_mbid(conn, mbid).await?;
-    
-            if db_data.is_none() || db_data.as_ref().is_some_and(|e| e.full_update_date.is_none()) {
-                Self::fetch_and_save(conn, mbid).await?;
-                return Ok(Self::find_by_mbid(conn, mbid).await?.expect("The data should be in the database"));
-            }
+        pub async fn get_or_fetch_as_complete(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error> {
+            match self.full_update_date {
+                Some(_) => Ok(self.clone()),
+                None => self.refetch(conn).await
+            }     
+        }
 
-            Ok(db_data.expect("The data should be in the database"))
+        /// Get from the database and perform an update if the data isn't fully present
+        pub async fn get_or_fetch_as_complete_from_mbid(conn: &mut sqlx::SqliteConnection, mbid: &str) -> Result<Option<Self>, crate::Error> {
+            match Self::find_by_mbid(conn, mbid).await? {
+                Some(data) => {
+                    if data.full_update_date.is_none() {
+                        return Ok(Some(data.refetch(conn).await?))
+                    }
+                    Ok(Some(data))
+                },
+                None => Self::fetch_and_save(conn, mbid).await
+            }
         }
 
         /// Refresh the data in the database by refetching the entity
         pub async fn refetch(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error> {
-            Self::fetch_and_save(conn, &self.mbid).await
+            Self::fetch_and_save(conn, &self.mbid).await?.ok_or(crate::Error::UnknownUpstream(self.mbid.clone()))
         }
     }
 }

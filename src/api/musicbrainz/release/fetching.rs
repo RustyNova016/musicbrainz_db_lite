@@ -1,9 +1,9 @@
-use crate::{api::SaveToDatabase, models::musicbrainz::release::Release, Error};
+use crate::{api::SaveToDatabase, models::musicbrainz::release::{Release, Track}, Error};
 use musicbrainz_rs_nova::{entity::release::Release as MBRelease, Fetch};
 use sqlx::SqliteConnection;
 
 impl Release {
-    pub async fn fetch_and_save(conn: &mut SqliteConnection, mbid: &str) -> Result<Self, Error> {
+    pub async fn fetch_and_save(conn: &mut SqliteConnection, mbid: &str) -> Result<Option<Self>, Error> {
         let data = MBRelease::fetch()
             .id(mbid)
             .with_aliases()
@@ -22,15 +22,23 @@ impl Release {
             .with_work_level_relations()
             .with_work_relations()
             .execute()
-            .await?
-            .save(conn)
-            .await?;
+            .await;
 
-        Self::reset_full_update_date(conn, data.id).await?;
+        match data {
+            Ok(data) => {
+                let data = data.save(conn).await?;
+                Self::reset_full_update_date(conn, data.id).await?;
 
-        Self::set_redirection(conn, mbid, data.id).await?;
+                Self::set_redirection(conn, mbid, data.id).await?;
 
-        Ok(data)
+                Ok(Some(data))
+            }
+            Err(musicbrainz_rs_nova::Error::NotFound(_)) => {
+                // TODO: Set deleted
+                Ok(None)
+            }
+            Err(err) => Err(err.into()),
+        }
     }
 }
 
@@ -39,5 +47,11 @@ impl SaveToDatabase for MBRelease {
 
     async fn save(self, conn: &mut SqliteConnection) -> Result<Self::ReturnedData, sqlx::Error> {
         Release::save_api_response_recursive(conn, self).await
+    }
+}
+
+impl Track {
+    pub async fn refetch(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error>  {
+        todo!();
     }
 }

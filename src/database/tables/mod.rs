@@ -25,7 +25,9 @@ CREATE TABLE IF NOT EXISTS "msid_mapping" (
     `id` INTEGER PRIMARY KEY NOT NULL,
     `recording_msid` TEXT NOT NULL REFERENCES `messybrainz_submission`(`msid`),
     `recording_mbid` TEXT NOT NULL REFERENCES `recordings_gid_redirect`(`gid`),
-    `user` INTEGER NOT NULL REFERENCES `users`(`id`)
+    `user` INTEGER NOT NULL REFERENCES `users`(`id`),
+
+    `release_mbid` TEXT REFERENCES `releases_gid_redirect`(gid)
 ) STRICT;
 
 CREATE TABLE IF NOT EXISTS "listens" (

@@ -1,6 +1,6 @@
 use sqlx::SqliteConnection;
 
-use crate::models::musicbrainz::release::Release;
+use crate::{models::musicbrainz::release::Release, Error};
 
 use super::Recording;
 
@@ -11,7 +11,7 @@ impl Recording {
         conn: &mut SqliteConnection,
     ) -> Result<Vec<Release>, crate::Error> {
         // First, make sure all the releases of the recording are in the database
-        let id = Self::get_or_fetch_as_complete(conn, &self.mbid).await?.id;
+        let id = self.get_or_fetch_as_complete(conn).await?.id;
 
         // Next, get all the releases
         Ok(
@@ -32,4 +32,6 @@ impl Recording {
                  .fetch_all(conn)
                  .await?)
     } 
+
+
 }

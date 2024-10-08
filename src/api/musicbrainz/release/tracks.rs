@@ -1,7 +1,7 @@
 use musicbrainz_rs_nova::entity::release::Track as MBTrack;
 use sqlx::{sqlite::SqliteQueryResult, SqliteConnection};
 
-use crate::models::musicbrainz::{recording::Recording, release::Track};
+use crate::models::musicbrainz::{artist_credit::ArtistCredits, recording::Recording, release::Track};
 
 impl Track {
     pub async fn save_api_response(
@@ -21,14 +21,21 @@ impl Track {
                 number: track.number,
                 media: media_id,
                 recording: None,
+                length: track.length.map(|v| v as i64),
+                artist_credit: None
             };
 
-            let new_track = new_track.upsert(&mut *conn).await?;
+            let mut new_track = new_track.upsert(&mut *conn).await?;
 
             if let Some(recording) = track.recording {
                 Recording::add_redirect_mbid(conn, &recording.id).await?;
                 new_track.set_recording_id(conn, &recording.id).await?;
                 Recording::save_api_response(conn, recording).await?;
+            }
+
+            if let Some(artist_credits) = track.artist_credit.clone() {
+                let credits = ArtistCredits::save_api_response(conn, artist_credits).await?;
+                new_track.set_artist_credits(conn, credits.0).await?;
             }
 
             converteds.push(new_track);

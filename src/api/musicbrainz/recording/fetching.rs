@@ -11,7 +11,7 @@ impl Recording {
     pub async fn fetch_and_save(
         conn: &mut SqliteConnection,
         mbid: &str,
-    ) -> Result<Recording, Error> {
+    ) -> Result<Option<Recording>, Error> {
         let data = MSRecording::fetch()
             .id(mbid)
             .with_aliases()
@@ -27,14 +27,22 @@ impl Recording {
             .with_work_relations()
             .with_medias()
             .execute()
-            .await?
-            .save(conn)
-            .await?;
+            .await;
 
-        Self::reset_full_update_date(conn, data.id).await?;
-        
-        Self::set_redirection(conn, mbid, data.id).await?;
+        match data {
+            Ok(data) => {
+                let data = data.save(conn).await?;
+                Self::reset_full_update_date(conn, data.id).await?;
 
-        Ok(data)
+                Self::set_redirection(conn, mbid, data.id).await?;
+
+                Ok(Some(data))
+            }
+            Err(musicbrainz_rs_nova::Error::NotFound(_)) => {
+                // TODO: Set deleted
+                Ok(None)
+            }
+            Err(err) => Err(err.into()),
+        }
     }
 }

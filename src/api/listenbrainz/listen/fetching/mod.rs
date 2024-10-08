@@ -12,7 +12,7 @@ impl Listen {
         client: &SqliteClient,
         user: &str,
     ) -> Result<(), Error> {
-        let latest_listen_ts = Listen::get_latest_listen_of_user(client, user)
+        let latest_listen_ts = Listen::get_latest_listen_of_user(&mut *client.as_sqlx_pool().acquire().await?, user)
             .await?
             .map(|v| v.listened_at);
         let mut pull_ts = Some(Utc::now().timestamp());
@@ -42,10 +42,8 @@ impl Listen {
         user: &str,
         max_ts: i64,
     ) -> Result<Option<i64>, Error> {
-        println!("Fetching {max_ts}");
         let dump = lb_client.user_listens(user, None, Some(max_ts), Some(1000));
 
-        println!("Saving {max_ts}");
         match dump {
             Ok(val) => Ok(val
                 .payload

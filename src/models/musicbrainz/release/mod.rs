@@ -36,6 +36,7 @@ pub struct Media {
     pub position: Option<i64>,
     pub disc_count: Option<i64>,
     pub format: Option<String>,
+    pub track_offset: Option<i64>,
 
     pub release: i64
 }
@@ -47,8 +48,12 @@ pub struct Track {
     pub gid: String,
     pub title: String,
     pub number: String,
+    pub length: Option<i64>,
     pub position: i64,
 
     pub media: i64,
-    pub recording: Option<String>
+    pub recording: Option<String>,
+    pub artist_credit: Option<i64>
 }
+
+impl_artist_credits!(Track, "tracks");

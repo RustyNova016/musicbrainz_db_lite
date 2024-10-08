@@ -15,6 +15,9 @@ pub enum Error {
 
     #[error(transparent)]
     SQLxError(#[from] sqlx::Error),
+
+    #[error("The MBID {0} wasn't found in Musicbrainz, but found in the local database. Hint: The upstream MBID might have been deleted")]
+    UnknownUpstream(String)
 }
 
 impl From<welds::connections::Error> for Error {

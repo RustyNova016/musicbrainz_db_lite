@@ -28,11 +28,12 @@ pub(super) async fn create_release_tables(conn: &mut SqliteConnection) -> Result
         CREATE TABLE IF NOT EXISTS
             `medias` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-                `track_count` INTEGER NOT NULL,
                 `title` TEXT,
                 `position` INTEGER,
+                `track_count` INTEGER NOT NULL,
                 `disc_count` INTEGER,
-                `format` TEXT,
+                `format` TEXT, 
+                `track_offset` INTEGER,
 
                 -- Foreign Keys
                 `release` INTEGER NOT NULL REFERENCES `releases` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
@@ -46,14 +47,21 @@ pub(super) async fn create_release_tables(conn: &mut SqliteConnection) -> Result
                 `gid` TEXT UNIQUE NOT NULL,
                 `title` TEXT NOT NULL,
                 `number` TEXT NOT NULL,
+                `length` INTEGER,
                 `position` INTEGER NOT NULL,
 
                 -- Foreign Keys
                 `media` INTEGER NOT NULL REFERENCES `medias` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
-                `recording` TEXT REFERENCES `recordings_gid_redirect` (`gid`) ON UPDATE CASCADE ON DELETE CASCADE
+                `recording` TEXT REFERENCES `recordings_gid_redirect` (`gid`) ON UPDATE CASCADE,
+                `artist_credit` INTEGER REFERENCES `artist_credits` (`id`)
             ) STRICT;
              
-        CREATE UNIQUE INDEX IF NOT EXISTS `idx_tracks` ON `tracks` (`media`, `position`)
+        CREATE UNIQUE INDEX IF NOT EXISTS `idx_tracks` ON `tracks` (`media`, `position`);
+
+        CREATE TRIGGER IF NOT EXISTS `trigger_after_delete_tracks` AFTER DELETE ON `tracks` BEGIN
+            -- Invalidate the recording as it doesn't have its tracks anymore
+            UPDATE `recordings` SET `full_update_date` = NULL;
+        END;
 "#
     )
     .execute(&mut *conn)

@@ -1,12 +1,14 @@
+pub mod relations;
 pub mod deletes;
 pub mod selects;
+use chrono::{DateTime, TimeZone, Utc};
 use welds::WeldsModel;
 
 use crate::models::musicbrainz::user::User;
 
 use super::{listen_user_metadata::MessybrainzSubmission, msid_mapping::MsidMapping};
 
-#[derive(Debug, WeldsModel, sqlx::FromRow)]
+#[derive(Debug, WeldsModel, PartialEq, Eq, Clone, sqlx::FromRow)]
 #[welds(table = "listens")]
 #[welds(BelongsTo(user, User, "user"))]
 #[welds(BelongsTo(messybrainz_submition, MessybrainzSubmission, "recording_msid"))]
@@ -22,4 +24,11 @@ pub struct Listen {
     pub recording_msid: String,
 
     pub data: Option<String>,
+}
+
+impl Listen {
+    pub fn listened_at_as_datetime(&self) -> DateTime<Utc> {
+        // unwrap() is best combined with time zone types where the mapping can never fail like Utc.
+        Utc.timestamp_opt(self.listened_at, 0).unwrap() 
+    }
 }

@@ -13,11 +13,12 @@ pub(super) async fn create_artist_tables(conn: &mut SqliteConnection) -> Result<
         `disambiguation` TEXT NOT NULL,
         `country` TEXT,
         `annotation` TEXT,
+        
         `full_update_date` INTEGER
     ) STRICT;
      
     CREATE TABLE IF NOT EXISTS `artist_credits_item` (
-        `artist_credit` INTEGER REFERENCES `artist_credits` (`id`),
+        `artist_credit` INTEGER REFERENCES `artist_credits` (`id`) ON DELETE CASCADE,
         `position` INTEGER NOT NULL,
         `name` TEXT NOT NULL,
         `artist_gid` TEXT NOT NULL REFERENCES `artists_gid_redirect` (`gid`),

@@ -7,8 +7,7 @@ rust-version = "1.75.0"
 [dependencies]
 musicbrainz_db_lite_macros = {path = "./musicbrainz_db_lite_macros"}
 
-#musicbrainz_rs_nova = "0.7.0"
-musicbrainz_rs_nova = { version = "0.7.0", git = "https://github.com/RustyNova016/musicbrainz_rs_nova.git", branch = "develop"}
+musicbrainz_rs_nova = { version = "0.8.0" }
 
 async-stream = "0.3.5"
 async-trait = "0.1.82"
@@ -29,6 +28,7 @@ welds = { version = "0.4.0", features = [
     "check",
     "migrations",
 ] }
+tracing = "0.1.40"
 
 
 [features]

@@ -1,5 +1,5 @@
 use macon::Builder;
-use sqlx::query_scalar;
+use sqlx::{query_scalar, SqliteConnection};
 use welds::connections::sqlite::SqliteClient;
 use welds::prelude::DbState;
 use welds::WeldsError;
@@ -62,31 +62,49 @@ pub enum ListenMappingFilter {
 }
 
 impl Listen {
+    /// Return the latest listen done by the user
     pub async fn get_latest_listen_of_user(
-        client: &SqliteClient,
+        conn: &mut SqliteConnection,
         user: &str,
-    ) -> Result<Option<DbState<Listen>>, WeldsError> {
-        Ok(Listen::where_col(|c| c.user.equal(user))
-            .limit(1)
-            .run(client)
-            .await?
-            .pop())
+    ) -> Result<Option<Listen>, sqlx::Error> {
+        sqlx::query_as!(
+            Listen,
+            "SELECT * FROM `listens` WHERE user = ? ORDER BY listened_at DESC LIMIT 1",
+            user
+        )
+        .fetch_optional(conn)
+        .await
     }
 
-    pub async fn get_unfetched_recordings_of_user(
-        client: &SqliteClient,
-        user: &User,
-    ) -> Result<Vec<String>, sqlx::Error> {
-        /*         Ok(Listen::all().where_col(|c| c.user.equal(user))
-        .map_query(|r| r.msib_mapping)
-        .where_col(|c| c.user.equal(1))
-        .map_query(|r| r.recording_mbid)
-        .where_col(|c| c.deleted.equal(0))
-        .where_col(|c| c.new_id.equal(None))
-        .run(client)
-        .await?
-        .into_iter().map(|r| r.into_inner().gid).collect()) */
+    /// Return the mapped listens of the user
+    pub async fn get_mapped_listen_of_user(
+        conn: &mut SqliteConnection,
+        user: &str,
+    ) -> Result<Vec<Listen>, sqlx::Error> {
+        sqlx::query_as!(
+            Listen,
+            "
+        SELECT 
+            listens.*
+        FROM
+            users
+            INNER JOIN listens ON users.name = listens.user
+            INNER JOIN msid_mapping ON listens.recording_msid = msid_mapping.recording_msid
+        WHERE
+            LOWER(msid_mapping.user) = users.id
+            AND 
+            LOWER(listens.user) = LOWER(?)",
+            user
+        )
+        .fetch_all(conn)
+        .await
+    }
 
+    /// Get the recordings that aren't in the database but got listened by the user
+    pub async fn get_unfetched_recordings_of_user(
+        conn: &mut SqliteConnection,
+        user: &str,
+    ) -> Result<Vec<String>, sqlx::Error> {
         query_scalar!(r#"
             SELECT DISTINCT
                 recordings_gid_redirect."gid"
@@ -100,11 +118,11 @@ impl Listen {
                 recordings_gid_redirect.deleted = 0
                 AND recordings_gid_redirect.new_id IS NULL
                 AND msid_mapping.user = users.id
-                AND users.id = ?
+                AND users.name = ?
                 "#,
-            user.id
+            user
         )
-        .fetch_all(client.as_sqlx_pool())
+        .fetch_all(conn)
         .await
     }
 
@@ -129,6 +147,34 @@ impl Listen {
             user.id
         )
         .fetch_all(client.as_sqlx_pool())
+        .await
+    }
+
+    pub async fn get_listens_of_recording_by_user(
+        conn: &mut SqliteConnection,
+        user: &str,
+        recording_id: i64,
+    ) -> Result<Vec<Listen>, sqlx::Error> {
+        sqlx::query_as(
+            "
+        SELECT
+            listens.*
+        FROM
+            users
+            INNER JOIN listens ON users.name = listens.user
+            INNER JOIN msid_mapping ON listens.recording_msid = msid_mapping.recording_msid
+            INNER JOIN recordings_gid_redirect ON msid_mapping.recording_mbid = recordings_gid_redirect.gid
+        WHERE
+            -- Only for this user
+            LOWER(listens.user) = LOWER(?)
+            -- Keep only mapped listens 
+            AND msid_mapping.user = users.id
+            -- Only get those 
+            AND recordings_gid_redirect.new_id = ?"
+        )
+        .bind(user)
+        .bind(recording_id)
+        .fetch_all(conn)
         .await
     }
 }
