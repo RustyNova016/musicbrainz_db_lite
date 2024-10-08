@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn::Ident;
 
-pub fn impl_selects(struct_name: &Ident, table_name: &str, pk: &str) -> TokenStream {
+pub fn impl_selects(_struct_name: &Ident, table_name: &str, _pk: &str) -> TokenStream {
     let sql = format!("SELECT * FROM `{}` WHERE id = ?", table_name);
 
     quote::quote! {

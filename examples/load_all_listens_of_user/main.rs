@@ -1,20 +1,12 @@
-use std::{
-    fs::{self, File},
-    sync::Arc,
-};
+use std::fs::{self, File};
 
-use listenbrainz::raw::Client;
 use musicbrainz_db_lite::{
-    api::listenbrainz::listen_collection::SaveListenPayload,
     database::{client::DBClient, create_database},
-    models::{
-        listenbrainz::listen::Listen,
-        musicbrainz::{recording::Recording, user::User},
-    },
+    models::listenbrainz::listen::Listen,
     Error,
 };
-use tokio_stream::{self as stream};
-use welds::{connections::sqlite::SqliteClient, WeldsError};
+
+use welds::connections::sqlite::SqliteClient;
 
 /// Connect and setup a DB to test on
 pub async fn setup_file_database() -> Result<SqliteClient, Error> {

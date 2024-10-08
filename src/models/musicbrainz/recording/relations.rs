@@ -1,6 +1,6 @@
 use sqlx::SqliteConnection;
 
-use crate::{models::musicbrainz::release::Release, Error};
+use crate::models::musicbrainz::release::Release;
 
 use super::Recording;
 

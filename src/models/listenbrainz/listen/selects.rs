@@ -1,10 +1,7 @@
+use crate::models::musicbrainz::user::User;
 use macon::Builder;
 use sqlx::{query_scalar, SqliteConnection};
 use welds::connections::sqlite::SqliteClient;
-use welds::prelude::DbState;
-use welds::WeldsError;
-
-use crate::models::musicbrainz::user::User;
 
 use super::Listen;
 

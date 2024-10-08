@@ -1,5 +1,5 @@
 use sqlx::{Executor, Sqlite, SqliteConnection};
-use welds::{state::DbState, WeldsModel};
+use welds::WeldsModel;
 
 use crate::models::listenbrainz::listen::Listen;
 

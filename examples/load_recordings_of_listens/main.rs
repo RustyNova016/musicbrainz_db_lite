@@ -1,7 +1,4 @@
-use std::{
-    fs::{self, File},
-    sync::Arc,
-};
+use std::fs::{self, File};
 
 use listenbrainz::raw::Client;
 use musicbrainz_db_lite::{
@@ -13,8 +10,7 @@ use musicbrainz_db_lite::{
     },
     Error,
 };
-use musicbrainz_rs_nova::entity::release;
-use welds::{connections::sqlite::SqliteClient, WeldsError};
+use welds::connections::sqlite::SqliteClient;
 
 /// Connect and setup a DB to test on
 pub async fn setup_file_database() -> Result<SqliteClient, Error> {

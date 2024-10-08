@@ -1,9 +1,5 @@
-use crate::{
-    api::{SaveToDatabase, SaveToDatabaseOld},
-    models::musicbrainz::recording::{redirect::RecordingGidRedirect, Recording},
-    Error,
-};
-use musicbrainz_rs_nova::{entity::recording::Recording as MSRecording, Fetch, FetchQuery};
+use crate::{api::SaveToDatabase, models::musicbrainz::recording::Recording, Error};
+use musicbrainz_rs_nova::{entity::recording::Recording as MSRecording, Fetch};
 use sqlx::SqliteConnection;
 
 impl Recording {

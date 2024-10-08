@@ -1,10 +1,12 @@
-mod derives;
 mod database_atributes;
-mod utils;
+mod derives;
 mod sql_gen;
+mod utils;
 extern crate proc_macro;
 
-use darling::{util::PathList, FromDeriveInput, FromMeta};
+use crate::database_atributes::DatabaseAtribute;
+use crate::utils::field_in_pathlist;
+use darling::FromDeriveInput;
 use derives::main_entity::derive_main_entity_impl;
 use proc_macro::TokenStream;
 use quote::quote;
@@ -12,9 +14,7 @@ use sql_gen::{
     get_insert_fields_from_idents, get_insert_values_fields_from_idents,
     get_on_conflict_fields_from_idents,
 };
-use syn::{Data, Path};
-use crate::database_atributes::DatabaseAtribute;
-use crate::utils::field_in_pathlist;
+use syn::Data;
 
 #[proc_macro_derive(MainEntity, attributes(database))]
 pub fn derive_main_entity(item: TokenStream) -> TokenStream {
@@ -35,8 +35,6 @@ pub fn derive_upsert(item: TokenStream) -> TokenStream {
 
     match &input.data {
         Data::Struct(syn::DataStruct { fields, .. }) => {
-            let field_identifiers = fields.iter().map(|item| item.ident.as_ref().unwrap()).collect::<Vec<_>>();
-
             let sql_statement = format!("INSERT INTO `{}` {} VALUES {} ON CONFLICT DO UPDATE SET {} RETURNING *;", 
                 args.table,
                 get_insert_fields_from_idents(fields),

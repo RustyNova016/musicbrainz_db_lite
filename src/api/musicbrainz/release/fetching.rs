@@ -51,7 +51,7 @@ impl SaveToDatabase for MBRelease {
 }
 
 impl Track {
-    pub async fn refetch(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error>  {
+    pub async fn refetch(&self, _conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error>  {
         todo!();
     }
 }

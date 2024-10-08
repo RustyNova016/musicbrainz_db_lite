@@ -3,7 +3,7 @@ use crate::models::listenbrainz::msid_mapping::MsidMapping;
 use crate::models::musicbrainz::recording::redirect::RecordingGidRedirect;
 use crate::Error;
 use listenbrainz::raw::response::UserListensListen;
-use sqlx::{Sqlite, SqliteConnection, Transaction};
+use sqlx::SqliteConnection;
 use welds::prelude::DbState;
 
 use crate::models::listenbrainz::listen_user_metadata::MessybrainzSubmission;
@@ -42,7 +42,7 @@ impl Listen {
 
         let data = serde_json::to_string(&listen.track_metadata.additional_info)
             .expect("Crashing from serializing a serde::Value isn't possible");
-        
+
         let listen_db = sqlx::query_as!(
             Listen,
             "INSERT OR IGNORE INTO listens VALUES (NULL, ?, ?, ?, ?) RETURNING *",

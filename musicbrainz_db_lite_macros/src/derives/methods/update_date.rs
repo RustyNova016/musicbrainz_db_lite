@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn::Ident;
 
-pub fn impl_update_date(struct_name: &Ident, table_name: &str, pk: &str) -> TokenStream {
+pub fn impl_update_date(_struct_name: &Ident, table_name: &str, pk: &str) -> TokenStream {
     let sql = format!(
         "UPDATE `{}` SET `full_update_date` = ? WHERE {} = ?",
         table_name, pk

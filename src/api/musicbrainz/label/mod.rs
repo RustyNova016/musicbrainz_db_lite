@@ -1,12 +1,7 @@
 pub mod fetching;
+use crate::models::musicbrainz::{label::Label, release::Release};
+use musicbrainz_rs_nova::entity::label::Label as MBLabel;
 use sqlx::SqliteConnection;
-use musicbrainz_rs_nova::{entity::label::Label as MBLabel, Fetch};
-use crate::{
-    models::musicbrainz::{
-        artist_credit::ArtistCredits, label::Label, release::{Media, Release}
-    },
-    utils::date_utils::date_to_timestamp,
-};
 
 impl Label {
     pub async fn save_api_response(
@@ -30,10 +25,13 @@ impl Label {
             disambiguation: new.disambiguation.or(self.disambiguation),
             full_update_date: self.full_update_date,
             label_code: new.label_code.map(|v| v as i64).or(self.label_code),
-            label_type: new.label_type.map(|v| serde_json::to_string(&v).unwrap()).or(self.label_type),
+            label_type: new
+                .label_type
+                .map(|v| serde_json::to_string(&v).unwrap())
+                .or(self.label_type),
             mbid: new.id,
             name: new.name,
-            sort_name: new.sort_name.or(self.sort_name)
+            sort_name: new.sort_name.or(self.sort_name),
         }
     }
 
@@ -41,7 +39,7 @@ impl Label {
         conn: &mut SqliteConnection,
         value: MBLabel,
     ) -> Result<Self, sqlx::Error> {
-        let mut new_value = Self::save_api_response(conn, value.clone()).await?;
+        let new_value = Self::save_api_response(conn, value.clone()).await?;
 
         // Save relations
         if let Some(releases) = value.releases {

@@ -1,5 +1,4 @@
-use chrono::Utc;
-use sqlx::{Executor, Sqlite, SqliteConnection};
+use sqlx::SqliteConnection;
 use welds::{connections::sqlite::SqliteClient, WeldsError, WeldsModel};
 
 use crate::models::listenbrainz::msid_mapping::MsidMapping;
@@ -22,10 +21,7 @@ pub struct RecordingGidRedirect {
 
 impl RecordingGidRedirect {
     /// Add an mbid in the redirect pool if it isn't in yet.
-    pub async fn add_mbid(
-        conn: &mut SqliteConnection,
-        mbid: &str,
-    ) -> Result<(), sqlx::Error> {
+    pub async fn add_mbid(conn: &mut SqliteConnection, mbid: &str) -> Result<(), sqlx::Error> {
         sqlx::query!(
             "INSERT OR IGNORE INTO `recordings_gid_redirect` VALUES (?, NULL, 0)",
             mbid
@@ -41,8 +37,6 @@ impl RecordingGidRedirect {
         original_mbid: &str,
         new_id: i64,
     ) -> Result<sqlx::sqlite::SqliteQueryResult, sqlx::Error> {
-        
-
         sqlx::query!(
             "INSERT INTO recordings_gid_redirect VALUES (?, ?, 0) ON CONFLICT DO UPDATE SET `new_id` = ?",
             original_mbid,
@@ -65,5 +59,4 @@ impl RecordingGidRedirect {
             .map(|r| r.into_inner().gid)
             .collect())
     }
-
 }
