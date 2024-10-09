@@ -4,7 +4,7 @@ use sqlx::FromRow;
 
 use crate::utils::macros::{artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections};
 
-#[derive(Debug, Default, Clone, FromRow, Upsert, MainEntity)]
+#[derive(Debug, Default, Clone, FromRow, Upsert, MainEntity, PartialEq, Eq)]
 #[database(table="releases", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id, mbid))]
 pub struct Release {
     pub id: i64,
@@ -57,3 +57,12 @@ pub struct Track {
 }
 
 impl_artist_credits!(Track, "tracks");
+
+#[derive(Debug, Default, Clone, FromRow, Upsert)]
+#[database(table="label_infos", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id, gid))]
+pub struct LabelInfo {
+    pub id: i64,
+    pub catalog_number: Option<String>,
+    pub label: String,
+    pub release: i64
+}

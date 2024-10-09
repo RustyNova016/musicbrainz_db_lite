@@ -13,7 +13,7 @@ pub(super) async fn create_recordings_tables(conn: &mut SqliteConnection) -> Res
             `length` INTEGER, 
             `disambiguation` TEXT,  
             `annotation` TEXT,
-            `first_release_date` INTEGER CHECK(`first_release_date` > 0),
+            `first_release_date`,
 
             `full_update_date` INTEGER CHECK(`full_update_date` > 0),
 

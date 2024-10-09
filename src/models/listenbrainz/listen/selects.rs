@@ -66,7 +66,7 @@ impl Listen {
     ) -> Result<Option<Listen>, sqlx::Error> {
         sqlx::query_as!(
             Listen,
-            "SELECT * FROM `listens` WHERE user = ? ORDER BY listened_at DESC LIMIT 1",
+            "SELECT * FROM `listens` WHERE LOWER(user) = LOWER(?) ORDER BY listened_at DESC LIMIT 1",
             user
         )
         .fetch_optional(conn)
@@ -115,7 +115,7 @@ impl Listen {
                 recordings_gid_redirect.deleted = 0
                 AND recordings_gid_redirect.new_id IS NULL
                 AND msid_mapping.user = users.id
-                AND users.name = ?
+                AND LOWER(users.name) = LOWER(?)
                 "#,
             user
         )
