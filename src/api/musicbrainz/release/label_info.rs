@@ -17,11 +17,11 @@ impl LabelInfo {
                 label: item.label.clone().unwrap().id,
             };
 
-            let new_media = new_media.upsert(&mut *conn).await?;
-
             if let Some(label) = item.label {
                 Label::save_api_response(&mut *conn, label).await?;
             }
+
+            let new_media = new_media.upsert(&mut *conn).await?;
 
             converteds.push(new_media);
         }

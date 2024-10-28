@@ -17,6 +17,8 @@ pub struct ListenQuery {
 }
 
 impl ListenQuery {
+    
+
     // pub async fn run(&self, client: &SqliteClient) -> Result<Vec<Listen>, Error> {
     //     if self.fetch_latest_listens {
     //         Listen::fetch_latest_listens_of_user(client, &self.user).await?;

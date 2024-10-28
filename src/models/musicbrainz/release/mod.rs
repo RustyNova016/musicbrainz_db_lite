@@ -1,3 +1,4 @@
+pub mod formating;
 pub mod relations;
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use sqlx::FromRow;
@@ -27,6 +28,12 @@ impl_redirections!(Release, "releases");
 impl_artist_credits!(Release, "releases");
 impl_get_and_fetch!(Release);
 
+impl crate::RowId for Release {
+    fn get_row_id(&self) -> i64 {
+        self.id
+    }
+}
+
 #[derive(Debug, Default, Clone, FromRow, Upsert)]
 #[database(table="medias", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id))]
 pub struct Media {
@@ -39,6 +46,12 @@ pub struct Media {
     pub track_offset: Option<i64>,
 
     pub release: i64
+}
+
+impl crate::RowId for Media {
+    fn get_row_id(&self) -> i64 {
+        self.id
+    }
 }
 
 #[derive(Debug, Default, Clone, FromRow, Upsert)]
@@ -58,6 +71,12 @@ pub struct Track {
 
 impl_artist_credits!(Track, "tracks");
 
+impl crate::RowId for Track {
+    fn get_row_id(&self) -> i64 {
+        self.id
+    }
+}
+
 #[derive(Debug, Default, Clone, FromRow, Upsert)]
 #[database(table="label_infos", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id, gid))]
 pub struct LabelInfo {
@@ -65,4 +84,10 @@ pub struct LabelInfo {
     pub catalog_number: Option<String>,
     pub label: String,
     pub release: i64
+}
+
+impl crate::RowId for LabelInfo {
+    fn get_row_id(&self) -> i64 {
+        self.id
+    }
 }

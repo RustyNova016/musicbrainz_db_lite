@@ -5,7 +5,7 @@ use crate::models::listenbrainz::msid_mapping::MsidMapping;
 
 use super::Recording;
 
-#[derive(Debug, WeldsModel)]
+#[derive(Debug, WeldsModel, Clone)]
 #[welds(table = "recordings_gid_redirect")]
 #[welds(BelongsTo(recording, Recording, "new_id"))]
 #[welds(HasMany(messybrainz_mapping, MsidMapping, "recording_mbid"))]

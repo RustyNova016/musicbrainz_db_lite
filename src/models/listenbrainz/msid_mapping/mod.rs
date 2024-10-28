@@ -1,9 +1,10 @@
+pub mod relations;
 use super::listen_user_metadata::MessybrainzSubmission;
 use crate::models::musicbrainz::{recording::redirect::RecordingGidRedirect, user::User};
 use sqlx::{Executor, Sqlite, SqliteConnection};
 use welds::{state::DbState, Client, WeldsError, WeldsModel};
 
-#[derive(Debug, WeldsModel)]
+#[derive(Debug, WeldsModel, Clone)]
 #[welds(table = "msid_mapping")]
 #[welds(BelongsTo(recording_mbid, RecordingGidRedirect, "recording_mbid"))]
 #[welds(BelongsTo(messybrainz_submission, MessybrainzSubmission, "recording_msid"))]
@@ -59,6 +60,10 @@ impl MsidMapping {
         msid: String,
         mbid: String,
     ) -> Result<(), sqlx::Error> {
+        //println!("mapping {} to {}", msid, mbid);
+
+        
+
         sqlx::query!("INSERT INTO `msid_mapping` VALUES (NULL, ?, ?, ?, NULL) ON CONFLICT DO UPDATE SET `recording_mbid` = ?", msid, mbid, user_id, mbid).execute(client).await?;
         Ok(())
     }

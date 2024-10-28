@@ -1,19 +1,22 @@
 use std::fs::{self, File};
+use std::io::Read;
+use std::fs::read_to_string;
 
 use listenbrainz::raw::Client;
 use musicbrainz_db_lite::{
     api::listenbrainz::listen_collection::SaveListenPayload,
-    database::{client::DBClient, create_database},
+    database::{client::DBClient},
     models::{
         listenbrainz::listen::Listen,
         musicbrainz::{recording::Recording, user::User},
     },
     Error,
 };
+use sqlx::Executor;
 use welds::connections::sqlite::SqliteClient;
 
 /// Connect and setup a DB to test on
-pub async fn setup_file_database() -> Result<SqliteClient, Error> {
+pub async fn setup_file_database() -> Result<(), Error> {
     if std::fs::exists("./examples/load_recordings_of_listens/db.db").unwrap() {
         fs::remove_file("./examples/load_recordings_of_listens/db.db").unwrap();
     }
@@ -22,8 +25,12 @@ pub async fn setup_file_database() -> Result<SqliteClient, Error> {
     let client =
         welds::connections::sqlite::connect("sqlite:./examples/load_recordings_of_listens/db.db")
             .await?;
-    create_database(&client).await?;
-    Ok(client)
+    
+    let client = DBClient::connect("./examples/load_recordings_of_listens/db.db").await.unwrap();
+    sqlx::query(&read_to_string("./musicbrainz_db_lite_schema/schema.sql").unwrap()).execute(&mut *client.connection.acquire().await.unwrap()).await.unwrap();
+
+    //Ok(client)
+    Ok(())
 }
 
 #[tokio::main]
@@ -79,7 +86,7 @@ async fn main() {
 
         //let mut trans = client.begin_transaction().await.unwrap();
         //let conn = &mut *trans;
-        let conn = &mut *client.as_sqlx_pool().acquire().await.unwrap();
+        let conn = &mut *client.connection.acquire().await.unwrap();
 
         let recording = Recording::get_or_fetch_as_complete_from_mbid(conn, &recording)
             .await

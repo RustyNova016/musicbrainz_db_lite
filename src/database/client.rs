@@ -1,47 +1,41 @@
-use sqlx::SqlitePool;
+use core::future::Future;
+use core::ops::Deref;
+use core::str::FromStr;
+use futures::future::BoxFuture;
+use sqlx::pool::PoolConnection;
+use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions};
+use sqlx::{Acquire, Database, Executor, Pool, Sqlite, SqliteConnection, SqlitePool};
+use std::time::Duration;
+use tokio::sync::Mutex;
 use welds::connections::sqlite::{self, SqliteClient};
 
 use crate::Error;
 
-use super::create_database;
-
 pub struct DBClient {
-    connection: SqliteClient,
+    welds_connection: SqliteClient,
+    pub connection: Pool<Sqlite>,
 }
 
 impl DBClient {
     pub async fn connect(path: &str) -> Result<DBClient, Error> {
         let connection = sqlite::connect(&format!("sqlite:{}", path)).await?;
-        sqlx::query("PRAGMA journal_mode=WAL; PRAGMA synchronous = NORMAL;")
-            .execute(connection.as_sqlx_pool())
-            .await
-            .unwrap();
-        sqlx::query("PRAGMA busy_timeout=60000")
-            .execute(connection.as_sqlx_pool())
-            .await
-            .unwrap();
 
-        // Commit wal mode
-        drop(connection);
+        let optconn = SqliteConnectOptions::from_str(&format!("sqlite:{}", path))?
+            .journal_mode(SqliteJournalMode::Wal)
+            .busy_timeout(Duration::from_millis(60000));
 
-        let connection = sqlite::connect(&format!("sqlite:{}", path)).await?;
-        Ok(Self { connection })
+        Ok(Self {
+            welds_connection: connection,
+            connection: SqlitePoolOptions::new().acquire_timeout(Duration::from_millis(60000)).connect_lazy_with(optconn),
+        })
     }
 
-    pub async fn create_database(&self) -> Result<(), Error> {
-        create_database(self.as_welds_client()).await
-    } 
+    //pub async fn create_database(&self) -> Result<(), Error> {
+    //    create_database(self.as_welds_client()).await
+    //}
 
     pub fn as_welds_client(&self) -> &SqliteClient {
-        &self.connection
-    }
-
-    pub fn as_sqlx_pool(&self) -> &SqlitePool {
-        self.connection.as_sqlx_pool()
-    }
-
-    pub async fn begin_transaction(&self) -> Result<sqlx::Transaction<'_, sqlx::Sqlite>, sqlx::Error> {
-        self.as_sqlx_pool().begin().await
+        &self.welds_connection
     }
 }
 

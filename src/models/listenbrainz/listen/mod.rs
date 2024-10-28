@@ -1,3 +1,5 @@
+pub mod associations;
+pub mod querry_builder;
 pub mod relations;
 pub mod deletes;
 pub mod selects;
@@ -5,6 +7,7 @@ use chrono::{DateTime, TimeZone, Utc};
 use welds::WeldsModel;
 
 use crate::models::musicbrainz::user::User;
+use crate::models::shared_traits::RowId;
 
 use super::{listen_user_metadata::MessybrainzSubmission, msid_mapping::MsidMapping};
 
@@ -30,5 +33,11 @@ impl Listen {
     pub fn listened_at_as_datetime(&self) -> DateTime<Utc> {
         // unwrap() is best combined with time zone types where the mapping can never fail like Utc.
         Utc.timestamp_opt(self.listened_at, 0).unwrap() 
+    }
+}
+
+impl RowId for Listen {
+    fn get_row_id(&self) -> i64 {
+        self.id
     }
 }

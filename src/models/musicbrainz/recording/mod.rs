@@ -10,7 +10,7 @@ use crate::utils::macros::{
 pub mod redirect;
 pub mod relations;
 
-#[derive(Debug, WeldsModel, Default, PartialEq, Eq, Clone, FromRow, Upsert, MainEntity)]
+#[derive(Debug, WeldsModel, Default, PartialEq, Eq, Clone, FromRow, Upsert, MainEntity)] 
 #[database(
     table = "recordings",
     primary_key = "id",
@@ -37,6 +37,12 @@ pub struct Recording {
 impl_redirections!(Recording, "recordings");
 impl_artist_credits!(Recording, "recordings");
 impl_get_and_fetch!(Recording);
+
+impl crate::RowId for Recording {
+    fn get_row_id(&self) -> i64 {
+        self.id
+    }
+}
 
 impl Recording {
     pub fn replace(mut row: DbState<Recording>, new: Recording) -> DbState<Self> {

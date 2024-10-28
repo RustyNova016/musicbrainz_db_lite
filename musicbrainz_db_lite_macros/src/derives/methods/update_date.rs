@@ -1,11 +1,13 @@
 use proc_macro2::TokenStream;
 use syn::Ident;
 
-pub fn impl_update_date(_struct_name: &Ident, table_name: &str, pk: &str) -> TokenStream {
+pub fn impl_update_date(struct_name: &Ident, table_name: &str, pk: &str) -> TokenStream {
     let sql = format!(
         "UPDATE `{}` SET `full_update_date` = ? WHERE {} = ?",
         table_name, pk
     );
+
+    let is_fully_fetched_doc = format!("Return true if the {} is fully fetched.", struct_name.to_string());
 
     quote::quote! {
         /// Reset the full update date to be now
@@ -20,6 +22,31 @@ pub fn impl_update_date(_struct_name: &Ident, table_name: &str, pk: &str) -> Tok
                 Some(_) => Ok(self.clone()),
                 None => self.refetch(conn).await
             }     
+        }
+
+        
+        #[doc = #is_fully_fetched_doc]
+        pub fn is_fully_fetched(&self) -> bool {
+            self.full_update_date.is_some()
+        }
+
+        /// Assert that a list of recordings are fetched, or panic
+        pub fn assert_recordings_fetched(vals: &[Self]) {
+            for val in vals {
+                if !val.is_fully_fetched() {
+                    panic!("Recording {} isn't fully fetched", val.id)
+                }
+            }
+        }
+
+        pub async fn fetch_if_incomplete(
+            &self,
+            conn: &mut sqlx::SqliteConnection,
+        ) -> Result<(), crate::Error> {
+            if self.full_update_date.is_none() {
+                self.refetch(conn).await?;
+            }
+            Ok(())
         }
 
         /// Get from the database and perform an update if the data isn't fully present
@@ -38,6 +65,13 @@ pub fn impl_update_date(_struct_name: &Ident, table_name: &str, pk: &str) -> Tok
         /// Refresh the data in the database by refetching the entity
         pub async fn refetch(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error> {
             Self::fetch_and_save(conn, &self.mbid).await?.ok_or(crate::Error::UnknownUpstream(self.mbid.clone()))
+        }
+
+        /// Refetch the entity and replace the inner values with the new ones
+        pub async fn refetch_and_load(&mut self, conn: &mut sqlx::SqliteConnection) -> Result<(), crate::Error> {
+            *self = self.refetch(conn).await?;
+
+            Ok(())
         }
     }
 }

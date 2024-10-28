@@ -20,8 +20,8 @@ macro_rules! impl_artist_credits {
                 match self.artist_credit {
                     Some(id) => Ok(crate::models::musicbrainz::artist_credit::ArtistCredits::find_by_id(conn, id).await?),
                     None => {
-                        self.refetch(conn).await?;
-                        Ok(crate::models::musicbrainz::artist_credit::ArtistCredits::find_by_id(conn, self.artist_credit.unwrap()).await?)
+                        let new_self = self.refetch(conn).await?;
+                        Ok(crate::models::musicbrainz::artist_credit::ArtistCredits::find_by_id(conn, new_self.artist_credit.expect("The artist creadits should be loaded after fetching")).await?)
                     },
                 }
             }

@@ -21,3 +21,9 @@ pub struct Label {
 
 impl_redirections!(Label, "labels");
 impl_get_and_fetch!(Label);
+
+impl crate::RowId for Label {
+    fn get_row_id(&self) -> i64 {
+        self.id
+    }
+}

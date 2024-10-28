@@ -2,6 +2,7 @@ use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use sqlx::prelude::FromRow;
 use welds::WeldsModel;
 
+use crate::models::shared_traits::RowId;
 use crate::utils::macros::{get_and_fetch::impl_get_and_fetch, impl_redirections};
 
 #[derive(Debug, WeldsModel, Default, Clone, FromRow, Upsert, MainEntity)]
@@ -22,3 +23,9 @@ pub struct Artist {
 
 impl_redirections!(Artist, "artists");
 impl_get_and_fetch!(Artist);
+
+impl crate::RowId for Artist {
+    fn get_row_id(&self) -> i64 {
+        self.id
+    }
+}
