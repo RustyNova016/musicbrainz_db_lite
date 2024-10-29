@@ -45,7 +45,7 @@ impl Release {
 impl SaveToDatabase for MBRelease {
     type ReturnedData = Release;
 
-    async fn save(self, conn: &mut SqliteConnection) -> Result<Self::ReturnedData, sqlx::Error> {
+    async fn save(self, conn: &mut SqliteConnection) -> Result<Self::ReturnedData, crate::Error> {
         Release::save_api_response_recursive(conn, self).await
     }
 }

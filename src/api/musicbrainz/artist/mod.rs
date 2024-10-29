@@ -24,7 +24,7 @@ impl Artist {
     pub async fn save_api_response(
         conn: &mut SqliteConnection,
         value: MBArtist,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::Error> {
         Artist::add_redirect_mbid(conn, &value.id).await?;
         Artist::find_by_mbid(conn, &value.id) // Get old data
             .await?
@@ -38,7 +38,7 @@ impl Artist {
         pub async fn save_api_response_recursive(
             conn: &mut SqliteConnection,
             value: MBArtist,
-        ) -> Result<Self, sqlx::Error> {
+        ) -> Result<Self, crate::Error> {
             let artist = Artist::save_api_response(&mut *conn, value.clone()).await?;
     
             Ok(artist)
@@ -48,7 +48,7 @@ impl Artist {
 impl SaveToDatabase for MBArtist {
     type ReturnedData = Artist;
 
-    async fn save(self, client: &mut SqliteConnection) -> Result<Self::ReturnedData, sqlx::Error> {
+    async fn save(self, client: &mut SqliteConnection) -> Result<Self::ReturnedData, crate::Error> {
         Artist::save_api_response(client, self).await
     }
 }

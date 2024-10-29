@@ -42,7 +42,7 @@ impl Label {
 impl SaveToDatabase for MBLabel {
     type ReturnedData = Label;
 
-    async fn save(self, conn: &mut sqlx::SqliteConnection) -> Result<Self::ReturnedData, sqlx::Error> {
+    async fn save(self, conn: &mut sqlx::SqliteConnection) -> Result<Self::ReturnedData, crate::Error> {
         Label::save_api_response_recursive(conn, self).await
     }
 }

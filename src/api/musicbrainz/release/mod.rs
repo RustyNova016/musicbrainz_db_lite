@@ -17,7 +17,7 @@ impl Release {
     pub async fn save_api_response(
         conn: &mut SqliteConnection,
         value: MBRelease,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::Error> {
         Release::add_redirect_mbid(conn, &value.id).await?;
         Release::find_by_mbid(conn, &value.id) // Get old data
             .await?
@@ -51,7 +51,7 @@ impl Release {
     pub async fn save_api_response_recursive(
         conn: &mut SqliteConnection,
         value: MBRelease,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::Error> {
         let mut new_release = Release::save_api_response(conn, value.clone()).await?;
 
         // Save relations

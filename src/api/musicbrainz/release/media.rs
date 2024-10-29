@@ -8,7 +8,7 @@ impl Media {
         conn: &mut SqliteConnection,
         value: Vec<MBMedia>,
         release_id: i64,
-    ) -> Result<Vec<Self>, sqlx::Error> {
+    ) -> Result<Vec<Self>, crate::Error> {
         let mut converteds = Vec::new();
         for media in value {
             let new_media = Media {

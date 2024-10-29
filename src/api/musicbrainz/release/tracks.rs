@@ -8,7 +8,7 @@ impl Track {
         conn: &mut SqliteConnection,
         value: Vec<MBTrack>,
         media_id: i64,
-    ) -> Result<Vec<Self>, sqlx::Error> {
+    ) -> Result<Vec<Self>, crate::Error> {
         // Now convert the medias and save
         let mut converteds = Vec::new();
         for track in value {

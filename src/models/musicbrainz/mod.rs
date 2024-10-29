@@ -1,3 +1,4 @@
+pub mod relations;
 pub mod label;
 pub mod release;
 pub mod artist_credit;

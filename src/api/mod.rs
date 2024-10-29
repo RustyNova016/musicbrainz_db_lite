@@ -47,7 +47,7 @@ pub trait SaveToDatabase {
     fn save(
         self,
         conn: &mut SqliteConnection,
-    ) -> impl std::future::Future<Output = Result<Self::ReturnedData, sqlx::Error>> + Send;
+    ) -> impl std::future::Future<Output = Result<Self::ReturnedData, crate::Error>> + Send;
 }
 
 pub trait SaveFromAPIToDatabase {

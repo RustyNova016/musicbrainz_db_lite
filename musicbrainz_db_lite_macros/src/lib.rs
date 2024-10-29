@@ -57,11 +57,17 @@ pub fn derive_upsert(item: TokenStream) -> TokenStream {
             quote! {
                 #[automatically_derived]
                 impl #struct_identifier {
-                    pub async fn upsert(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, sqlx::Error> {
+                    pub async fn upsert(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error> {
                         let mut query = sqlx::query_as(#sql_statement);
                         #binds
 
-                        query.fetch_one(conn).await
+                        Ok(query.fetch_one(conn).await?)
+                    }
+                }
+
+                impl crate::models::shared_traits::Upsertable for #struct_identifier {
+                    async fn upsert(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error> {
+                        self.upsert(conn).await
                     }
                 }
             }

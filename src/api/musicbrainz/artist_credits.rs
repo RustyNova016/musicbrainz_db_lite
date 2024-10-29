@@ -10,7 +10,7 @@ impl ArtistCredits {
     pub async fn save_api_response(
         conn: &mut SqliteConnection,
         value: Vec<MBArtistCredit>,
-    ) -> Result<ArtistCredits, sqlx::Error> {
+    ) -> Result<ArtistCredits, crate::Error> {
         let mut rows = Vec::new();
 
         for (position, resp) in value.into_iter().enumerate() {
@@ -25,6 +25,6 @@ impl ArtistCredits {
             Artist::save_api_response_recursive(conn, resp.artist).await?;
         }
 
-        ArtistCredits::save(conn, &rows).await
+        Ok(ArtistCredits::save(conn, &rows).await?)
     }
 }

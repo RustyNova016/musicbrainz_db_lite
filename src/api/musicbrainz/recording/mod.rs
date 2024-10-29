@@ -16,7 +16,7 @@ impl Recording {
     pub async fn save_api_response(
         conn: &mut SqliteConnection,
         value: MBRecording,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::Error> {
         Recording::add_redirect_mbid(conn, &value.id).await?;
         Recording::find_by_mbid(conn, &value.id) // Get old data
             .await?
@@ -48,7 +48,7 @@ impl Recording {
     pub async fn save_api_response_recursive(
         conn: &mut SqliteConnection,
         value: MBRecording,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::Error> {
         // Save the recording
         let mut recording = Recording::save_api_response(&mut *conn, value.clone()).await?;
 
@@ -76,7 +76,7 @@ impl Recording {
 impl SaveToDatabase for MBRecording {
     type ReturnedData = Recording;
 
-    async fn save(self, conn: &mut SqliteConnection) -> Result<Self::ReturnedData, sqlx::Error> {
+    async fn save(self, conn: &mut SqliteConnection) -> Result<Self::ReturnedData, crate::Error> {
         Recording::save_api_response_recursive(conn, self).await
     }
 }

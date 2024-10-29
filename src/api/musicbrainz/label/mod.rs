@@ -7,7 +7,7 @@ impl Label {
     pub async fn save_api_response(
         conn: &mut SqliteConnection,
         value: MBLabel,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::Error> {
         Self::add_redirect_mbid(conn, &value.id).await?;
         Self::find_by_mbid(conn, &value.id) // Get old data
             .await?
@@ -38,7 +38,7 @@ impl Label {
     pub async fn save_api_response_recursive(
         conn: &mut SqliteConnection,
         value: MBLabel,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::Error> {
         let new_value = Self::save_api_response(conn, value.clone()).await?;
 
         // Save relations
