@@ -1,4 +1,3 @@
-pub mod relations;
 use super::listen_user_metadata::MessybrainzSubmission;
 use crate::models::musicbrainz::{recording::redirect::RecordingGidRedirect, user::User};
 use sqlx::{Executor, Sqlite, SqliteConnection};

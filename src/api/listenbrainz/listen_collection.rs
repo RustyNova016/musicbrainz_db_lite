@@ -21,6 +21,11 @@ pub impl UserListensPayload {
         max_ts: i64,
         count: u64,
     ) -> Result<Option<i64>, Error> {
+        // Check: We must have at least 1 listen
+        if self.listens.len() == 0 {
+            return Ok(None);
+        }
+
         // If the count retrived is the count we asked, then there's an high change that it is a partial fetch.
         let delete_range = if count == self.listens.len() as u64 {
             get_deletion_range_for_part(self, max_ts)
@@ -43,7 +48,14 @@ pub impl UserListensPayload {
         let mut trans = client.as_sqlx_pool().begin().await?;
 
         // Delete the old listens. we want to remove all the old data to not miss any removed listens
-        Listen::delete_listen_range(&mut *trans, delete_range.1, delete_range.0).await?;
+        Listen::delete_listen_range(
+            &mut *trans,
+            delete_range.1,
+            delete_range.0,
+            self.get_username()
+                .expect("There should have at least one listen"),
+        )
+        .await?;
 
         Self::save_listens(&mut trans, listens).await?;
 
@@ -67,6 +79,10 @@ pub impl UserListensPayload {
         }
 
         Ok(result)
+    }
+
+    fn get_username(&self) -> Option<&String> {
+        self.listens.first().map(|listen| &listen.user_name)
     }
 }
 

@@ -6,6 +6,7 @@ rust-version = "1.75.0"
 
 [dependencies]
 musicbrainz_db_lite_macros = {path = "./musicbrainz_db_lite_macros"}
+musicbrainz_db_lite_schema = {path = "./musicbrainz_db_lite_schema"}
 
 musicbrainz_rs_nova = { version = "0.8.0" }
 
@@ -42,6 +43,6 @@ serial_test = "3.1.1"
 colog = "1.3.0"
 log = "0.4.22"
 
-[[test]]
-name = "all"
-path = "tests/tests.rs"
+[workspace]
+default-members = [".", "musicbrainz_db_lite_schema", "musicbrainz_db_lite_macros"]
+members = ["musicbrainz_db_lite_schema", "musicbrainz_db_lite_macros"]

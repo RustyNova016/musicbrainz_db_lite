@@ -1,12 +1,8 @@
-use core::future::Future;
-use core::ops::Deref;
 use core::str::FromStr;
-use futures::future::BoxFuture;
-use sqlx::pool::PoolConnection;
+
 use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions};
-use sqlx::{Acquire, Database, Executor, Pool, Sqlite, SqliteConnection, SqlitePool};
+use sqlx::{Pool, Sqlite};
 use std::time::Duration;
-use tokio::sync::Mutex;
 use welds::connections::sqlite::{self, SqliteClient};
 
 use crate::Error;
@@ -30,12 +26,27 @@ impl DBClient {
         })
     }
 
-    //pub async fn create_database(&self) -> Result<(), Error> {
-    //    create_database(self.as_welds_client()).await
-    //}
+    pub async fn create_database(&self) -> Result<(), Error> {
+        musicbrainz_db_lite_schema::create_database(&mut *self.connection.acquire().await?).await?;
+
+        Ok(())
+    }
 
     pub fn as_welds_client(&self) -> &SqliteClient {
-        &self.welds_connection
+        &self.welds_connection 
+    }
+
+    pub async fn connect_in_memory() -> Result<DBClient, Error> {
+        let connection = sqlite::connect("sqlite::memory:").await?;
+
+        let optconn = SqliteConnectOptions::from_str("sqlite::memory:")?
+            .journal_mode(SqliteJournalMode::Wal)
+            .busy_timeout(Duration::from_millis(60000));
+
+        Ok(Self {
+            welds_connection: connection,
+            connection: SqlitePoolOptions::new().acquire_timeout(Duration::from_millis(60000)).connect_lazy_with(optconn),
+        })
     }
 }
 

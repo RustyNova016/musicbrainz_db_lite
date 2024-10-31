@@ -2,15 +2,18 @@ use musicbrainz_rs_nova::entity::relations::Relation as MBRelation;
 
 use crate::models::musicbrainz::relations::Relation;
 use crate::utils::date_utils::date_to_timestamp;
+use crate::RowId;
 
 impl<T, U> Relation<T, U>
 where
-    T: Send + Unpin,
-    U: Send + Unpin,
+    T: Send + Unpin + RowId,
+    U: Send + Unpin + RowId,
 {
     pub async fn save_api_response(
         conn: &mut sqlx::SqliteConnection,
         value: MBRelation,
+        entity0: &T,
+        entity1: &U
     ) -> Result<Relation<T, U>, crate::Error> {
         let relation = Relation {
             atribute_values: value
@@ -29,9 +32,9 @@ where
             direction: value.direction,
             end: value.end.map(|date| date_to_timestamp(date).unwrap()),
             id: Default::default(),
-            entity0: Default::default(),
+            entity0: entity0.get_row_id(),
             entity0_phamtom: Default::default(),
-            entity1: Default::default(),
+            entity1: entity1.get_row_id(),
             entity1_phamtom: Default::default(),
             relation_type: value.relation_type,
             source_credit: value.source_credit,

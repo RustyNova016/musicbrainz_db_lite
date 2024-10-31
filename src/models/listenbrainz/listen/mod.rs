@@ -1,7 +1,6 @@
-pub mod associations;
+pub mod deletes;
 pub mod querry_builder;
 pub mod relations;
-pub mod deletes;
 pub mod selects;
 use chrono::{DateTime, TimeZone, Utc};
 use welds::WeldsModel;
@@ -32,7 +31,7 @@ pub struct Listen {
 impl Listen {
     pub fn listened_at_as_datetime(&self) -> DateTime<Utc> {
         // unwrap() is best combined with time zone types where the mapping can never fail like Utc.
-        Utc.timestamp_opt(self.listened_at, 0).unwrap() 
+        Utc.timestamp_opt(self.listened_at, 0).unwrap()
     }
 }
 

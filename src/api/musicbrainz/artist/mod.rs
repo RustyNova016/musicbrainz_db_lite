@@ -1,11 +1,13 @@
 pub mod fetching;
+
 use musicbrainz_rs_nova::entity::artist::Artist as MBArtist;
 use sqlx::SqliteConnection;
 
-use crate::{
-    api::SaveToDatabase,
-    models::musicbrainz::artist::Artist,
-};
+use crate::api::SaveToDatabase;
+use crate::models::musicbrainz::artist::Artist;
+use crate::models::musicbrainz::main_entities::MainEntity;
+use crate::models::musicbrainz::relations::Relation;
+use crate::Error;
 
 impl Artist {
     pub fn merge_api_data(self, new: MBArtist) -> Self {
@@ -17,7 +19,7 @@ impl Artist {
             mbid: new.id,
             name: new.name,
             sort_name: new.sort_name,
-            full_update_date: self.full_update_date
+            full_update_date: self.full_update_date,
         }
     }
 
@@ -34,15 +36,29 @@ impl Artist {
             .await
     }
 
-        /// Save a recording from the api data. It also save the relationships
-        pub async fn save_api_response_recursive(
-            conn: &mut SqliteConnection,
-            value: MBArtist,
-        ) -> Result<Self, crate::Error> {
-            let artist = Artist::save_api_response(&mut *conn, value.clone()).await?;
-    
-            Ok(artist)
+    /// Save a recording from the api data. It also save the relationships
+    pub async fn save_api_response_recursive(
+        conn: &mut SqliteConnection,
+        value: MBArtist,
+    ) -> Result<Self, crate::Error> {
+        let artist = Artist::save_api_response(&mut *conn, value.clone()).await?;
+
+        if let Some(relations) = value.relations {
+            for rel in relations {
+                match MainEntity::save_relation_content(conn, rel.content.clone()).await {
+                    Ok(entity1) => {
+                        Relation::save_api_response(conn, rel, &artist, &entity1).await?;
+                    }
+                    Err(Error::RelationNotImplemented) => {}
+                    Err(err) => {
+                        Err(err)?;
+                    }
+                }
+            }
         }
+
+        Ok(artist)
+    }
 }
 
 impl SaveToDatabase for MBArtist {

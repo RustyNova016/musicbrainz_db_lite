@@ -2,7 +2,6 @@ use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use sqlx::prelude::FromRow;
 use welds::WeldsModel;
 
-use crate::models::shared_traits::RowId;
 use crate::utils::macros::{get_and_fetch::impl_get_and_fetch, impl_redirections};
 
 #[derive(Debug, WeldsModel, Default, Clone, FromRow, Upsert, MainEntity)]
@@ -29,3 +28,4 @@ impl crate::RowId for Artist {
         self.id
     }
 }
+

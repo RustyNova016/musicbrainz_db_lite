@@ -8,6 +8,7 @@ pub mod listenbrainz;
 pub mod musicbrainz;
 
 /// This trait is implemented by all the entities that are able to be saved to the database
+#[deprecated]
 pub trait SaveToDatabaseOld {
     type ReturnedData;
 
@@ -65,4 +66,3 @@ pub trait SaveFromAPIToDatabase {
         conn: &mut SqliteConnection,
     ) -> impl std::future::Future<Output = Result<Self::ReturnedData, sqlx::Error>> + Send;
 }
-

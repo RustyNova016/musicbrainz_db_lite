@@ -1,4 +1,7 @@
 pub mod fetching;
+use crate::models::musicbrainz::main_entities::MainEntity;
+use crate::models::musicbrainz::relations::Relation;
+use crate::Error;
 use crate::{
     api::SaveToDatabase,
     models::musicbrainz::{
@@ -58,13 +61,28 @@ impl Recording {
             recording.set_artist_credits(conn, credits.0).await?;
         }
 
-        if let Some(values) = value.releases.clone() {
-            for value in values {
-                let gids = get_track_gids_from_release(value.clone());
-                Release::save_api_response_recursive(conn, value).await?;
+        if let Some(releases) = value.releases.clone() {
+            for release in releases {
+                let gids = get_track_gids_from_release(release.clone());
+                Release::save_api_response_recursive(conn, release).await?;
 
                 for gid in gids {
-                    Track::set_recording_id_from_gid(conn, &recording.mbid, &gid).await?;
+                    //TODO: Improve flow to prevent updating after insert, thus making `tracks`.`recording` non optional
+                    Track::set_recording_id_from_gid(conn, recording.id, &gid).await?; 
+                }
+            }
+        }
+
+        if let Some(relations) = value.relations {
+            for rel in relations {
+                match MainEntity::save_relation_content(conn, rel.content.clone()).await {
+                    Ok(entity1) => {
+                        Relation::save_api_response(conn, rel, &recording, &entity1).await?;
+                    }
+                    Err(Error::RelationNotImplemented) => {}
+                    Err(err) => {
+                        Err(err)?;
+                    }
                 }
             }
         }
@@ -84,7 +102,7 @@ impl SaveToDatabase for MBRecording {
 fn get_track_gids_from_release(release: MBRelease) -> Vec<String> {
     let mut gids = Vec::new();
 
-    for media in release.media.unwrap_or_else(Vec::new) {
+    for media in release.media.unwrap_or_default() {
         for track in media.tracks.unwrap_or_else(Vec::new) {
             gids.push(track.id);
         }

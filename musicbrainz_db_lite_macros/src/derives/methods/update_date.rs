@@ -7,12 +7,17 @@ pub fn impl_update_date(struct_name: &Ident, table_name: &str, pk: &str) -> Toke
         table_name, pk
     );
 
-    let is_fully_fetched_doc = format!("Return true if the {} is fully fetched.", struct_name.to_string());
+    let is_fully_fetched_doc = format!(
+        "Return true if the {} is fully fetched.",
+        struct_name
+    );
 
     quote::quote! {
         /// Reset the full update date to be now
-        pub async fn reset_full_update_date(conn: &mut sqlx::SqliteConnection, id: i64) -> Result<(), sqlx::Error> {
-            sqlx::query(#sql).bind(chrono::Utc::now().timestamp()).bind(id).execute(conn).await?;
+        pub async fn reset_full_update_date(&mut self, conn: &mut sqlx::SqliteConnection) -> Result<(), sqlx::Error> {
+            let ts = chrono::Utc::now().timestamp();
+            sqlx::query(#sql).bind(ts).bind(self.id).execute(conn).await?;
+            self.full_update_date = Some(ts);
             Ok(())
         }
 
@@ -21,10 +26,10 @@ pub fn impl_update_date(struct_name: &Ident, table_name: &str, pk: &str) -> Toke
             match self.full_update_date {
                 Some(_) => Ok(self.clone()),
                 None => self.refetch(conn).await
-            }     
+            }
         }
 
-        
+
         #[doc = #is_fully_fetched_doc]
         pub fn is_fully_fetched(&self) -> bool {
             self.full_update_date.is_some()

@@ -1,3 +1,4 @@
+pub mod main_entity;
 pub mod relation;
 pub mod label;
 pub mod release;

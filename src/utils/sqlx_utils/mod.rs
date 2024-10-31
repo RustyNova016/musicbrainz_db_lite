@@ -1,13 +1,12 @@
 pub mod join_map;
-pub mod query_builder;
+//pub mod query_builder;
 pub mod entity_relations;
 use core::ops::{Deref, DerefMut};
 
-use async_trait::async_trait;
-use serde_json::de::Read;
-use sqlx::{Acquire, Database, Executor, Pool, Sqlite, SqliteConnection, Transaction};
 
-use crate::database::client::DBClient;
+use sqlx::{Acquire, Pool, Sqlite, SqliteConnection, Transaction};
+
+
 
 // pub trait SqliteAquire<'c>: Acquire<'c, Database = Sqlite> {}
 

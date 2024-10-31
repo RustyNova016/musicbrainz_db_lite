@@ -1,3 +1,4 @@
+mod select;
 use core::marker::PhantomData;
 
 use sqlx::prelude::FromRow;

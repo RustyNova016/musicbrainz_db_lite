@@ -27,8 +27,8 @@ impl Recording {
 
         match data {
             Ok(data) => {
-                let data = data.save(conn).await?;
-                Self::reset_full_update_date(conn, data.id).await?;
+                let mut data = data.save(conn).await?;
+                data.reset_full_update_date(conn).await?;
 
                 Self::set_redirection(conn, mbid, data.id).await?;
 
@@ -40,5 +40,27 @@ impl Recording {
             }
             Err(err) => Err(err.into()),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use musicbrainz_db_lite_schema::create_database;
+
+    use crate::database::client::DBClient;
+    use crate::models::musicbrainz::recording::Recording;
+
+    #[tokio::test]
+    #[serial_test::serial]
+    async fn should_insert_recording() {
+        let client = DBClient::connect_in_memory().await.unwrap();
+        let mut conn  = &mut *client.connection.acquire().await.unwrap();
+        create_database(conn).await.unwrap();
+
+        let recording = Recording::get_or_fetch(conn,"5fed738b-1e5c-4a1b-9f66-b3fd15dbc8ef")
+        .await
+        .unwrap();
+
+        assert!(recording.is_some_and(|r| r.full_update_date.is_some()))
     }
 }

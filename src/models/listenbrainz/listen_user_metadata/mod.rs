@@ -48,7 +48,6 @@ impl MessybrainzSubmission {
             .pop())
     }
 
-    ///
     pub async fn insert_or_ignore(
         &self,
         client: impl Executor<'_, Database = Sqlite>,

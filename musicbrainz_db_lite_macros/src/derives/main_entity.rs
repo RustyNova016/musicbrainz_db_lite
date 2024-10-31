@@ -19,8 +19,8 @@ pub fn derive_main_entity_impl(item: TokenStream) -> TokenStream {
 
     match &input.data {
         Data::Struct(syn::DataStruct { .. }) => {
-            let full_update = impl_update_date(&struct_identifier, &args.table, &args.primary_key);
-            let selects = impl_selects(&struct_identifier, &args.table, &args.primary_key);
+            let full_update = impl_update_date(struct_identifier, &args.table, &args.primary_key);
+            let selects = impl_selects(struct_identifier, &args.table, &args.primary_key);
 
             quote! {
                 #[automatically_derived]

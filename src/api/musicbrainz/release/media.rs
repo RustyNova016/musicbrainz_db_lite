@@ -25,7 +25,7 @@ impl Media {
             let new_media = new_media.upsert(&mut *conn).await?;
 
             if let Some(tracks) = media.tracks {
-                Track::save_api_response(&mut *conn, tracks, new_media.id).await?;
+                Track::save_api_responses(&mut *conn, tracks, new_media.id).await?;
             }
 
             converteds.push(new_media);

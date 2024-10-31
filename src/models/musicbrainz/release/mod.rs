@@ -65,7 +65,7 @@ pub struct Track {
     pub position: i64,
 
     pub media: i64,
-    pub recording: Option<String>,
+    pub recording: Option<i64>,
     pub artist_credit: Option<i64>
 }
 

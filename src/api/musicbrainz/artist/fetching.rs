@@ -36,8 +36,8 @@ impl Artist {
         
         match data {
             Ok(data) => {
-                let data = data.save(conn).await?;
-                Self::reset_full_update_date(conn, data.id).await?;
+                let mut data = data.save(conn).await?;
+                data.reset_full_update_date(conn).await?;
 
                 Self::set_redirection(conn, mbid, data.id).await?;
         
