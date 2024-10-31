@@ -1,4 +1,6 @@
 pub mod fetching;
+use crate::models::musicbrainz::main_entities::MainEntity;
+use crate::models::musicbrainz::relations::Relation;
 use crate::{
     api::SaveToDatabase,
     models::musicbrainz::{
@@ -66,6 +68,14 @@ impl Recording {
                 for gid in gids {
                     Track::set_recording_id_from_gid(conn, &recording.mbid, &gid).await?;
                 }
+            }
+        }
+
+        if let Some(relations) = value.relations {
+            for rel in relations {
+                let entity1 = MainEntity::save_relation_content(conn, rel.content.clone()).await?;
+
+                Relation::save_api_response(conn, rel, &recording, &entity1).await?;
             }
         }
 

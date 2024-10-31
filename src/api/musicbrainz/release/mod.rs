@@ -5,6 +5,8 @@ pub mod tracks;
 use musicbrainz_rs_nova::entity::release::Release as MBRelease;
 use sqlx::SqliteConnection;
 
+use crate::models::musicbrainz::main_entities::MainEntity;
+use crate::models::musicbrainz::relations::Relation;
 use crate::{
     models::musicbrainz::{
         artist_credit::ArtistCredits,
@@ -67,6 +69,14 @@ impl Release {
         if let Some(values) = value.label_info {
             LabelInfo::save_api_response(conn, values, new_release.id).await?;
         } 
+
+        if let Some(relations) = value.relations {
+            for rel in relations {
+                let entity1 = MainEntity::save_relation_content(conn, rel.content.clone()).await?;
+
+                Relation::save_api_response(conn, rel, &new_release, &entity1).await?;
+            }
+        }
 
         Ok(new_release)
     }

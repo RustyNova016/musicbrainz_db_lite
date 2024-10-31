@@ -1,4 +1,6 @@
 pub mod fetching;
+use crate::models::musicbrainz::main_entities::MainEntity;
+use crate::models::musicbrainz::relations::Relation;
 use crate::models::musicbrainz::{label::Label, release::Release};
 use musicbrainz_rs_nova::entity::label::Label as MBLabel;
 use sqlx::SqliteConnection;
@@ -45,6 +47,14 @@ impl Label {
         if let Some(releases) = value.releases {
             for release in releases {
                 Release::save_api_response(conn, release).await?;
+            }
+        }
+
+        if let Some(relations) = value.relations {
+            for rel in relations {
+                let entity1 = MainEntity::save_relation_content(conn, rel.content.clone()).await?;
+
+                Relation::save_api_response(conn, rel, &new_value, &entity1).await?;
             }
         }
 
