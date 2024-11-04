@@ -1,0 +1,118 @@
+name: Rust_Checks
+
+on:
+  push:
+    branches: [ "master", "develop" ]
+  pull_request:
+    branches: [ "master", "develop" ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -Dwarnings
+  RUST_BACKTRACE: 1
+
+jobs:
+  stable_tests:
+    runs-on: ${{ matrix.os }}
+    needs: clippy
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          #- windows-latest
+          - ubuntu-latest
+          #- macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: rustup toolchain install stable --profile minimal --no-self-update
+
+      - uses: Swatinem/rust-cache@v2
+        with: 
+          key: "(${{ matrix.os }})"
+
+      - uses: taiki-e/install-action@cargo-hack
+        
+      - name: Run tests
+        run: cargo hack test --feature-powerset --ignore-private
+  
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install minimal toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          profile: minimal
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: taiki-e/install-action@cargo-hack
+
+      - name: Run clippy
+        run: cargo hack clippy --feature-powerset --ignore-private -- -D warnings
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install minimal toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          profile: minimal
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Run rustdoc
+        env:
+          RUSTDOCFLAGS: -D warnings
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --no-deps --document-private-items
+
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install minimal toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          profile: minimal
+          components: rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Run rustfmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all --check
+
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: Swatinem/rust-cache@v2
+    - uses: taiki-e/install-action@cargo-hack
+    - run: cargo hack check --rust-version --workspace --all-targets --ignore-private
+
+  minimum_versions:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@nightly
+    - uses: Swatinem/rust-cache@v2
+    - uses: taiki-e/install-action@cargo-hack
+    - uses: taiki-e/install-action@cargo-minimal-versions
+    - run: cargo minimal-versions check --direct
