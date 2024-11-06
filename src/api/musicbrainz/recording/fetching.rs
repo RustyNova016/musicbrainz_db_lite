@@ -57,10 +57,16 @@ mod tests {
         let conn = &mut *client.connection.acquire().await.unwrap();
         create_database(conn).await.unwrap();
 
-        let recording = Recording::get_or_fetch(conn, "5fed738b-1e5c-4a1b-9f66-b3fd15dbc8ef")
-            .await
-            .unwrap();
+        // Test values. Feel free to add edge cases here
+        let test_values = vec![
+            "5fed738b-1e5c-4a1b-9f66-b3fd15dbc8ef",
+            "2d1a7579-10dc-471b-a758-5f63f9d2e5dd", // Artist -> Recording + Recording -> Recording
+        ];
 
-        assert!(recording.is_some_and(|r| r.full_update_date.is_some()))
+        for test in test_values {
+            let value = Recording::get_or_fetch(conn, test).await.unwrap();
+
+            assert!(value.is_some_and(|r| r.full_update_date.is_some()))
+        }
     }
 }

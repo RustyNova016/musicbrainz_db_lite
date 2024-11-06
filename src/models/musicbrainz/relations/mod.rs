@@ -74,7 +74,7 @@ where
                 `source_credit` = excluded.`source_credit`,
                 `entity0` = excluded.`entity0`,
                 `entity1` = excluded.`entity1` RETURNING *;",
-            T::TABLE
+            T::RELATION_TABLE
         );
         let mut query = sqlx::query_as(&sql);
         query = query.bind(&self.type_id);
@@ -97,7 +97,7 @@ where
         conn: &mut sqlx::SqliteConnection,
         entity: T,
     ) -> Result<Vec<Relation<T, U>>, sqlx::Error> {
-        let sql = format!("SELECT * FROM {} WHERE `entity0` = ?", T::TABLE);
+        let sql = format!("SELECT * FROM {} WHERE `entity0` = ?", T::RELATION_TABLE);
         let relations: Vec<Relation<T, U>> = sqlx::query_as(&sql)
             .bind(entity.get_row_id())
             .fetch_all(conn)

@@ -76,10 +76,14 @@ mod tests {
         let client = DBClient::connect_in_memory().await.unwrap();
         let conn = &mut *client.connection.acquire().await.unwrap();
         create_database(conn).await.unwrap();
-        let recording = Release::get_or_fetch(conn, "daf6e333-b491-490a-9444-8888cb08b141")
-            .await
-            .unwrap();
 
-        assert!(recording.is_some_and(|r| r.full_update_date.is_some()))
+        // Test values. Feel free to add edge cases here
+        let test_values = vec!["daf6e333-b491-490a-9444-8888cb08b141"];
+
+        for test in test_values {
+            let value = Release::get_or_fetch(conn, test).await.unwrap();
+
+            assert!(value.is_some_and(|r| r.full_update_date.is_some()))
+        }
     }
 }

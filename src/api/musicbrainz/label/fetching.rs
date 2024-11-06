@@ -67,10 +67,16 @@ mod tests {
         let conn = &mut *client.connection.acquire().await.unwrap();
         create_database(conn).await.unwrap();
 
-        let value = Label::get_or_fetch(conn, "b10497d9-68c2-4f58-a9ae-8ba7b15d3e09")
-            .await
-            .unwrap();
+        // Test values. Feel free to add edge cases here
+        let test_values = vec![
+            "b10497d9-68c2-4f58-a9ae-8ba7b15d3e09",
+            "ecc4aa34-753b-4031-9a12-53a27ec94955", // Label -> Artist + Label -> Serie
+        ];
 
-        assert!(value.is_some_and(|r| r.full_update_date.is_some()))
+        for test in test_values {
+            let value = Label::get_or_fetch(conn, test).await.unwrap();
+
+            assert!(value.is_some_and(|r| r.full_update_date.is_some()))
+        }
     }
 }
