@@ -14,8 +14,8 @@ where
     pub async fn save_api_response_inner(
         conn: &mut sqlx::SqliteConnection,
         value: MBRelation,
-        entity0: &T,
-        entity1: &U,
+        fetched_entity: &T,
+        content_entity: &U,
     ) -> Result<Relation<T, U>, crate::Error> {
         let relation = Relation {
             atribute_values: value
@@ -34,9 +34,9 @@ where
             direction: value.direction,
             end: value.end.map(|date| date_to_timestamp(date).unwrap()),
             id: Default::default(),
-            entity0: entity0.get_row_id(),
+            entity0: fetched_entity.get_entity0_id(content_entity),
             entity0_phamtom: Default::default(),
-            entity1: entity1.get_row_id(),
+            entity1: fetched_entity.get_entity1_id(content_entity),
             entity1_phamtom: Default::default(),
             relation_type: value.relation_type,
             source_credit: value.source_credit,
