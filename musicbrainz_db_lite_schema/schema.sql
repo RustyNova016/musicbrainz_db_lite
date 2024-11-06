@@ -119,6 +119,22 @@ CREATE TABLE `labels_gid_redirect` (
     `new_id` TEXT REFERENCES `labels`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
+CREATE TABLE `works` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `mbid` TEXT UNIQUE NOT NULL,
+                `title` TEXT NOT NULL,
+                `work_type` TEXT,
+                `disambiguation` TEXT,
+                `annotation` TEXT,
+
+                -- Database Utils
+                `full_update_date` INTEGER CHECK(`full_update_date` > 0)
+            ) STRICT;
+CREATE TABLE `works_gid_redirect` (
+    `gid` TEXT PRIMARY KEY NOT NULL, 
+    `new_id` TEXT REFERENCES `works`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
+    `deleted` INTEGER DEFAULT 0 NOT NULL
+) STRICT;
 CREATE TABLE `l_artists_artists` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
         `type_id` TEXT NOT NULL,
@@ -191,6 +207,24 @@ CREATE TABLE `l_artists_releases` (
         `entity0` INTEGER NOT NULL REFERENCES `artists` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
         `entity1` INTEGER NOT NULL REFERENCES `releases` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
     ) STRICT;
+CREATE TABLE `l_artists_works` (
+        `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+        `type_id` TEXT NOT NULL,
+        `relation_type` TEXT NOT NULL,
+        `direction` TEXT NOT NULL, 
+        `begin` INTEGER,
+        `end` INTEGER,
+        `attributes` TEXT,
+        `attribute_ids` TEXT,
+        `atribute_values` TEXT,
+        `target_type` TEXT,
+        `target_credit` TEXT,
+        `source_credit` TEXT,
+
+        -- Foreign Keys
+        `entity0` INTEGER NOT NULL REFERENCES `artists` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+        `entity1` INTEGER NOT NULL REFERENCES `works` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+    ) STRICT;
 CREATE TABLE `l_labels_labels` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
         `type_id` TEXT NOT NULL,
@@ -245,6 +279,24 @@ CREATE TABLE `l_labels_releases` (
         `entity0` INTEGER NOT NULL REFERENCES `labels` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
         `entity1` INTEGER NOT NULL REFERENCES `releases` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
     ) STRICT;
+CREATE TABLE `l_labels_works` (
+        `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+        `type_id` TEXT NOT NULL,
+        `relation_type` TEXT NOT NULL,
+        `direction` TEXT NOT NULL, 
+        `begin` INTEGER,
+        `end` INTEGER,
+        `attributes` TEXT,
+        `attribute_ids` TEXT,
+        `atribute_values` TEXT,
+        `target_type` TEXT,
+        `target_credit` TEXT,
+        `source_credit` TEXT,
+
+        -- Foreign Keys
+        `entity0` INTEGER NOT NULL REFERENCES `labels` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+        `entity1` INTEGER NOT NULL REFERENCES `works` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+    ) STRICT;
 CREATE TABLE `l_recordings_recordings` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
         `type_id` TEXT NOT NULL,
@@ -281,6 +333,24 @@ CREATE TABLE `l_recordings_releases` (
         `entity0` INTEGER NOT NULL REFERENCES `recordings` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
         `entity1` INTEGER NOT NULL REFERENCES `releases` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
     ) STRICT;
+CREATE TABLE `l_recordings_works` (
+        `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+        `type_id` TEXT NOT NULL,
+        `relation_type` TEXT NOT NULL,
+        `direction` TEXT NOT NULL, 
+        `begin` INTEGER,
+        `end` INTEGER,
+        `attributes` TEXT,
+        `attribute_ids` TEXT,
+        `atribute_values` TEXT,
+        `target_type` TEXT,
+        `target_credit` TEXT,
+        `source_credit` TEXT,
+
+        -- Foreign Keys
+        `entity0` INTEGER NOT NULL REFERENCES `recordings` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+        `entity1` INTEGER NOT NULL REFERENCES `works` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+    ) STRICT;
 CREATE TABLE `l_releases_releases` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
         `type_id` TEXT NOT NULL,
@@ -298,6 +368,42 @@ CREATE TABLE `l_releases_releases` (
         -- Foreign Keys
         `entity0` INTEGER NOT NULL REFERENCES `releases` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
         `entity1` INTEGER NOT NULL REFERENCES `releases` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+    ) STRICT;
+CREATE TABLE `l_releases_works` (
+        `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+        `type_id` TEXT NOT NULL,
+        `relation_type` TEXT NOT NULL,
+        `direction` TEXT NOT NULL, 
+        `begin` INTEGER,
+        `end` INTEGER,
+        `attributes` TEXT,
+        `attribute_ids` TEXT,
+        `atribute_values` TEXT,
+        `target_type` TEXT,
+        `target_credit` TEXT,
+        `source_credit` TEXT,
+
+        -- Foreign Keys
+        `entity0` INTEGER NOT NULL REFERENCES `releases` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+        `entity1` INTEGER NOT NULL REFERENCES `works` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+    ) STRICT;
+CREATE TABLE `l_works_works` (
+        `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+        `type_id` TEXT NOT NULL,
+        `relation_type` TEXT NOT NULL,
+        `direction` TEXT NOT NULL, 
+        `begin` INTEGER,
+        `end` INTEGER,
+        `attributes` TEXT,
+        `attribute_ids` TEXT,
+        `atribute_values` TEXT,
+        `target_type` TEXT,
+        `target_credit` TEXT,
+        `source_credit` TEXT,
+
+        -- Foreign Keys
+        `entity0` INTEGER NOT NULL REFERENCES `works` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+        `entity1` INTEGER NOT NULL REFERENCES `works` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
     ) STRICT;
 CREATE TABLE IF NOT EXISTS "users" (
     `id` INTEGER PRIMARY KEY UNIQUE NOT NULL,
@@ -363,6 +469,9 @@ CREATE TRIGGER `trigger_after_insert_releases` AFTER INSERT ON `releases` FOR EA
 END;
 CREATE TRIGGER `trigger_after_insert_labels` AFTER INSERT ON `labels` FOR EACH ROW BEGIN
     INSERT INTO labels_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
+END;
+CREATE TRIGGER `trigger_after_insert_works` AFTER INSERT ON `works` FOR EACH ROW BEGIN
+    INSERT INTO works_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
 CREATE UNIQUE INDEX `msid_mapping_unique_mapping` ON `msid_mapping` (`recording_msid`, `user`);
 CREATE UNIQUE INDEX `idx_listens` ON `listens` (`listened_at`, `user`, `recording_msid`);
