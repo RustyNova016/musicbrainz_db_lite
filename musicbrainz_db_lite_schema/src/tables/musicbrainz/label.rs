@@ -21,7 +21,7 @@ pub(super) async fn create_label_tables(conn: &mut SqliteConnection) -> Result<(
                 `full_update_date` INTEGER CHECK(`full_update_date` > 0)
             ) STRICT;
 
-"#
+"#,
     )
     .execute(&mut *conn)
     .await?;
