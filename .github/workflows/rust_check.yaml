@@ -115,4 +115,4 @@ jobs:
     - uses: Swatinem/rust-cache@v2
     - uses: taiki-e/install-action@cargo-hack
     - uses: taiki-e/install-action@cargo-minimal-versions
-    - run: cargo minimal-versions check --direct
+    - run: cargo minimal-versions test --direct

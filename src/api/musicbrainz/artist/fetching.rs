@@ -54,3 +54,25 @@ impl Artist {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use musicbrainz_db_lite_schema::create_database;
+
+    use crate::database::client::DBClient;
+    use crate::models::musicbrainz::artist::Artist;
+
+    #[tokio::test]
+    #[serial_test::serial]
+    async fn should_insert_artist() {
+        let client = DBClient::connect_in_memory().await.unwrap();
+        let conn = &mut *client.connection.acquire().await.unwrap();
+        create_database(conn).await.unwrap();
+
+        let value = Artist::get_or_fetch(conn, "d51d0c5b-8003-4b38-97a2-6400a5128784")
+            .await
+            .unwrap();
+
+        assert!(value.is_some_and(|r| r.full_update_date.is_some()))
+    }
+}
