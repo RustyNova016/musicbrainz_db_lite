@@ -14,71 +14,76 @@ pub impl UserListensPayload {
     /// ⚠️ May not insert all the listens if the recieved count is equal to the asked count ⚠️
     ///
     /// Return the timestamp for the next fetch in sequence
-    ///
-    async fn save_listen_payload_in_transaction(
+    #[allow(clippy::manual_async_fn)]
+    fn save_listen_payload_in_transaction(
         &self,
         client: &SqliteClient,
         max_ts: i64,
         count: u64,
-    ) -> Result<Option<i64>, Error> {
-        // Check: We must have at least 1 listen
-        if self.listens.len() == 0 {
-            return Ok(None);
-        }
+    ) -> impl std::future::Future<Output = Result<Option<i64>, Error>> + Send {
+        async move {
+            // Check: We must have at least 1 listen
+            if self.listens.is_empty() {
+                return Ok(None);
+            }
 
-        // If the count retrived is the count we asked, then there's an high change that it is a partial fetch.
-        let delete_range = if count == self.listens.len() as u64 {
-            get_deletion_range_for_part(self, max_ts)
-        } else {
-            get_deletion_range_for_limit(self, max_ts)
-        };
+            // If the count retrived is the count we asked, then there's an high change that it is a partial fetch.
+            let delete_range = if count == self.listens.len() as u64 {
+                get_deletion_range_for_part(self, max_ts)
+            } else {
+                get_deletion_range_for_limit(self, max_ts)
+            };
 
-        // Trim the listens we aren't inserting
-        let listens = self
-            .listens
-            .iter()
-            .filter(|l| {
-                let var_name = l.listened_at < delete_range.0;
-                let var_namet = l.listened_at > delete_range.1;
-                var_name && var_namet
-            })
-            .cloned()
-            .collect::<Vec<_>>();
+            // Trim the listens we aren't inserting
+            let listens = self
+                .listens
+                .iter()
+                .filter(|l| {
+                    let var_name = l.listened_at < delete_range.0;
+                    let var_namet = l.listened_at > delete_range.1;
+                    var_name && var_namet
+                })
+                .cloned()
+                .collect::<Vec<_>>();
 
-        let mut trans = client.as_sqlx_pool().begin().await?;
+            let mut trans = client.as_sqlx_pool().begin().await?;
 
-        // Delete the old listens. we want to remove all the old data to not miss any removed listens
-        Listen::delete_listen_range(
-            &mut *trans,
-            delete_range.1,
-            delete_range.0,
-            self.get_username()
-                .expect("There should have at least one listen"),
-        )
-        .await?;
+            // Delete the old listens. we want to remove all the old data to not miss any removed listens
+            Listen::delete_listen_range(
+                &mut trans,
+                delete_range.1,
+                delete_range.0,
+                self.get_username()
+                    .expect("There should have at least one listen"),
+            )
+            .await?;
 
-        Self::save_listens(&mut trans, listens).await?;
+            Self::save_listens(&mut trans, listens).await?;
 
-        trans.commit().await?;
+            trans.commit().await?;
 
-        if count == self.listens.len() as u64 {
-            Ok(Some(delete_range.1))
-        } else {
-            Ok(None)
+            if count == self.listens.len() as u64 {
+                Ok(Some(delete_range.1))
+            } else {
+                Ok(None)
+            }
         }
     }
 
-    async fn save_listens(
+    #[allow(clippy::manual_async_fn)]
+    fn save_listens(
         client: &mut SqliteConnection,
         listens: Vec<UserListensListen>,
-    ) -> Result<Vec<DbState<Listen>>, Error> {
-        let mut result = Vec::with_capacity(1000);
+    ) -> impl std::future::Future<Output = Result<Vec<DbState<Listen>>, Error>> + Send {
+        async {
+            let mut result = Vec::with_capacity(1000);
 
-        for listen in listens {
-            result.push(Listen::insert_api_listen(&mut *client, &listen).await?);
+            for listen in listens {
+                result.push(Listen::insert_api_listen(&mut *client, &listen).await?);
+            }
+
+            Ok(result)
         }
-
-        Ok(result)
     }
 
     fn get_username(&self) -> Option<&String> {

@@ -55,5 +55,5 @@ pub(crate) fn get_on_conflict_fields_from_idents(
         names.push(format!("`{}` = excluded.`{}`", identifier, identifier));
     }
 
-    format!("{}", names.join(", "))
+    names.join(", ").to_string()
 }
