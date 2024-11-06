@@ -29,24 +29,26 @@ impl Recording {
                     INNER JOIN recordings_gid_redirect ON recordings_gid_redirect.gid = tracks.recording
                     INNER JOIN recordings ON recordings.id = recordings_gid_redirect.new_id
                 WHERE
-                    recordings.id = ?"#,
-                
+                    recordings.id = ?"#
                  ).bind(self.id)
                  .fetch_all(conn)
                  .await?)
-    } 
+    }
 
-    /// Get a all the releases of a list of recordings. 
-    /// 
+    /// Get a all the releases of a list of recordings.
+    ///
     /// ⚠️ The recordings must all be fetched before. A `debug_assert` will block in case of, but won't trigger in production
-    pub async fn get_releases_as_batch<'r>(conn: &mut sqlx::SqliteConnection, recordings: &'r[&'r Recording]) -> Result<HashMap<i64, (&'r &'r Recording, Vec<Release>)>, crate::Error> {
+    pub async fn get_releases_as_batch<'r>(
+        conn: &mut sqlx::SqliteConnection,
+        recordings: &'r [&'r Recording],
+    ) -> Result<HashMap<i64, (&'r &'r Recording, Vec<Release>)>, crate::Error> {
         #[cfg(debug_assertions)]
         //Self::assert_recordings_fetched(recordings); TODO: Fix borow types
-
         let ids = recordings.iter().map(|r| r.id).collect_vec();
         let id_string = serde_json::to_string(&ids)?;
 
-        let joins: Vec<JoinRelation<i64, Release>> = sqlx::query_as("
+        let joins: Vec<JoinRelation<i64, Release>> = sqlx::query_as(
+            "
             SELECT
                 recordings.id as original_id,
                 releases.*
@@ -63,11 +65,12 @@ impl Recording {
                     FROM
                         JSON_EACH(?)
                 )
-        ").bind(id_string).fetch_all(conn).await?;
+        ",
+        )
+        .bind(id_string)
+        .fetch_all(conn)
+        .await?;
 
         Ok(JoinCollection::from(joins).into_hashmap(recordings, |id, value| &value.id == id))
     }
-
-
 }
-

@@ -91,7 +91,8 @@ pub(super) async fn create_release_tables(conn: &mut SqliteConnection) -> Result
 
     sqlx::query(&generate_redirect_table("releases"))
         .execute(conn)
-        .await.unwrap();
+        .await
+        .unwrap();
 
     Ok(())
 }

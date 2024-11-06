@@ -7,10 +7,7 @@ pub fn impl_update_date(struct_name: &Ident, table_name: &str, pk: &str) -> Toke
         table_name, pk
     );
 
-    let is_fully_fetched_doc = format!(
-        "Return true if the {} is fully fetched.",
-        struct_name
-    );
+    let is_fully_fetched_doc = format!("Return true if the {} is fully fetched.", struct_name);
 
     quote::quote! {
         /// Reset the full update date to be now

@@ -7,7 +7,7 @@ macro_rules! impl_get_and_fetch {
                 data: Vec<$left_entity>,
             ) -> Result<Self, crate::Error> {
                 let left_ids = data.iter().map(|l| l.recording_mbid.clone()).collect_vec();
-        
+
                 let left_ids_string = serde_json::to_string(&left_ids)?;
                 let res: Vec<$right_entity> = sqlx::query_as(
                     format!("SELECT * FROM recordings_gid_redirect WHERE gid IN (SELECT value from json_each(?))"),
@@ -15,16 +15,16 @@ macro_rules! impl_get_and_fetch {
                 )
                 .fetch_all(conn)
                 .await?;
-        
+
                 let mapped = inner_join_values(
                     data.into_iter().map(|l| (l.recording_mbid.clone(), l)),
                     res.into_iter().map(|r| (r.gid.clone(), r)),
                 );
-        
+
                 Ok(Self { relations: mapped })
             }
         }
-        
+
     };
 }
 

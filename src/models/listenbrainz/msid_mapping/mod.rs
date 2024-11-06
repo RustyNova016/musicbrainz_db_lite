@@ -61,8 +61,6 @@ impl MsidMapping {
     ) -> Result<(), sqlx::Error> {
         //println!("mapping {} to {}", msid, mbid);
 
-        
-
         sqlx::query!("INSERT INTO `msid_mapping` VALUES (NULL, ?, ?, ?, NULL) ON CONFLICT DO UPDATE SET `recording_mbid` = ?", msid, mbid, user_id, mbid).execute(client).await?;
         Ok(())
     }

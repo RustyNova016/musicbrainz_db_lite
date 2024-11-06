@@ -10,7 +10,7 @@ use crate::utils::macros::{
 pub mod redirect;
 pub mod relations;
 
-#[derive(Debug, WeldsModel, Default, PartialEq, Eq, Clone, FromRow, Upsert, MainEntity)] 
+#[derive(Debug, WeldsModel, Default, PartialEq, Eq, Clone, FromRow, Upsert, MainEntity)]
 #[database(
     table = "recordings",
     primary_key = "id",

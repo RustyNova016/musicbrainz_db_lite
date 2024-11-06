@@ -4,7 +4,12 @@ use sqlx::FromRow;
 use crate::utils::macros::{get_and_fetch::impl_get_and_fetch, impl_redirections};
 
 #[derive(Debug, Default, Clone, FromRow, Upsert, MainEntity)]
-#[database(table="labels", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id, mbid))]
+#[database(
+    table = "labels",
+    primary_key = "id",
+    ignore_insert_keys(id),
+    ignore_update_keys(id, mbid)
+)]
 pub struct Label {
     pub id: i64,
     pub mbid: String,

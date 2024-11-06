@@ -12,9 +12,10 @@ impl Listen {
         client: &SqliteClient,
         user: &str,
     ) -> Result<(), Error> {
-        let latest_listen_ts = Listen::get_latest_listen_of_user(&mut *client.as_sqlx_pool().acquire().await?, user)
-            .await?
-            .map(|v| v.listened_at);
+        let latest_listen_ts =
+            Listen::get_latest_listen_of_user(&mut *client.as_sqlx_pool().acquire().await?, user)
+                .await?
+                .map(|v| v.listened_at);
         let mut pull_ts = Some(Utc::now().timestamp());
 
         let lb_client = Client::new();

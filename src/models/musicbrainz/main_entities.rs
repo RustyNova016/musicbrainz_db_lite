@@ -18,7 +18,7 @@ impl RowId for MainEntity {
             Self::Artist(val) => val.get_row_id(),
             Self::Label(val) => val.get_row_id(),
             Self::Recording(val) => val.get_row_id(),
-            Self::Release(val) => val.get_row_id()
+            Self::Release(val) => val.get_row_id(),
         }
     }
 }

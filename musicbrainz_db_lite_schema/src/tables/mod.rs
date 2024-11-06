@@ -4,7 +4,8 @@ use musicbrainz::generate_musicbrainz_database;
 use sqlx::SqliteConnection;
 
 pub async fn create_listenbrainz_tables(conn: &mut SqliteConnection) -> Result<(), sqlx::Error> {
-    sqlx::query(r#"PRAGMA foreign_keys = OFF; 
+    sqlx::query(
+        r#"PRAGMA foreign_keys = OFF; 
 
 -- Tables
 CREATE TABLE IF NOT EXISTS "users" (
@@ -32,9 +33,10 @@ CREATE TABLE IF NOT EXISTS `metadata` (
 
 --INSERT INTO `metadata` VALUES (1); 
 
-PRAGMA foreign_keys = ON;"#)
-.execute( conn)
-.await?;
+PRAGMA foreign_keys = ON;"#,
+    )
+    .execute(conn)
+    .await?;
     Ok(())
 }
 

@@ -1,8 +1,8 @@
+use crate::utils::field_in_pathlist;
+use darling::util::PathList;
 use darling::FromMeta;
 use syn::Fields;
 use syn::Path;
-use darling::util::PathList;
-use crate::utils::field_in_pathlist;
 
 pub(crate) fn get_insert_fields_from_idents(fields: &Fields) -> String {
     let mut names = Vec::new();
@@ -14,7 +14,10 @@ pub(crate) fn get_insert_fields_from_idents(fields: &Fields) -> String {
     format!("({})", names.join(", "))
 }
 
-pub(crate) fn get_insert_values_fields_from_idents(fields: &Fields, ignored_keys: &PathList) -> String {
+pub(crate) fn get_insert_values_fields_from_idents(
+    fields: &Fields,
+    ignored_keys: &PathList,
+) -> String {
     let mut values = vec![];
 
     for field in fields {
@@ -24,14 +27,15 @@ pub(crate) fn get_insert_values_fields_from_idents(fields: &Fields, ignored_keys
             values.push("?");
         }
     }
-    for _i in 1..fields.len() {
-
-    }
+    for _i in 1..fields.len() {}
 
     format!("({})", values.join(", "))
 }
 
-pub(crate) fn get_on_conflict_fields_from_idents(fields: &Fields, ignored_keys: &PathList) -> String {
+pub(crate) fn get_on_conflict_fields_from_idents(
+    fields: &Fields,
+    ignored_keys: &PathList,
+) -> String {
     let mut names = Vec::new();
     for field in fields {
         let identifier = field.ident.as_ref().unwrap();
@@ -43,14 +47,13 @@ pub(crate) fn get_on_conflict_fields_from_idents(fields: &Fields, ignored_keys: 
             Ok(path) => path,
             Err(error) => panic!("Failed to convert field identifier to path: {error:?}"),
         };
-        
+
         if ignored_keys.contains(&path) {
-            continue
+            continue;
         }
-        
+
         names.push(format!("`{}` = excluded.`{}`", identifier, identifier));
     }
 
     format!("{}", names.join(", "))
 }
-

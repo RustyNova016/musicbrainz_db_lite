@@ -3,7 +3,10 @@ use musicbrainz_rs_nova::{entity::label::Label as MBLabel, Fetch};
 use crate::{api::SaveToDatabase, models::musicbrainz::label::Label};
 
 impl Label {
-    pub async fn fetch_and_save(conn: &mut sqlx::SqliteConnection, mbid: &str) -> Result<Option<Self>, crate::Error> {
+    pub async fn fetch_and_save(
+        conn: &mut sqlx::SqliteConnection,
+        mbid: &str,
+    ) -> Result<Option<Self>, crate::Error> {
         let data = MBLabel::fetch()
             .id(mbid)
             .with_aliases()
@@ -42,7 +45,10 @@ impl Label {
 impl SaveToDatabase for MBLabel {
     type ReturnedData = Label;
 
-    async fn save(self, conn: &mut sqlx::SqliteConnection) -> Result<Self::ReturnedData, crate::Error> {
+    async fn save(
+        self,
+        conn: &mut sqlx::SqliteConnection,
+    ) -> Result<Self::ReturnedData, crate::Error> {
         Label::save_api_response_recursive(conn, self).await
     }
 }

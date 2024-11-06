@@ -1,6 +1,6 @@
-pub mod inner_joins;
 pub mod artist_credits;
 pub mod get_and_fetch;
+pub mod inner_joins;
 macro_rules! impl_redirections {
     ($row_struct: ty, $entity_table_name: expr) => {
         impl $row_struct {

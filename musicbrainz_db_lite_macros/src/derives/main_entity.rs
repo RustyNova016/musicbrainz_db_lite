@@ -1,10 +1,10 @@
+use crate::derives::main_entity::selects::impl_selects;
 use crate::derives::methods::update_date::impl_update_date;
 use crate::{database_atributes::DatabaseAtribute, derives::methods::selects};
 use darling::FromDeriveInput;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::Data;
-use crate::derives::main_entity::selects::impl_selects;
 
 pub fn derive_main_entity_impl(item: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(item as syn::DeriveInput);

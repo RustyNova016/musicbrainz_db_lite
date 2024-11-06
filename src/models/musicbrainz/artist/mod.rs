@@ -5,7 +5,12 @@ use welds::WeldsModel;
 use crate::utils::macros::{get_and_fetch::impl_get_and_fetch, impl_redirections};
 
 #[derive(Debug, WeldsModel, Default, Clone, FromRow, Upsert, MainEntity)]
-#[database(table="artists", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id, mbid))]
+#[database(
+    table = "artists",
+    primary_key = "id",
+    ignore_insert_keys(id),
+    ignore_update_keys(id, mbid)
+)]
 #[welds(table = "artists")]
 pub struct Artist {
     #[welds(primary_key)]
@@ -28,4 +33,3 @@ impl crate::RowId for Artist {
         self.id
     }
 }
-

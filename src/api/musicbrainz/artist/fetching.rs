@@ -1,14 +1,17 @@
-use tracing::debug;
 use musicbrainz_rs_nova::entity::artist::Artist as MBArtist;
 use musicbrainz_rs_nova::Fetch;
 use sqlx::SqliteConnection;
+use tracing::debug;
 
 use crate::api::SaveToDatabase;
 use crate::models::musicbrainz::artist::Artist;
 use crate::Error;
 
 impl Artist {
-    pub async fn fetch_and_save(conn: &mut SqliteConnection, mbid: &str) -> Result<Option<Self>, Error> {
+    pub async fn fetch_and_save(
+        conn: &mut SqliteConnection,
+        mbid: &str,
+    ) -> Result<Option<Self>, Error> {
         debug!(mbid = mbid);
 
         let data = MBArtist::fetch()
@@ -33,22 +36,21 @@ impl Artist {
             .with_medias()
             .execute()
             .await;
-        
+
         match data {
             Ok(data) => {
                 let mut data = data.save(conn).await?;
                 data.reset_full_update_date(conn).await?;
 
                 Self::set_redirection(conn, mbid, data.id).await?;
-        
+
                 Ok(Some(data))
             }
             Err(musicbrainz_rs_nova::Error::NotFound(_)) => {
                 // TODO: Set deleted
                 Ok(None)
             }
-            Err(err) => {Err(err.into())}
+            Err(err) => Err(err.into()),
         }
     }
 }
-
