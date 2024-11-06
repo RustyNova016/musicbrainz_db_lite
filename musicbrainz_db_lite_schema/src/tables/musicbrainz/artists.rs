@@ -28,7 +28,7 @@ pub(super) async fn create_artist_tables(conn: &mut SqliteConnection) -> Result<
     ) STRICT;
 
     CREATE TABLE IF NOT EXISTS `artist_credits` (`id` INTEGER PRIMARY KEY AUTOINCREMENT) STRICT;
-"#
+"#,
     )
     .execute(&mut *conn)
     .await?;

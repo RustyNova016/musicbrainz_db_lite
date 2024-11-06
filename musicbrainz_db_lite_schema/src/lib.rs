@@ -18,11 +18,11 @@ pub async fn create_database(conn: &mut sqlx::SqliteConnection) -> Result<(), sq
 
 #[cfg(test)]
 mod tests {
+    use crate::create_database;
     use std::fs;
+    use std::fs::File;
     use std::io::Write;
     use std::process::Command;
-    use std::fs::File;
-    use crate::create_database;
 
     #[tokio::test]
     #[serial_test::serial]
@@ -36,7 +36,9 @@ mod tests {
         let sql_pool = sqlx::SqlitePool::connect_lazy("sqlite:./schema.db").unwrap();
 
         // Create Database
-        create_database(&mut sql_pool.acquire().await.unwrap()).await.unwrap();
+        create_database(&mut sql_pool.acquire().await.unwrap())
+            .await
+            .unwrap();
 
         //assert!(check_db_integrity(&client).await.is_ok_and(|v| v));
 

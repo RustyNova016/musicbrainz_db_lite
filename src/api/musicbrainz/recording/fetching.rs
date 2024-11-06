@@ -54,12 +54,12 @@ mod tests {
     #[serial_test::serial]
     async fn should_insert_recording() {
         let client = DBClient::connect_in_memory().await.unwrap();
-        let mut conn  = &mut *client.connection.acquire().await.unwrap();
+        let conn = &mut *client.connection.acquire().await.unwrap();
         create_database(conn).await.unwrap();
 
-        let recording = Recording::get_or_fetch(conn,"5fed738b-1e5c-4a1b-9f66-b3fd15dbc8ef")
-        .await
-        .unwrap();
+        let recording = Recording::get_or_fetch(conn, "5fed738b-1e5c-4a1b-9f66-b3fd15dbc8ef")
+            .await
+            .unwrap();
 
         assert!(recording.is_some_and(|r| r.full_update_date.is_some()))
     }

@@ -1,6 +1,6 @@
-pub mod querry_builder;
 pub mod date_utils;
 pub mod macros;
+pub mod querry_builder;
 pub mod sqlx_utils;
 use welds::model_traits::HasSchema;
 use welds::model_traits::TableColumns;

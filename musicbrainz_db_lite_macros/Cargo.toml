@@ -2,6 +2,7 @@
 name = "musicbrainz_db_lite_macros"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.81.0"
 
 [lib]
 name = "musicbrainz_db_lite_macros"

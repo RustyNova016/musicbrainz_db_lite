@@ -1,6 +1,5 @@
 use sqlx::SqliteConnection;
 
-
 pub(super) async fn create_relation_tables(conn: &mut SqliteConnection) -> Result<(), sqlx::Error> {
     create_relation_table(conn, "artists", "artists").await?;
     create_relation_table(conn, "artists", "labels").await?;

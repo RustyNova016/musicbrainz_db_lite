@@ -3,10 +3,17 @@ pub mod relations;
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use sqlx::FromRow;
 
-use crate::utils::macros::{artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections};
+use crate::utils::macros::{
+    artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections,
+};
 
 #[derive(Debug, Default, Clone, FromRow, Upsert, MainEntity, PartialEq, Eq)]
-#[database(table="releases", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id, mbid))]
+#[database(
+    table = "releases",
+    primary_key = "id",
+    ignore_insert_keys(id),
+    ignore_update_keys(id, mbid)
+)]
 pub struct Release {
     pub id: i64,
     pub mbid: String,
@@ -35,7 +42,12 @@ impl crate::RowId for Release {
 }
 
 #[derive(Debug, Default, Clone, FromRow, Upsert)]
-#[database(table="medias", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id))]
+#[database(
+    table = "medias",
+    primary_key = "id",
+    ignore_insert_keys(id),
+    ignore_update_keys(id)
+)]
 pub struct Media {
     pub id: i64,
     pub track_count: i64,
@@ -45,7 +57,7 @@ pub struct Media {
     pub format: Option<String>,
     pub track_offset: Option<i64>,
 
-    pub release: i64
+    pub release: i64,
 }
 
 impl crate::RowId for Media {
@@ -55,7 +67,12 @@ impl crate::RowId for Media {
 }
 
 #[derive(Debug, Default, Clone, FromRow, Upsert)]
-#[database(table="tracks", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id, gid))]
+#[database(
+    table = "tracks",
+    primary_key = "id",
+    ignore_insert_keys(id),
+    ignore_update_keys(id, gid)
+)]
 pub struct Track {
     pub id: i64,
     pub gid: String,
@@ -66,7 +83,7 @@ pub struct Track {
 
     pub media: i64,
     pub recording: Option<i64>,
-    pub artist_credit: Option<i64>
+    pub artist_credit: Option<i64>,
 }
 
 impl_artist_credits!(Track, "tracks");
@@ -78,12 +95,17 @@ impl crate::RowId for Track {
 }
 
 #[derive(Debug, Default, Clone, FromRow, Upsert)]
-#[database(table="label_infos", primary_key= "id", ignore_insert_keys(id), ignore_update_keys(id, gid))]
+#[database(
+    table = "label_infos",
+    primary_key = "id",
+    ignore_insert_keys(id),
+    ignore_update_keys(id, gid)
+)]
 pub struct LabelInfo {
     pub id: i64,
     pub catalog_number: Option<String>,
     pub label: String,
-    pub release: i64
+    pub release: i64,
 }
 
 impl crate::RowId for LabelInfo {

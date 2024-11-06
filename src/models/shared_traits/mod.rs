@@ -9,4 +9,3 @@ pub trait Upsertable: Sized {
         conn: &mut sqlx::SqliteConnection,
     ) -> impl std::future::Future<Output = Result<Self, crate::Error>> + Send;
 }
-

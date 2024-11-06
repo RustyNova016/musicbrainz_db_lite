@@ -1,4 +1,3 @@
-pub mod inner_joins;
 pub mod artist_credits;
 pub mod get_and_fetch;
 macro_rules! impl_redirections {

@@ -22,7 +22,9 @@ impl DBClient {
 
         Ok(Self {
             welds_connection: connection,
-            connection: SqlitePoolOptions::new().acquire_timeout(Duration::from_millis(60000)).connect_lazy_with(optconn),
+            connection: SqlitePoolOptions::new()
+                .acquire_timeout(Duration::from_millis(60000))
+                .connect_lazy_with(optconn),
         })
     }
 
@@ -33,7 +35,7 @@ impl DBClient {
     }
 
     pub fn as_welds_client(&self) -> &SqliteClient {
-        &self.welds_connection 
+        &self.welds_connection
     }
 
     pub async fn connect_in_memory() -> Result<DBClient, Error> {
@@ -45,8 +47,9 @@ impl DBClient {
 
         Ok(Self {
             welds_connection: connection,
-            connection: SqlitePoolOptions::new().acquire_timeout(Duration::from_millis(60000)).connect_lazy_with(optconn),
+            connection: SqlitePoolOptions::new()
+                .acquire_timeout(Duration::from_millis(60000))
+                .connect_lazy_with(optconn),
         })
     }
 }
-

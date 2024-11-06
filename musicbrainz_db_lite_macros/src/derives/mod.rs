@@ -1,2 +1,2 @@
-pub mod methods;
 pub mod main_entity;
+pub mod methods;

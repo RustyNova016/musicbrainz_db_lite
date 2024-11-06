@@ -3,10 +3,7 @@ pub mod join_map;
 pub mod entity_relations;
 use core::ops::{Deref, DerefMut};
 
-
 use sqlx::{Acquire, Pool, Sqlite, SqliteConnection, Transaction};
-
-
 
 // pub trait SqliteAquire<'c>: Acquire<'c, Database = Sqlite> {}
 

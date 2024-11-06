@@ -1,7 +1,7 @@
 use darling::util::PathList;
+use darling::FromMeta;
 use syn::Field;
 use syn::Path;
-use darling::FromMeta;
 
 pub fn field_in_pathlist(field: &Field, list: &PathList) -> bool {
     let identifier = field.ident.as_ref().unwrap();
