@@ -1,4 +1,4 @@
-macro_rules! impl_has_relation {
+macro_rules! impl_save_relation {
     ($left_entity: ty) => {
         impl $left_entity {
             pub(crate) async fn save_relation(
@@ -58,6 +58,19 @@ macro_rules! impl_has_relation {
                         )
                         .await?;
                     }
+                    musicbrainz_rs_nova::entity::relations::RelationContent::Work(value) => {
+                        let entity1 =
+                            crate::models::musicbrainz::work::Work::save_api_response(conn, *value)
+                                .await?;
+
+                        crate::models::musicbrainz::relations::Relation::save_api_response_inner(
+                            conn,
+                            api_relation,
+                            self,
+                            &entity1,
+                        )
+                        .await?;
+                    }
                     _ => Err(crate::Error::RelationNotImplemented)?,
                 })
             }
@@ -69,9 +82,11 @@ use crate::models::musicbrainz::artist::Artist;
 use crate::models::musicbrainz::label::Label;
 use crate::models::musicbrainz::recording::Recording;
 use crate::models::musicbrainz::release::Release;
-pub(crate) use impl_has_relation;
+use crate::models::musicbrainz::work::Work;
+pub(crate) use impl_save_relation;
 
-impl_has_relation!(Artist);
-impl_has_relation!(Label);
-impl_has_relation!(Recording);
-impl_has_relation!(Release);
+impl_save_relation!(Artist);
+impl_save_relation!(Label);
+impl_save_relation!(Recording);
+impl_save_relation!(Release);
+impl_save_relation!(Work);
