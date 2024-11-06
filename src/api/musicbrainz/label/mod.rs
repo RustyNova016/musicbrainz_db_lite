@@ -1,6 +1,5 @@
 pub mod fetching;
-use crate::models::musicbrainz::main_entities::MainEntity;
-use crate::models::musicbrainz::relations::Relation;
+
 use crate::models::musicbrainz::{label::Label, release::Release};
 use crate::Error;
 use musicbrainz_rs_nova::entity::label::Label as MBLabel;
@@ -53,10 +52,8 @@ impl Label {
 
         if let Some(relations) = value.relations {
             for rel in relations {
-                match MainEntity::save_relation_content(conn, rel.content.clone()).await {
-                    Ok(entity1) => {
-                        Relation::save_api_response(conn, rel, &new_value, &entity1).await?;
-                    }
+                match new_value.save_relation(conn, rel).await {
+                    Ok(_) => {}
                     Err(Error::RelationNotImplemented) => {}
                     Err(err) => {
                         Err(err)?;

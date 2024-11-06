@@ -5,8 +5,6 @@ use sqlx::SqliteConnection;
 
 use crate::api::SaveToDatabase;
 use crate::models::musicbrainz::artist::Artist;
-use crate::models::musicbrainz::main_entities::MainEntity;
-use crate::models::musicbrainz::relations::Relation;
 use crate::Error;
 
 impl Artist {
@@ -45,10 +43,8 @@ impl Artist {
 
         if let Some(relations) = value.relations {
             for rel in relations {
-                match MainEntity::save_relation_content(conn, rel.content.clone()).await {
-                    Ok(entity1) => {
-                        Relation::save_api_response(conn, rel, &artist, &entity1).await?;
-                    }
+                match artist.save_relation(conn, rel).await {
+                    Ok(_) => {}
                     Err(Error::RelationNotImplemented) => {}
                     Err(err) => {
                         Err(err)?;

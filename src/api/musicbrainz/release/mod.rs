@@ -1,20 +1,17 @@
-pub mod label_info;
-pub mod fetching;
-pub mod media;
-pub mod tracks;
 use musicbrainz_rs_nova::entity::release::Release as MBRelease;
 use sqlx::SqliteConnection;
 
-use crate::models::musicbrainz::main_entities::MainEntity;
-use crate::models::musicbrainz::relations::Relation;
+use crate::models::musicbrainz::artist_credit::ArtistCredits;
+use crate::models::musicbrainz::release::LabelInfo;
+use crate::models::musicbrainz::release::Media;
+use crate::models::musicbrainz::release::Release;
+use crate::utils::date_utils::date_to_timestamp;
 use crate::Error;
-use crate::{
-    models::musicbrainz::{
-        artist_credit::ArtistCredits,
-        release::{LabelInfo, Media, Release},
-    },
-    utils::date_utils::date_to_timestamp,
-};
+
+pub mod fetching;
+pub mod label_info;
+pub mod media;
+pub mod tracks;
 
 impl Release {
     pub async fn save_api_response(
@@ -69,14 +66,12 @@ impl Release {
 
         if let Some(values) = value.label_info {
             LabelInfo::save_api_response(conn, values, new_release.id).await?;
-        } 
+        }
 
         if let Some(relations) = value.relations {
             for rel in relations {
-                match MainEntity::save_relation_content(conn, rel.content.clone()).await {
-                    Ok(entity1) => {
-                        Relation::save_api_response(conn, rel, &new_release, &entity1).await?;
-                    }
+                match new_release.save_relation(conn, rel).await {
+                    Ok(_) => {}
                     Err(Error::RelationNotImplemented) => {}
                     Err(err) => {
                         Err(err)?;
@@ -87,5 +82,4 @@ impl Release {
 
         Ok(new_release)
     }
-
 }

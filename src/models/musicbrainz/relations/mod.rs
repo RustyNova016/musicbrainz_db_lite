@@ -1,7 +1,11 @@
-mod select;
 use core::marker::PhantomData;
 
 use sqlx::prelude::FromRow;
+use traits::HasRelation;
+
+use crate::RowId;
+
+pub mod traits;
 
 #[derive(Debug, FromRow, Default, PartialEq, Eq, Clone)]
 pub struct Relation<T, U> {
@@ -29,11 +33,50 @@ pub struct Relation<T, U> {
 
 impl<T, U> Relation<T, U>
 where
-    T: Send + Unpin,
-    U: Send + Unpin,
+    T: Send + Unpin + HasRelation<U> + RowId,
+    U: Send + Unpin + HasRelation<T>,
 {
     pub async fn upsert(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, sqlx::Error> {
-        let mut query = sqlx::query_as("INSERT INTO `recordings` (`id`, `type_id`, `relation_type`, `direction`, `begin`, `end`, `attributes`, `attribute_ids`, `atribute_values`, `target_type`, `target_credit`, `source_credit`, `entity0`, `entity1`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET `type_id` = excluded.`type_id`, `relation_type` = excluded.`relation_type`, `direction` = excluded.`direction`, `begin` = excluded.`begin`, `end` = excluded.`end`, `attributes` = excluded.`attributes`, `attribute_ids` = excluded.`attribute_ids`, `atribute_values` = excluded.`atribute_values`, `target_type` = excluded.`target_type`, `target_credit` = excluded.`target_credit`, `source_credit` = excluded.`source_credit`, `entity0` = excluded.`entity0`, `entity1` = excluded.`entity1` RETURNING *;");
+        let sql = format!(
+            "
+            INSERT INTO
+                `{}` (
+                    `id`,
+                    `type_id`,
+                    `relation_type`,
+                    `direction`,
+                    `begin`,
+                    `end`,
+                    `attributes`,
+                    `attribute_ids`,
+                    `atribute_values`,
+                    `target_type`,
+                    `target_credit`,
+                    `source_credit`,
+                    `entity0`,
+                    `entity1`
+                )
+            VALUES
+                (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT DO
+            UPDATE
+            SET
+                `type_id` = excluded.`type_id`,
+                `relation_type` = excluded.`relation_type`,
+                `direction` = excluded.`direction`,
+                `begin` = excluded.`begin`,
+                `end` = excluded.`end`,
+                `attributes` = excluded.`attributes`,
+                `attribute_ids` = excluded.`attribute_ids`,
+                `atribute_values` = excluded.`atribute_values`,
+                `target_type` = excluded.`target_type`,
+                `target_credit` = excluded.`target_credit`,
+                `source_credit` = excluded.`source_credit`,
+                `entity0` = excluded.`entity0`,
+                `entity1` = excluded.`entity1` RETURNING *;",
+            T::TABLE
+        );
+        let mut query = sqlx::query_as(&sql);
         query = query.bind(&self.type_id);
         query = query.bind(&self.relation_type);
         query = query.bind(&self.direction);
@@ -48,5 +91,18 @@ where
         query = query.bind(self.entity0);
         query = query.bind(self.entity1);
         query.fetch_one(conn).await
+    }
+
+    pub async fn get_relations_of(
+        conn: &mut sqlx::SqliteConnection,
+        entity: T,
+    ) -> Result<Vec<Relation<T, U>>, sqlx::Error> {
+        let sql = format!("SELECT * FROM {} WHERE `entity0` = ?", T::TABLE);
+        let relations: Vec<Relation<T, U>> = sqlx::query_as(&sql)
+            .bind(entity.get_row_id())
+            .fetch_all(conn)
+            .await?;
+
+        Ok(relations)
     }
 }
