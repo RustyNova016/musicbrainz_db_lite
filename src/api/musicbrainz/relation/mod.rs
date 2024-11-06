@@ -1,19 +1,21 @@
+pub mod save_relations;
 use musicbrainz_rs_nova::entity::relations::Relation as MBRelation;
 
+use crate::models::musicbrainz::relations::traits::HasRelation;
 use crate::models::musicbrainz::relations::Relation;
 use crate::utils::date_utils::date_to_timestamp;
 use crate::RowId;
 
 impl<T, U> Relation<T, U>
 where
-    T: Send + Unpin + RowId,
-    U: Send + Unpin + RowId,
+    T: Send + Unpin + RowId + HasRelation<U>,
+    U: Send + Unpin + RowId + HasRelation<T>,
 {
-    pub async fn save_api_response(
+    pub async fn save_api_response_inner(
         conn: &mut sqlx::SqliteConnection,
         value: MBRelation,
         entity0: &T,
-        entity1: &U
+        entity1: &U,
     ) -> Result<Relation<T, U>, crate::Error> {
         let relation = Relation {
             atribute_values: value
