@@ -1,5 +1,7 @@
 use chrono::Duration;
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
+use serde::Deserialize;
+use serde::Serialize;
 use sqlx::{prelude::FromRow, SqliteConnection};
 use welds::{state::DbState, WeldsModel};
 
@@ -10,7 +12,19 @@ use crate::utils::macros::{
 pub mod redirect;
 pub mod relations;
 
-#[derive(Debug, WeldsModel, Default, PartialEq, Eq, Clone, FromRow, Upsert, MainEntity)]
+#[derive(
+    Debug,
+    WeldsModel,
+    Default,
+    PartialEq,
+    Eq,
+    Clone,
+    FromRow,
+    Upsert,
+    MainEntity,
+    Deserialize,
+    Serialize,
+)]
 #[database(
     table = "recordings",
     primary_key = "id",
