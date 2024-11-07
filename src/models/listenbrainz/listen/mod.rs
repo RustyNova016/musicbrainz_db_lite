@@ -3,6 +3,8 @@ pub mod querry_builder;
 pub mod relations;
 pub mod selects;
 use chrono::{DateTime, TimeZone, Utc};
+use serde::Deserialize;
+use serde::Serialize;
 use welds::WeldsModel;
 
 use crate::models::musicbrainz::user::User;
@@ -10,7 +12,7 @@ use crate::models::shared_traits::RowId;
 
 use super::{listen_user_metadata::MessybrainzSubmission, msid_mapping::MsidMapping};
 
-#[derive(Debug, WeldsModel, PartialEq, Eq, Clone, sqlx::FromRow)]
+#[derive(Debug, WeldsModel, PartialEq, Eq, Clone, sqlx::FromRow, Deserialize, Serialize)]
 #[welds(table = "listens")]
 #[welds(BelongsTo(user, User, "user"))]
 #[welds(BelongsTo(messybrainz_submition, MessybrainzSubmission, "recording_msid"))]

@@ -3,7 +3,7 @@ use sqlx::FromRow;
 
 use crate::utils::macros::{get_and_fetch::impl_get_and_fetch, impl_redirections};
 
-#[derive(Debug, Default, Clone, FromRow, Upsert, MainEntity)]
+#[derive(Debug, Default, PartialEq, Eq, Clone, FromRow, Upsert, MainEntity)]
 #[database(
     table = "Works",
     primary_key = "id",

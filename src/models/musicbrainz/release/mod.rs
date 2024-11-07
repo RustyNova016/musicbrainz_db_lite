@@ -1,13 +1,17 @@
 pub mod formating;
 pub mod relations;
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
+use serde::Deserialize;
+use serde::Serialize;
 use sqlx::FromRow;
 
 use crate::utils::macros::{
     artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections,
 };
 
-#[derive(Debug, Default, Clone, FromRow, Upsert, MainEntity, PartialEq, Eq)]
+#[derive(
+    Debug, Default, Clone, FromRow, Upsert, MainEntity, PartialEq, Eq, Deserialize, Serialize,
+)]
 #[database(
     table = "releases",
     primary_key = "id",
