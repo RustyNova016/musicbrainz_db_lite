@@ -3,7 +3,7 @@ use welds::WeldsModel;
 
 use crate::models::listenbrainz::listen::Listen;
 
-#[derive(Debug, WeldsModel, sqlx::FromRow)]
+#[derive(Debug, WeldsModel, sqlx::FromRow, Clone, PartialEq, Eq)]
 #[welds(table = "users")]
 #[welds(HasMany(listens, Listen, "id"))]
 pub struct User {
