@@ -9,6 +9,7 @@ musicbrainz_db_lite_macros = { path = "./musicbrainz_db_lite_macros" }
 musicbrainz_db_lite_schema = { path = "./musicbrainz_db_lite_schema" }
 
 musicbrainz_rs_nova = { version = "0.8.0" }
+#musicbrainz_rs_nova = { path = "../musicbrainz_rs_nova" }
 
 async-stream = "0.3.5"
 async-trait = "0.1.82"
