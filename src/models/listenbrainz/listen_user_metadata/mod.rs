@@ -1,18 +1,10 @@
 use macon::Builder;
 use sqlx::{Executor, Sqlite};
-use welds::{state::DbState, Client, WeldsError, WeldsModel};
-
-use super::{listen::Listen, msid_mapping::MsidMapping};
 
 /// The fingerprint that identify a listened recording. This is the data scrobblers send to LB to tell that the user listened to a recording
-#[derive(Debug, WeldsModel, Builder)]
+#[derive(Debug, Builder)]
 #[builder(Default=!)]
-#[derive()]
-#[welds(table = "messybrainz_submission")]
-#[welds(HasMany(listen, Listen, "recording_msid"))]
-#[welds(HasMany(mapping, MsidMapping, "recording_msid"))]
 pub struct MessybrainzSubmission {
-    #[welds(primary_key)]
     pub id: i32,
 
     #[builder(Default=!)]
@@ -35,19 +27,6 @@ pub struct MessybrainzSubmission {
 }
 
 impl MessybrainzSubmission {
-    /// Find an [`MessybrainzSubmission`] by its MSID
-    pub async fn find_by_msid(
-        client: &dyn Client,
-        msid: &str,
-    ) -> Result<Option<DbState<Self>>, WeldsError> {
-        Ok(Self::all()
-            .where_col(|c| c.msid.equal(msid))
-            .limit(1)
-            .run(client)
-            .await?
-            .pop())
-    }
-
     pub async fn insert_or_ignore(
         &self,
         client: impl Executor<'_, Database = Sqlite>,

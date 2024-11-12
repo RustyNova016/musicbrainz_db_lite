@@ -1,15 +1,7 @@
-use super::listen_user_metadata::MessybrainzSubmission;
-use crate::models::musicbrainz::{recording::redirect::RecordingGidRedirect, user::User};
 use sqlx::{Executor, Sqlite, SqliteConnection};
-use welds::{state::DbState, Client, WeldsError, WeldsModel};
 
-#[derive(Debug, WeldsModel, Clone)]
-#[welds(table = "msid_mapping")]
-#[welds(BelongsTo(recording_mbid, RecordingGidRedirect, "recording_mbid"))]
-#[welds(BelongsTo(messybrainz_submission, MessybrainzSubmission, "recording_msid"))]
-#[welds(BelongsTo(user, User, "user"))]
+#[derive(Debug, Clone)]
 pub struct MsidMapping {
-    #[welds(primary_key)]
     pub id: i64,
 
     pub recording_mbid: String,
@@ -22,22 +14,7 @@ pub struct MsidMapping {
 }
 
 impl MsidMapping {
-    /// Finds a mapping by its user's ID, and msid
     pub async fn find_by_user_msid(
-        client: &dyn Client,
-        user_id: i64,
-        msid: &str,
-    ) -> Result<Option<DbState<Self>>, WeldsError> {
-        Ok(MsidMapping::all()
-            .where_col(|c| c.user.equal(user_id))
-            .where_col(|c| c.recording_msid.equal(msid))
-            .limit(1)
-            .run(client)
-            .await?
-            .pop())
-    }
-
-    pub async fn find_by_user_msid2(
         conn: &mut SqliteConnection,
         user_id: i64,
         msid: &str,

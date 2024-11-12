@@ -1,38 +1,37 @@
 pub mod fetching;
 use crate::models::listenbrainz::msid_mapping::MsidMapping;
-use crate::models::musicbrainz::recording::redirect::RecordingGidRedirect;
+use crate::models::musicbrainz::recording::Recording;
 use crate::Error;
 use listenbrainz::raw::response::UserListensListen;
 use sqlx::SqliteConnection;
-use welds::prelude::DbState;
 
 use crate::models::listenbrainz::listen_user_metadata::MessybrainzSubmission;
 use crate::models::{listenbrainz::listen::Listen, musicbrainz::user::User};
 
 impl Listen {
     pub async fn insert_api_listen(
-        client: &mut SqliteConnection,
+        conn: &mut SqliteConnection,
         listen: &UserListensListen,
-    ) -> Result<DbState<Listen>, Error> {
+    ) -> Result<Listen, Error> {
         // First, get the user
-        User::insert_or_ignore(&mut *client, &listen.user_name).await?;
+        User::insert_or_ignore(&mut *conn, &listen.user_name).await?;
 
         // Then upsert the MSID.
         MessybrainzSubmission::from(listen)
-            .insert_or_ignore(&mut *client)
+            .insert_or_ignore(&mut *conn)
             .await?;
 
         // Set the mapping if available
         if let Some(mapping) = &listen.track_metadata.mbid_mapping {
             // First insert the mbid
-            RecordingGidRedirect::add_mbid(&mut *client, &mapping.recording_mbid).await?;
+            Recording::add_redirect_mbid(conn, &mapping.recording_mbid).await?;
 
-            let user = User::find_by_name(&mut *client, &listen.user_name)
+            let user = User::find_by_name(&mut *conn, &listen.user_name)
                 .await?
                 .expect("The user shall be inserted");
 
             MsidMapping::set_user_mapping(
-                &mut *client,
+                &mut *conn,
                 user.id,
                 listen.recording_msid.clone(),
                 mapping.recording_mbid.clone(),
@@ -51,10 +50,10 @@ impl Listen {
             listen.recording_msid,
             data
         )
-        .fetch_one(&mut *client)
+        .fetch_one(&mut *conn)
         .await?;
 
-        Ok(DbState::new_uncreated(listen_db))
+        Ok(listen_db)
     }
 }
 

@@ -1,19 +1,16 @@
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use sqlx::prelude::FromRow;
-use welds::WeldsModel;
 
 use crate::utils::macros::{get_and_fetch::impl_get_and_fetch, impl_redirections};
 
-#[derive(Debug, WeldsModel, Default, Clone, FromRow, Upsert, MainEntity)]
+#[derive(Debug, Default, Clone, FromRow, Upsert, MainEntity)]
 #[database(
     table = "artists",
     primary_key = "id",
     ignore_insert_keys(id),
     ignore_update_keys(id, mbid)
 )]
-#[welds(table = "artists")]
 pub struct Artist {
-    #[welds(primary_key)]
     pub id: i64,
     pub mbid: String,
     pub name: String,

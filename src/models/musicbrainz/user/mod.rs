@@ -1,13 +1,7 @@
 use sqlx::{Executor, Sqlite, SqliteConnection};
-use welds::WeldsModel;
 
-use crate::models::listenbrainz::listen::Listen;
-
-#[derive(Debug, WeldsModel, sqlx::FromRow, Clone, PartialEq, Eq)]
-#[welds(table = "users")]
-#[welds(HasMany(listens, Listen, "id"))]
+#[derive(Debug, sqlx::FromRow, Clone, PartialEq, Eq)]
 pub struct User {
-    #[welds(primary_key)]
     pub id: i64,
 
     pub name: String,
