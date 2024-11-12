@@ -22,8 +22,17 @@ pub(super) async fn create_release_tables(conn: &mut SqliteConnection) -> Result
                 `full_update_date` INTEGER,
 
                 -- Foreign Keys
-                `artist_credit` INTEGER REFERENCES `artist_credits` (`id`)
+                `artist_credit` INTEGER REFERENCES `artist_credits` (`id`),
+                `release_group` INTEGER REFERENCES `release_groups` (`id`)
             ) STRICT;
+
+        CREATE TRIGGER `trigger_after_delete_releases` AFTER DELETE ON `releases` BEGIN
+            -- Clean full update date
+            UPDATE `release_groups` SET `full_update_date` = NULL WHERE id = OLD.`release_group`;
+
+            -- Remove the artist credit
+            DELETE FROM `artist_credits` WHERE id = OLD.artist_credit;
+        END;
 
         CREATE TABLE IF NOT EXISTS
             `medias` (

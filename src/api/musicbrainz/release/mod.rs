@@ -5,6 +5,7 @@ use crate::models::musicbrainz::artist_credit::ArtistCredits;
 use crate::models::musicbrainz::release::LabelInfo;
 use crate::models::musicbrainz::release::Media;
 use crate::models::musicbrainz::release::Release;
+use crate::models::musicbrainz::release_group::ReleaseGroup;
 use crate::utils::date_utils::date_to_timestamp;
 use crate::Error;
 
@@ -66,6 +67,10 @@ impl Release {
 
         if let Some(values) = value.label_info {
             LabelInfo::save_api_response(conn, values, new_release.id).await?;
+        }
+
+        if let Some(release_group) = value.release_group.clone() {
+            ReleaseGroup::save_api_response(conn, release_group).await?;
         }
 
         if let Some(relations) = value.relations {

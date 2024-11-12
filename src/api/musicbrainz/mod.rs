@@ -4,4 +4,5 @@ pub mod label;
 pub mod recording;
 pub mod relation;
 pub mod release;
+pub mod release_group;
 pub mod work;
