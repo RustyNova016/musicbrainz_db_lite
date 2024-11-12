@@ -8,22 +8,10 @@ use crate::utils::macros::{
     artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections,
 };
 
-//pub mod redirect;
 pub mod relations;
 
-#[derive(Debug, Default, PartialEq, Eq, Clone, FromRow, Upsert, MainEntity)]
 #[derive(
-    Debug,
-    WeldsModel,
-    Default,
-    PartialEq,
-    Eq,
-    Clone,
-    FromRow,
-    Upsert,
-    MainEntity,
-    Deserialize,
-    Serialize,
+    Debug, Default, PartialEq, Eq, Clone, FromRow, Upsert, MainEntity, Deserialize, Serialize,
 )]
 #[database(
     table = "recordings",
