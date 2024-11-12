@@ -46,6 +46,7 @@ impl Release {
             quality: self.quality, //TODO: Quality to string
             status: self.status,   //TODO: Status to string
             full_update_date: self.full_update_date,
+            release_group: self.release_group,
         }
     }
 
@@ -70,7 +71,9 @@ impl Release {
         }
 
         if let Some(release_group) = value.release_group.clone() {
-            ReleaseGroup::save_api_response(conn, release_group).await?;
+            let release_group = ReleaseGroup::save_api_response(conn, release_group).await?;
+            new_release.release_group = Some(release_group.id);
+            new_release.upsert(conn).await?;
         }
 
         if let Some(relations) = value.relations {

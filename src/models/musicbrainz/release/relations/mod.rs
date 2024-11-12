@@ -2,6 +2,8 @@ use sqlx::SqliteConnection;
 
 use super::{LabelInfo, Media, Release};
 
+pub mod release_group;
+
 impl Release {
     /// Get the releases of the recording, and fetch them if necessary.
     pub async fn get_medias_or_fetch(
