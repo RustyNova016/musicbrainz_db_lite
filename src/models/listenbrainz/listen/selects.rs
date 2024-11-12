@@ -1,54 +1,52 @@
 use crate::models::musicbrainz::user::User;
-use macon::Builder;
 use sqlx::{query_scalar, SqliteConnection};
-use welds::connections::sqlite::SqliteClient;
 
 use super::Listen;
 
-#[derive(Debug, Default, Builder)]
-pub struct ListenQuery {
-    pub user: String,
+// #[derive(Debug, Default, Builder)]
+// pub struct ListenQuery {
+//     pub user: String,
 
-    /// Sets wether to filter out mapped listens, unmapped listens, or ignore(default)
-    pub unmapped: ListenMappingFilter,
+//     /// Sets wether to filter out mapped listens, unmapped listens, or ignore(default)
+//     pub unmapped: ListenMappingFilter,
 
-    /// Sets whether it should fetch the user's latest listens or not.
-    pub fetch_latest_listens: bool,
-}
+//     /// Sets whether it should fetch the user's latest listens or not.
+//     pub fetch_latest_listens: bool,
+// }
 
-impl ListenQuery {
-    // pub async fn run(&self, client: &SqliteClient) -> Result<Vec<Listen>, Error> {
-    //     if self.fetch_latest_listens {
-    //         Listen::fetch_latest_listens_of_user(client, &self.user).await?;
-    //     }
+// impl ListenQuery {
+//     // pub async fn run(&self, client: &SqliteClient) -> Result<Vec<Listen>, Error> {
+//     //     if self.fetch_latest_listens {
+//     //         Listen::fetch_latest_listens_of_user(client, &self.user).await?;
+//     //     }
 
-    //     // Ok(query_as!(
-    //     //     Listen,
-    //     //     "SELECT * FROM listens WHERE listens.user = ?",
-    //     //     self.user
-    //     // )
-    //     // .fetch_all(client.as_sqlx_pool())
-    //     // .await?)
+//     //     // Ok(query_as!(
+//     //     //     Listen,
+//     //     //     "SELECT * FROM listens WHERE listens.user = ?",
+//     //     //     self.user
+//     //     // )
+//     //     // .fetch_all(client.as_sqlx_pool())
+//     //     // .await?)
 
-    //     // let querr = sqlx::query_as::<Sqlite, Listen>(
-    //     //     "SELECT
-    //     //         *
-    //     //     FROM
-    //     //         listens
-    //     //     WHERE
-    //     //         (
-    //     //             SELECT
-    //     //                 COUNT(msid_mapping.recording_msid)
-    //     //             FROM
-    //     //                 msid_mapping
-    //     //             WHERE
-    //     //                 msid_mapping.recording_msid = listens.recording_msid
-    //     //                 AND msid_mapping.user = listens.user
-    //     //         ) = 0
-    //     // "
-    //     // );
-    // }
-}
+//     //     // let querr = sqlx::query_as::<Sqlite, Listen>(
+//     //     //     "SELECT
+//     //     //         *
+//     //     //     FROM
+//     //     //         listens
+//     //     //     WHERE
+//     //     //         (
+//     //     //             SELECT
+//     //     //                 COUNT(msid_mapping.recording_msid)
+//     //     //             FROM
+//     //     //                 msid_mapping
+//     //     //             WHERE
+//     //     //                 msid_mapping.recording_msid = listens.recording_msid
+//     //     //                 AND msid_mapping.user = listens.user
+//     //     //         ) = 0
+//     //     // "
+//     //     // );
+//     // }
+// }
 
 #[derive(Debug, Default)]
 pub enum ListenMappingFilter {
@@ -124,7 +122,7 @@ impl Listen {
     }
 
     pub async fn get_recordings_of_user(
-        client: &SqliteClient,
+        conn: &mut sqlx::SqliteConnection,
         user: &User,
     ) -> Result<Vec<String>, sqlx::Error> {
         query_scalar!(r#"
@@ -143,7 +141,7 @@ impl Listen {
                 "#,
             user.id
         )
-        .fetch_all(client.as_sqlx_pool())
+        .fetch_all(conn)
         .await
     }
 

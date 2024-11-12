@@ -24,12 +24,6 @@ sqlx = { version = "0.8.2", features = ["runtime-tokio", "macros", "sqlite"] }
 thiserror = "2.0.0"
 tokio = { version = "1.40.0", features = ["full"] }
 tokio-stream = "0.1.16"
-welds = { version = "0.4.5", features = [
-    "sqlite",
-    "detect",
-    "check",
-    "migrations",
-] }
 tracing = "0.1.40"
 itertools = "0.13.0"
 serde = "1.0.210"

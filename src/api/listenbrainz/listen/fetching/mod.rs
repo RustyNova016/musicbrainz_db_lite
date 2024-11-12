@@ -1,6 +1,5 @@
 use chrono::Utc;
 use listenbrainz::raw::Client;
-use welds::connections::sqlite::SqliteClient;
 
 use crate::api::listenbrainz::listen_collection::SaveListenPayload;
 use crate::models::listenbrainz::listen::Listen;
@@ -9,13 +8,12 @@ use crate::Error;
 impl Listen {
     /// Fetch the latest listens for the provided user. If the user has no listens, it will do a full listen fetch.
     pub async fn fetch_latest_listens_of_user(
-        client: &SqliteClient,
+        conn: &mut sqlx::SqliteConnection,
         user: &str,
     ) -> Result<(), Error> {
-        let latest_listen_ts =
-            Listen::get_latest_listen_of_user(&mut *client.as_sqlx_pool().acquire().await?, user)
-                .await?
-                .map(|v| v.listened_at);
+        let latest_listen_ts = Listen::get_latest_listen_of_user(conn, user)
+            .await?
+            .map(|v| v.listened_at);
         let mut pull_ts = Some(Utc::now().timestamp());
 
         let lb_client = Client::new();
@@ -29,8 +27,7 @@ impl Listen {
         while (latest_listen_ts.is_none() && pull_ts.is_some())
             || (latest_listen_ts.is_some_and(|a| pull_ts.is_some_and(|b| a <= b)))
         {
-            pull_ts =
-                Self::execute_listen_fetch(client, &lb_client, user, pull_ts.unwrap()).await?;
+            pull_ts = Self::execute_listen_fetch(conn, &lb_client, user, pull_ts.unwrap()).await?;
         }
 
         Ok(())
@@ -38,7 +35,7 @@ impl Listen {
 
     /// Fetch listens for the user and save them in the database
     pub async fn execute_listen_fetch(
-        client: &SqliteClient,
+        conn: &mut sqlx::SqliteConnection,
         lb_client: &Client,
         user: &str,
         max_ts: i64,
@@ -48,7 +45,7 @@ impl Listen {
         match dump {
             Ok(val) => Ok(val
                 .payload
-                .save_listen_payload_in_transaction(client, max_ts, 1000)
+                .save_listen_payload_in_transaction(conn, max_ts, 1000)
                 .await?),
 
             #[cfg(feature = "timeout_continue")]

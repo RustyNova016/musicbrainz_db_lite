@@ -1,11 +1,11 @@
-use crate::models::listenbrainz::listen::Listen;
-use crate::Error;
 use extend::ext;
 use listenbrainz::raw::response::UserListensListen;
 use listenbrainz::raw::response::UserListensPayload;
+use sqlx::Connection;
 use sqlx::SqliteConnection;
-use welds::connections::sqlite::SqliteClient;
-use welds::state::DbState;
+
+use crate::models::listenbrainz::listen::Listen;
+use crate::Error;
 
 #[ext(name = SaveListenPayload)]
 pub impl UserListensPayload {
@@ -17,7 +17,7 @@ pub impl UserListensPayload {
     #[allow(clippy::manual_async_fn)]
     fn save_listen_payload_in_transaction(
         &self,
-        client: &SqliteClient,
+        conn: &mut sqlx::SqliteConnection,
         max_ts: i64,
         count: u64,
     ) -> impl std::future::Future<Output = Result<Option<i64>, Error>> + Send {
@@ -46,7 +46,7 @@ pub impl UserListensPayload {
                 .cloned()
                 .collect::<Vec<_>>();
 
-            let mut trans = client.as_sqlx_pool().begin().await?;
+            let mut trans = conn.begin().await?;
 
             // Delete the old listens. we want to remove all the old data to not miss any removed listens
             Listen::delete_listen_range(
@@ -72,14 +72,14 @@ pub impl UserListensPayload {
 
     #[allow(clippy::manual_async_fn)]
     fn save_listens(
-        client: &mut SqliteConnection,
+        conn: &mut SqliteConnection,
         listens: Vec<UserListensListen>,
-    ) -> impl std::future::Future<Output = Result<Vec<DbState<Listen>>, Error>> + Send {
+    ) -> impl std::future::Future<Output = Result<Vec<Listen>, Error>> + Send {
         async {
             let mut result = Vec::with_capacity(1000);
 
             for listen in listens {
-                result.push(Listen::insert_api_listen(&mut *client, &listen).await?);
+                result.push(Listen::insert_api_listen(&mut *conn, &listen).await?);
             }
 
             Ok(result)

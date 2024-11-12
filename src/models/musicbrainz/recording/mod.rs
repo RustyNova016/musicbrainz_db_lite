@@ -3,15 +3,15 @@ use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use serde::Deserialize;
 use serde::Serialize;
 use sqlx::{prelude::FromRow, SqliteConnection};
-use welds::{state::DbState, WeldsModel};
 
 use crate::utils::macros::{
     artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections,
 };
 
-pub mod redirect;
+//pub mod redirect;
 pub mod relations;
 
+#[derive(Debug, Default, PartialEq, Eq, Clone, FromRow, Upsert, MainEntity)]
 #[derive(
     Debug,
     WeldsModel,
@@ -31,9 +31,7 @@ pub mod relations;
     ignore_insert_keys(id),
     ignore_update_keys(id, mbid)
 )]
-#[welds(table = "recordings")]
 pub struct Recording {
-    #[welds(primary_key)]
     pub id: i64,
     pub mbid: String,
     pub title: String,
@@ -59,15 +57,6 @@ impl crate::RowId for Recording {
 }
 
 impl Recording {
-    pub fn replace(mut row: DbState<Recording>, new: Recording) -> DbState<Self> {
-        let id = row.id;
-
-        *row = new;
-        row.id = id;
-
-        row
-    }
-
     pub fn length_as_duration(&self) -> Option<Duration> {
         self.length.and_then(|length| {
             Duration::new(length.div_euclid(1000), length.rem_euclid(1000) as u32)

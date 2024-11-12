@@ -11,9 +11,6 @@ pub enum Error {
     ListenbrainzError(#[from] listenbrainz::Error),
 
     #[error(transparent)]
-    WeldsError(#[from] welds::WeldsError),
-
-    #[error(transparent)]
     SQLxError(#[from] sqlx::Error),
 
     #[error(transparent)]
@@ -25,10 +22,4 @@ pub enum Error {
     // Temporary errors
     #[error("Tried to insert a relation that is not yet implemented")]
     RelationNotImplemented, //TODO: Remove when all relations are implemented
-}
-
-impl From<welds::connections::Error> for Error {
-    fn from(value: welds::connections::Error) -> Self {
-        Self::WeldsError(value.into())
-    }
 }

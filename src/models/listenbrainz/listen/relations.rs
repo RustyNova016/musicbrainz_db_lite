@@ -21,7 +21,7 @@ impl Listen {
             .expect("User should be in due to foreign keys");
 
         let recording_mbid =
-            MsidMapping::find_by_user_msid2(conn, user.id, &self.recording_msid).await?;
+            MsidMapping::find_by_user_msid(conn, user.id, &self.recording_msid).await?;
 
         match recording_mbid {
             None => Ok(None),
