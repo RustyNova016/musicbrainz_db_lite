@@ -1,3 +1,5 @@
+pub mod release_groups;
+use release_groups::create_release_group_tables;
 use sqlx::SqliteConnection;
 
 use artists::create_artist_tables;
@@ -21,6 +23,7 @@ pub(super) async fn generate_musicbrainz_database(
     create_artist_tables(conn).await?;
     create_recordings_tables(conn).await?;
     create_release_tables(conn).await?;
+    create_release_group_tables(conn).await?;
     create_label_tables(conn).await?;
     create_work_tables(conn).await?;
 

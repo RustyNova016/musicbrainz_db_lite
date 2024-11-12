@@ -5,6 +5,7 @@ use crate::models::musicbrainz::artist_credit::ArtistCredits;
 use crate::models::musicbrainz::release::LabelInfo;
 use crate::models::musicbrainz::release::Media;
 use crate::models::musicbrainz::release::Release;
+use crate::models::musicbrainz::release_group::ReleaseGroup;
 use crate::utils::date_utils::date_to_timestamp;
 use crate::Error;
 
@@ -45,6 +46,7 @@ impl Release {
             quality: self.quality, //TODO: Quality to string
             status: self.status,   //TODO: Status to string
             full_update_date: self.full_update_date,
+            release_group: self.release_group,
         }
     }
 
@@ -66,6 +68,12 @@ impl Release {
 
         if let Some(values) = value.label_info {
             LabelInfo::save_api_response(conn, values, new_release.id).await?;
+        }
+
+        if let Some(release_group) = value.release_group.clone() {
+            let release_group = ReleaseGroup::save_api_response(conn, release_group).await?;
+            new_release.release_group = Some(release_group.id);
+            new_release.upsert(conn).await?;
         }
 
         if let Some(relations) = value.relations {

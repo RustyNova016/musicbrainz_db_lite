@@ -1,9 +1,10 @@
-pub mod formating;
-pub mod relations;
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use serde::Deserialize;
 use serde::Serialize;
 use sqlx::FromRow;
+
+pub mod formating;
+pub mod relations;
 
 use crate::utils::macros::{
     artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections,
@@ -33,6 +34,7 @@ pub struct Release {
     pub full_update_date: Option<i64>,
 
     pub artist_credit: Option<i64>,
+    pub release_group: Option<i64>,
 }
 
 impl_redirections!(Release, "releases");

@@ -55,6 +55,7 @@ use crate::models::musicbrainz::artist::Artist;
 use crate::models::musicbrainz::label::Label;
 use crate::models::musicbrainz::recording::Recording;
 use crate::models::musicbrainz::release::Release;
+use crate::models::musicbrainz::release_group::ReleaseGroup;
 use crate::models::musicbrainz::work::Work;
 use crate::RowId;
 
@@ -65,6 +66,8 @@ impl_has_relation!(Artist, Recording, "l_artists_recordings");
 impl_reverse_has_relation!(Artist, Recording, "l_artists_recordings");
 impl_has_relation!(Artist, Release, "l_artists_releases");
 impl_reverse_has_relation!(Artist, Release, "l_artists_releases");
+impl_has_relation!(Artist, ReleaseGroup, "l_artists_release_groups");
+impl_reverse_has_relation!(Artist, ReleaseGroup, "l_artists_release_groups");
 impl_has_relation!(Artist, Work, "l_artists_works");
 impl_reverse_has_relation!(Artist, Work, "l_artists_works");
 
@@ -73,17 +76,31 @@ impl_has_relation!(Label, Recording, "l_labels_recordings");
 impl_reverse_has_relation!(Label, Recording, "l_labels_recordings");
 impl_has_relation!(Label, Release, "l_labels_releases");
 impl_reverse_has_relation!(Label, Release, "l_labels_releases");
+impl_has_relation!(Label, ReleaseGroup, "l_labels_release_groups");
+impl_reverse_has_relation!(Label, ReleaseGroup, "l_labels_release_groups");
 impl_has_relation!(Label, Work, "l_labels_works");
 impl_reverse_has_relation!(Label, Work, "l_labels_works");
 
 impl_has_relation!(Recording, Recording, "l_recordings_recordings");
 impl_has_relation!(Recording, Release, "l_recordings_releases");
 impl_reverse_has_relation!(Recording, Release, "l_recordings_releases");
+impl_has_relation!(Recording, ReleaseGroup, "l_recordings_release_groups");
+impl_reverse_has_relation!(Recording, ReleaseGroup, "l_recordings_release_groups");
 impl_has_relation!(Recording, Work, "l_recordings_works");
 impl_reverse_has_relation!(Recording, Work, "l_recordings_works");
 
 impl_has_relation!(Release, Release, "l_releases_releases");
+impl_has_relation!(Release, ReleaseGroup, "l_recordings_release_groups");
+impl_reverse_has_relation!(Release, ReleaseGroup, "l_recordings_release_groups");
 impl_has_relation!(Release, Work, "l_releases_works");
 impl_reverse_has_relation!(Release, Work, "l_releases_works");
+
+impl_has_relation!(
+    ReleaseGroup,
+    ReleaseGroup,
+    "l_release_groups_release_groups"
+);
+impl_has_relation!(ReleaseGroup, Work, "l_release_groups_works");
+impl_reverse_has_relation!(ReleaseGroup, Work, "l_release_groups_works");
 
 impl_has_relation!(Work, Work, "l_works_works");
