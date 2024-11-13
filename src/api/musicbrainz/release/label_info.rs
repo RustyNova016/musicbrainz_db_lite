@@ -14,7 +14,7 @@ impl LabelInfo {
                 id: Default::default(),
                 release: release_id,
                 catalog_number: item.catalog_number,
-                label: item.label.clone().unwrap().id,
+                label: item.label.clone().map(|l| l.id),
             };
 
             if let Some(label) = item.label {

@@ -109,7 +109,7 @@ impl crate::RowId for Track {
 pub struct LabelInfo {
     pub id: i64,
     pub catalog_number: Option<String>,
-    pub label: String,
+    pub label: Option<String>,
     pub release: i64,
 }
 

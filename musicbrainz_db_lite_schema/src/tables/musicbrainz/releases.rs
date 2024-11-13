@@ -85,8 +85,8 @@ pub(super) async fn create_release_tables(conn: &mut SqliteConnection) -> Result
             "label_infos" (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
                 `catalog_number` TEXT,
-                `label` TEXT NOT NULL REFERENCES `labels_gid_redirect` (`gid`),
-                `release` INTEGER NOT NULL REFERENCES `releases` (`id`) ON DELETE CASCADE
+                `label` TEXT REFERENCES `labels_gid_redirect` (`gid`),
+                `release` INTEGER NOT NULL REFERENCES `releases` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
             ) STRICT;
 
         CREATE INDEX IF NOT EXISTS `idx_label_infos_2` ON `label_infos` (`catalog_number`, `release`);
