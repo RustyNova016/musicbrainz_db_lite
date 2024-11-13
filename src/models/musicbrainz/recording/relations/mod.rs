@@ -1,4 +1,3 @@
-pub mod work;
 use std::collections::HashMap;
 
 use itertools::Itertools;
@@ -8,6 +7,9 @@ use crate::models::musicbrainz::release::Release;
 use crate::utils::sqlx_utils::entity_relations::{JoinCollection, JoinRelation};
 
 use super::Recording;
+
+pub mod artist;
+pub mod work;
 
 impl Recording {
     /// Get the releases of the recording, and fetch them if necessary.
