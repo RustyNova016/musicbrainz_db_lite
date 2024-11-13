@@ -46,7 +46,7 @@ impl Release {
         let joins: Vec<JoinRelation<i64, ReleaseGroup>> = sqlx::query_as(
             "
             SELECT
-                recordings.id as original_id,
+                releases.id as original_id,
                 release_groups.*
             FROM
                 release_groups
