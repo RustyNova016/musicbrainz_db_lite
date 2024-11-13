@@ -33,7 +33,7 @@ impl Release {
 
     /// Get a all the releases of a list of recordings.
     ///
-    /// ⚠️ The recordings must all be fetched before. A `debug_assert` will block in case of, but won't trigger in production
+    /// ⚠️ The releases must all be fetched before. A `debug_assert` will block in case of, but won't trigger in production
     pub async fn get_release_groups_as_batch<'r>(
         conn: &mut sqlx::SqliteConnection,
         releases: &'r [&'r Release],
@@ -46,7 +46,7 @@ impl Release {
         let joins: Vec<JoinRelation<i64, ReleaseGroup>> = sqlx::query_as(
             "
             SELECT
-                recordings.id as original_id,
+                releases.id as original_id,
                 release_groups.*
             FROM
                 release_groups

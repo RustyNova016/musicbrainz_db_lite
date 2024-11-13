@@ -4,6 +4,7 @@ use crate::{
     Error,
 };
 use musicbrainz_rs_nova::{entity::release::Release as MBRelease, Fetch};
+use sqlx::Connection;
 use sqlx::SqliteConnection;
 
 impl Release {
@@ -33,10 +34,12 @@ impl Release {
 
         match data {
             Ok(data) => {
-                let mut data = data.save(conn).await?;
-                data.reset_full_update_date(conn).await?;
+                let mut trans = conn.begin().await?;
+                let mut data = data.save(&mut trans).await?;
+                data.reset_full_update_date(&mut trans).await?;
 
-                Self::set_redirection(conn, mbid, data.id).await?;
+                Self::set_redirection(&mut trans, mbid, data.id).await?;
+                trans.commit().await?;
 
                 Ok(Some(data))
             }
