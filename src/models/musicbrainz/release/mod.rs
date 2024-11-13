@@ -3,7 +3,6 @@ use serde::Deserialize;
 use serde::Serialize;
 use sqlx::FromRow;
 
-pub mod formating;
 pub mod relations;
 
 use crate::utils::macros::{

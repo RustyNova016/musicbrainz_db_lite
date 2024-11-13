@@ -33,7 +33,7 @@ impl Release {
 
     /// Get a all the releases of a list of recordings.
     ///
-    /// ⚠️ The recordings must all be fetched before. A `debug_assert` will block in case of, but won't trigger in production
+    /// ⚠️ The releases must all be fetched before. A `debug_assert` will block in case of, but won't trigger in production
     pub async fn get_release_groups_as_batch<'r>(
         conn: &mut sqlx::SqliteConnection,
         releases: &'r [&'r Release],

@@ -2,7 +2,7 @@ use chrono::Duration;
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use serde::Deserialize;
 use serde::Serialize;
-use sqlx::{prelude::FromRow, SqliteConnection};
+use sqlx::prelude::FromRow;
 
 use crate::utils::macros::{
     artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections,
@@ -49,16 +49,5 @@ impl Recording {
         self.length.and_then(|length| {
             Duration::new(length.div_euclid(1000), length.rem_euclid(1000) as u32)
         })
-    }
-
-    /// Return a string containing the recording name and its artist credits
-    ///
-    /// Exemple: Never Gonna Give You Up by Rick Astley
-    pub async fn format_with_credits(
-        &self,
-        conn: &mut SqliteConnection,
-    ) -> Result<String, crate::Error> {
-        let credit = self.get_artist_credits_or_fetch(conn).await?.to_string();
-        Ok(format!("{} by {}", self.title, credit))
     }
 }
