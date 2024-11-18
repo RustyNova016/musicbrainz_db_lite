@@ -1,11 +1,12 @@
-pub mod fetching;
-
 use musicbrainz_rs_nova::entity::artist::Artist as MBArtist;
 use sqlx::SqliteConnection;
 
 use crate::api::SaveToDatabase;
 use crate::models::musicbrainz::artist::Artist;
 use crate::Error;
+
+pub mod browse;
+pub mod fetching;
 
 impl Artist {
     pub fn merge_api_data(self, new: MBArtist) -> Self {

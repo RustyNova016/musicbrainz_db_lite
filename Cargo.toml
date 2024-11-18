@@ -8,7 +8,8 @@ rust-version = "1.81.0"
 musicbrainz_db_lite_macros = { path = "./musicbrainz_db_lite_macros" }
 musicbrainz_db_lite_schema = { path = "./musicbrainz_db_lite_schema" }
 
-musicbrainz_rs_nova = { version = "0.8.0" }
+#musicbrainz_rs_nova = { version = "0.8.0" }
+musicbrainz_rs_nova = { branch = "fix/browse_relations", git = "https://github.com/RustyNova016/musicbrainz_rs_nova.git" }
 #musicbrainz_rs_nova = { path = "../musicbrainz_rs_nova" }
 
 async-trait = "0.1.82"
@@ -23,6 +24,7 @@ thiserror = "2.0.0"
 tracing = "0.1.40"
 itertools = "0.13.0"
 serde = "1.0.210"
+async-fn-stream = "0.2.2"
 
 
 [features]
