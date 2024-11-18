@@ -93,8 +93,8 @@ CREATE TABLE `tracks` (
 CREATE TABLE IF NOT EXISTS "label_infos" (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
                 `catalog_number` TEXT,
-                `label` TEXT NOT NULL REFERENCES `labels_gid_redirect` (`gid`),
-                `release` INTEGER NOT NULL REFERENCES `releases` (`id`) ON DELETE CASCADE
+                `label` TEXT REFERENCES `labels_gid_redirect` (`gid`),
+                `release` INTEGER NOT NULL REFERENCES `releases` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
             ) STRICT;
 CREATE TABLE `releases_gid_redirect` (
     `gid` TEXT PRIMARY KEY NOT NULL, 
