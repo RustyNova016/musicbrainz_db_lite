@@ -24,7 +24,6 @@ impl Artist {
             let mut total = 1;
 
             while (progress as i32) < total {
-                println!("Fetching offset {offset}");
                 let results = MSRecording::browse()
                     .by_artist(&self.mbid)
                     .with_artist_credits()
@@ -32,8 +31,6 @@ impl Artist {
                     .with_genres()
                     .with_isrcs()
                     .with_tags()
-                    .with_user_genres()
-                    .with_user_tags()
                     .with_area_relations()
                     .with_artist_relations()
                     .with_event_relations()
