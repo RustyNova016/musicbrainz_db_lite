@@ -5,7 +5,7 @@ use crate::Error;
 use listenbrainz::raw::response::UserListensListen;
 use sqlx::SqliteConnection;
 
-use crate::models::listenbrainz::listen_user_metadata::MessybrainzSubmission;
+use crate::models::listenbrainz::messybrainz_submission::MessybrainzSubmission;
 use crate::models::{listenbrainz::listen::Listen, musicbrainz::user::User};
 
 impl Listen {

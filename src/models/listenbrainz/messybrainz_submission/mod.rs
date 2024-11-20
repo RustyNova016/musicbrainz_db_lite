@@ -1,3 +1,4 @@
+pub mod relations;
 use macon::Builder;
 use sqlx::{Executor, Sqlite};
 

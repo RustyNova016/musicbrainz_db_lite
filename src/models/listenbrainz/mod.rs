@@ -1,3 +1,3 @@
 pub mod listen;
-pub mod listen_user_metadata;
+pub mod messybrainz_submission;
 pub mod msid_mapping;
