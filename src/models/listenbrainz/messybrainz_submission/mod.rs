@@ -1,9 +1,9 @@
-pub mod relations;
 use macon::Builder;
+use sqlx::prelude::FromRow;
 use sqlx::{Executor, Sqlite};
 
 /// The fingerprint that identify a listened recording. This is the data scrobblers send to LB to tell that the user listened to a recording
-#[derive(Debug, Builder)]
+#[derive(Debug, Builder, FromRow, Clone)]
 #[builder(Default=!)]
 pub struct MessybrainzSubmission {
     pub id: i32,
