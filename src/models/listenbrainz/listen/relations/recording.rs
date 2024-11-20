@@ -1,21 +1,21 @@
+
 use std::collections::HashMap;
 
 use itertools::Itertools;
 use sqlx::SqliteConnection;
 
-use crate::models::{
-    listenbrainz::msid_mapping::MsidMapping,
-    musicbrainz::{recording::Recording, user::User},
-};
+use crate::models::listenbrainz::listen::Listen;
+use crate::models::listenbrainz::msid_mapping::MsidMapping;
+use crate::models::musicbrainz::recording::Recording;
+use crate::models::musicbrainz::user::User;
 use crate::utils::sqlx_utils::entity_relations::{JoinCollection, JoinRelation};
-
-use super::Listen;
 
 impl Listen {
     pub async fn get_recording_or_fetch(
         &self,
         conn: &mut SqliteConnection,
     ) -> Result<Option<Recording>, crate::Error> {
+        // TODO: Convert to one SQL query
         let user = User::find_by_name(conn, &self.user)
             .await?
             .expect("User should be in due to foreign keys");
