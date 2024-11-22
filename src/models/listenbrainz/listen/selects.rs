@@ -95,6 +95,29 @@ impl Listen {
         .await
     }
 
+    /// Return the unmapped listens of the user
+    pub async fn get_unmapped_listen_of_user(
+        conn: &mut SqliteConnection,
+        user: &str,
+    ) -> Result<Vec<Listen>, sqlx::Error> {
+        sqlx::query_as!(
+            Listen,
+            "
+            SELECT 
+                listens.*
+            FROM
+                listens
+                LEFT JOIN msid_mapping ON listens.recording_msid = msid_mapping.recording_msid
+            WHERE
+                msid_mapping.recording_mbid IS NULL
+                AND 
+                LOWER(listens.user) = LOWER(?)",
+            user
+        )
+        .fetch_all(conn)
+        .await
+    }
+
     /// Get the recordings that aren't in the database but got listened by the user
     pub async fn get_unfetched_recordings_of_user(
         conn: &mut SqliteConnection,

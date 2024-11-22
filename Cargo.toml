@@ -9,7 +9,7 @@ musicbrainz_db_lite_macros = { path = "./musicbrainz_db_lite_macros" }
 musicbrainz_db_lite_schema = { path = "./musicbrainz_db_lite_schema" }
 
 #musicbrainz_rs_nova = { version = "0.8.0" }
-musicbrainz_rs_nova = { branch = "fix/browse_relations", git = "https://github.com/RustyNova016/musicbrainz_rs_nova.git" }
+musicbrainz_rs_nova = { branch = "develop", git = "https://github.com/RustyNova016/musicbrainz_rs_nova.git" }
 #musicbrainz_rs_nova = { path = "../musicbrainz_rs_nova" }
 
 async-trait = "0.1.82"
