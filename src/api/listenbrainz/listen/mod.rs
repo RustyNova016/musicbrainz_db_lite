@@ -42,16 +42,15 @@ impl Listen {
         let data = serde_json::to_string(&listen.track_metadata.additional_info)
             .expect("Crashing from serializing a serde::Value isn't possible");
 
-        let listen_db = sqlx::query_as!(
-            Listen,
-            "INSERT OR IGNORE INTO listens VALUES (NULL, ?, ?, ?, ?) RETURNING *",
-            listen.listened_at,
-            listen.user_name,
-            listen.recording_msid,
-            data
-        )
-        .fetch_one(&mut *conn)
-        .await?;
+        let listen_db = Listen {
+            id:0,
+            listened_at: listen.listened_at,
+            user:  listen.user_name.clone(),
+            recording_msid: listen.recording_msid.clone(),
+            data: Some(data)
+        };
+
+        listen_db.upsert_listen(conn).await?;
 
         Ok(listen_db)
     }
