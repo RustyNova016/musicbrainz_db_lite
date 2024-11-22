@@ -45,7 +45,7 @@ impl Recording {
         conn: &mut sqlx::SqliteConnection,
         recordings: &'r [&'r Recording],
     ) -> Result<HashMap<i64, (&'r &'r Recording, Vec<Release>)>, crate::Error> {
-        #[cfg(debug_assertions)]
+        //#[cfg(debug_assertions)]
         //Self::assert_recordings_fetched(recordings); TODO: Fix borow types
         let ids = recordings.iter().map(|r| r.id).collect_vec();
         let id_string = serde_json::to_string(&ids)?;
