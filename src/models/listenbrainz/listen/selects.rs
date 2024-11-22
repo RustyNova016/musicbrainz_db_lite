@@ -106,11 +106,10 @@ impl Listen {
             SELECT 
                 listens.*
             FROM
-                users
-                INNER JOIN listens ON users.name = listens.user
-                LEFT OUTER JOIN msid_mapping ON listens.recording_msid = msid_mapping.recording_msid
+                listens
+                LEFT JOIN msid_mapping ON listens.recording_msid = msid_mapping.recording_msid
             WHERE
-                LOWER(msid_mapping.user) = users.id
+                msid_mapping.recording_mbid IS NULL
                 AND 
                 LOWER(listens.user) = LOWER(?)",
             user
