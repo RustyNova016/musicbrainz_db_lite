@@ -27,6 +27,23 @@ impl Listen {
         // unwrap() is best combined with time zone types where the mapping can never fail like Utc.
         Utc.timestamp_opt(self.listened_at, 0).unwrap()
     }
+
+    pub async fn upsert_listen(
+        &self,
+        conn: &mut sqlx::SqliteConnection,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "INSERT OR IGNORE INTO listens VALUES (NULL, ?, ?, ?, ?)",
+            self.listened_at,
+            self.user,
+            self.recording_msid,
+            self.data
+        )
+        .execute(&mut *conn)
+        .await?;
+
+        Ok(())
+    }
 }
 
 impl RowId for Listen {
