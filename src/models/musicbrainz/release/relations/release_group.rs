@@ -38,7 +38,7 @@ impl Release {
         conn: &mut sqlx::SqliteConnection,
         releases: &'r [&'r Release],
     ) -> Result<HashMap<i64, (&'r &'r Release, Vec<ReleaseGroup>)>, crate::Error> {
-        #[cfg(debug_assertions)]
+        //#[cfg(debug_assertions)]
         //Self::assert_recordings_fetched(recordings); TODO: Fix borow types
         let ids = releases.iter().map(|r| r.id).collect_vec();
         let id_string = serde_json::to_string(&ids)?;
