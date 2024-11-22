@@ -43,11 +43,11 @@ impl Listen {
             .expect("Crashing from serializing a serde::Value isn't possible");
 
         let listen_db = Listen {
-            id:0,
+            id: 0,
             listened_at: listen.listened_at,
-            user:  listen.user_name.clone(),
+            user: listen.user_name.clone(),
             recording_msid: listen.recording_msid.clone(),
-            data: Some(data)
+            data: Some(data),
         };
 
         listen_db.upsert_listen(conn).await?;

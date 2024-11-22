@@ -29,7 +29,7 @@ impl Listen {
     }
 
     pub async fn upsert_listen(
-        & self,
+        &self,
         conn: &mut sqlx::SqliteConnection,
     ) -> Result<(), sqlx::Error> {
         sqlx::query!(
