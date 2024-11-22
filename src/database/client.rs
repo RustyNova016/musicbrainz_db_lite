@@ -1,4 +1,5 @@
 use core::str::FromStr;
+use std::fs::File;
 
 use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions};
 use sqlx::{Pool, Sqlite};
@@ -21,6 +22,15 @@ impl DBClient {
                 .acquire_timeout(Duration::from_millis(60000))
                 .connect_lazy_with(optconn),
         })
+    }
+
+    /// Create the database file and the database
+    pub async fn create_database_file(path: &str) -> Result<Self, Error> {
+        File::create_new(path).unwrap();
+        let new = Self::connect(path).await?;
+        new.create_database().await?;
+
+        Ok(new)
     }
 
     pub async fn create_database(&self) -> Result<(), Error> {
