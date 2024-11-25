@@ -21,21 +21,20 @@ impl Recording {
         self.fetch_if_incomplete(conn).await?;
 
         // Next, get all the releases
-        Ok(
-            sqlx::query_as(
-                r#"SELECT
+        Ok(sqlx::query_as(
+            r#"SELECT
                     releases.*
                 FROM
                     releases
                     INNER JOIN medias ON medias.`release` = releases.id
                     INNER JOIN tracks ON tracks.media = medias.id
-                    INNER JOIN recordings_gid_redirect ON recordings_gid_redirect.gid = tracks.recording
-                    INNER JOIN recordings ON recordings.id = recordings_gid_redirect.new_id
+                    INNER JOIN recordings ON recordings.id = tracks.recording
                 WHERE
-                    recordings.id = ?"#
-                 ).bind(self.id)
-                 .fetch_all(conn)
-                 .await?)
+                    recordings.id = ?"#,
+        )
+        .bind(self.id)
+        .fetch_all(conn)
+        .await?)
     }
 
     /// Get a all the releases of a list of recordings.
@@ -74,5 +73,45 @@ impl Recording {
         .await?;
 
         Ok(JoinCollection::from(joins).into_hashmap(recordings, |id, value| &value.id == id))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crate::database::client::DBClient;
+    use crate::models::musicbrainz::recording::Recording;
+
+    #[tokio::test]
+    #[serial_test::serial]
+    async fn should_get_release_group_from_release() {
+        let client = DBClient::connect_in_memory_and_create().await.unwrap();
+        let conn = &mut *client.connection.acquire().await.unwrap();
+
+        // Test values. Feel free to add edge cases here
+        // (Recording MBID, Release MBID)
+        let test_values = vec![(
+            "543bb836-fb00-470a-8a27-25941fe0294c",
+            "19d60a3e-0980-4ce9-bc3a-c72cb49ebd4c",
+        )];
+
+        for (left, right) in test_values {
+            let value = Recording::get_or_fetch(conn, left)
+                .await
+                .expect("Error during fetch")
+                .expect("The release should exists");
+
+            let right_value = value
+                .get_releases_or_fetch(conn)
+                .await
+                .expect("Error during fetching");
+
+            println!("{:#?}", right_value);
+
+            right_value
+                .iter()
+                .find(|r| r.mbid == right)
+                .expect("There should have a release matching the recording");
+        }
     }
 }
