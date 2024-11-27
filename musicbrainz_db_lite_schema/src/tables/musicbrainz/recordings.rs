@@ -1,5 +1,7 @@
 use sqlx::SqliteConnection;
 
+use crate::tables::triggers::after_delete_table_artist_credits::after_delete_table_artist_credits;
+
 use super::gid_redirect_tables::generate_redirect_table;
 
 pub(super) async fn create_recordings_tables(
@@ -28,8 +30,10 @@ pub(super) async fn create_recordings_tables(
     .await?;
 
     sqlx::query(&generate_redirect_table("recordings"))
-        .execute(conn)
+        .execute(&mut *conn)
         .await?;
+
+    after_delete_table_artist_credits(conn, "recordings").await?;
 
     Ok(())
 }

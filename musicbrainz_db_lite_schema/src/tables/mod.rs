@@ -1,5 +1,6 @@
 pub mod listenbrainz;
 pub mod musicbrainz;
+pub mod triggers;
 use musicbrainz::generate_musicbrainz_database;
 use sqlx::SqliteConnection;
 
