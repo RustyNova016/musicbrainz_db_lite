@@ -1,3 +1,4 @@
+pub mod selects;
 use macon::Builder;
 use sqlx::prelude::FromRow;
 use sqlx::{Executor, Sqlite};
