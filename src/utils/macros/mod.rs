@@ -67,7 +67,22 @@ macro_rules! impl_redirections {
                 .await
             }
 
-            pub async fn get_mbids_of_entity(
+            /// Return all the mbid aliases of the entity
+            pub async fn get_mbids_aliases(
+                &self,
+                conn: &mut sqlx::SqliteConnection,
+            ) -> Result<Vec<String>, sqlx::Error> {
+                sqlx::query_scalar(&format!(
+                    "SELECT gid FROM `{}_gid_redirect` WHERE new_id = ?",
+                    $entity_table_name
+                ))
+                .bind(self.id)
+                .fetch_all(conn)
+                .await
+            }
+
+            /// Return all the mbid aliases from an entity's id
+            pub async fn get_mbid_aliases_of_id(
                 conn: &mut sqlx::SqliteConnection,
                 id: i64,
             ) -> Result<Vec<String>, sqlx::Error> {
@@ -76,6 +91,20 @@ macro_rules! impl_redirections {
                     $entity_table_name
                 ))
                 .bind(id)
+                .fetch_all(conn)
+                .await
+            }
+
+            /// Return all the mbid aliases of an mbid
+            pub async fn get_mbid_aliases_of_mbid(
+                conn: &mut sqlx::SqliteConnection,
+                mbid: &str,
+            ) -> Result<Vec<String>, sqlx::Error> {
+                sqlx::query_scalar(&format!(
+                    "SELECT gid FROM `{entity}_gid_redirect` WHERE new_id = (SELECT new_id FROM `{entity}_gid_redirect` WHERE gid = ?)",
+                    entity = $entity_table_name
+                ))
+                .bind(mbid)
                 .fetch_all(conn)
                 .await
             }
