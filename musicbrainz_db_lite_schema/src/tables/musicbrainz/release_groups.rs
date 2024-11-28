@@ -1,6 +1,6 @@
 use sqlx::SqliteConnection;
 
-use crate::tables::triggers::after_delete_table_artist_credits::after_delete_table_artist_credits;
+use crate::tables::triggers::after_delete_table_artist_credits::after_update_delete_table_artist_credits;
 
 use super::gid_redirect_tables::generate_redirect_table;
 
@@ -20,7 +20,7 @@ pub(super) async fn create_release_group_tables(
                 `annotation` TEXT,
 
                 -- Foreign Keys
-                `artist_credit` INTEGER REFERENCES `artist_credits` (`id`),
+                `artist_credit` INTEGER REFERENCES `artist_credits`(`id`) ON DELETE SET NULL,
                 
                 -- Database Utils
                 `full_update_date` INTEGER CHECK(`full_update_date` > 0)
@@ -43,7 +43,7 @@ pub(super) async fn create_release_group_tables(
         .execute(&mut *conn)
         .await?;
 
-    after_delete_table_artist_credits(conn, "release_groups").await?;
+    after_update_delete_table_artist_credits(conn, "release_groups").await?;
 
     Ok(())
 }

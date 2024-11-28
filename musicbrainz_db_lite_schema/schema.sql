@@ -39,7 +39,7 @@ CREATE TABLE `recordings` (
             `full_update_date` INTEGER CHECK(`full_update_date` > 0),
 
             -- Foreign keys
-            `artist_credit` INTEGER REFERENCES `artist_credits`(`id`)
+            `artist_credit` INTEGER REFERENCES `artist_credits`(`id`) ON DELETE SET NULL
         ) STRICT;
 CREATE TABLE `recordings_gid_redirect` (
     `gid` TEXT PRIMARY KEY NOT NULL, 
@@ -62,7 +62,7 @@ CREATE TABLE `releases` (
                 `full_update_date` INTEGER,
 
                 -- Foreign Keys
-                `artist_credit` INTEGER REFERENCES `artist_credits` (`id`),
+                `artist_credit` INTEGER REFERENCES `artist_credits`(`id`) ON DELETE SET NULL,
                 `release_group` INTEGER REFERENCES `release_groups` (`id`)
             ) STRICT;
 CREATE TABLE `medias` (
@@ -111,7 +111,7 @@ CREATE TABLE `release_groups` (
                 `annotation` TEXT,
 
                 -- Foreign Keys
-                `artist_credit` INTEGER REFERENCES `artist_credits` (`id`),
+                `artist_credit` INTEGER REFERENCES `artist_credits`(`id`) ON DELETE SET NULL,
                 
                 -- Database Utils
                 `full_update_date` INTEGER CHECK(`full_update_date` > 0)
@@ -574,7 +574,6 @@ CREATE TRIGGER `trigger_after_delete_artist_credits` AFTER DELETE ON `artist_cre
         UPDATE `recordings` SET full_update_date = NULL WHERE recordings.artist_credit = OLD.id;
         UPDATE `release_groups` SET full_update_date = NULL WHERE release_groups.artist_credit = OLD.id;
         UPDATE `releases` SET full_update_date = NULL WHERE releases.artist_credit = OLD.id;
-        UPDATE `tracks` SET full_update_date = NULL WHERE tracks.artist_credit = OLD.id;
     END
 ;
 CREATE TRIGGER `trigger_after_insert_artists` AFTER INSERT ON `artists` FOR EACH ROW BEGIN
@@ -584,7 +583,12 @@ CREATE TRIGGER `trigger_after_insert_recordings` AFTER INSERT ON `recordings` FO
     INSERT INTO recordings_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
 CREATE TRIGGER `trigger_after_delete_recordings_artist_credits` AFTER DELETE ON `recordings` BEGIN
-        DELETE FROM artist_credits WHERE artist_credit.id = OLD.artist_credit;
+        DELETE FROM artist_credits WHERE artist_credits.id = OLD.artist_credit;
+    END;
+CREATE TRIGGER `trigger_after_update_recordings_artist_credit` AFTER UPDATE OF `artist_credit` ON `recordings` 
+    WHEN NEW.artist_credit != OLD.artist_credit
+    BEGIN
+        DELETE FROM artist_credits WHERE artist_credits.id = OLD.artist_credit;
     END;
 CREATE TRIGGER `trigger_after_delete_releases` AFTER DELETE ON `releases` BEGIN
             -- Clean full update date
@@ -616,10 +620,20 @@ CREATE TRIGGER `trigger_after_insert_releases` AFTER INSERT ON `releases` FOR EA
     INSERT INTO releases_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
 CREATE TRIGGER `trigger_after_delete_releases_artist_credits` AFTER DELETE ON `releases` BEGIN
-        DELETE FROM artist_credits WHERE artist_credit.id = OLD.artist_credit;
+        DELETE FROM artist_credits WHERE artist_credits.id = OLD.artist_credit;
+    END;
+CREATE TRIGGER `trigger_after_update_releases_artist_credit` AFTER UPDATE OF `artist_credit` ON `releases` 
+    WHEN NEW.artist_credit != OLD.artist_credit
+    BEGIN
+        DELETE FROM artist_credits WHERE artist_credits.id = OLD.artist_credit;
     END;
 CREATE TRIGGER `trigger_after_delete_tracks_artist_credits` AFTER DELETE ON `tracks` BEGIN
-        DELETE FROM artist_credits WHERE artist_credit.id = OLD.artist_credit;
+        DELETE FROM artist_credits WHERE artist_credits.id = OLD.artist_credit;
+    END;
+CREATE TRIGGER `trigger_after_update_tracks_artist_credit` AFTER UPDATE OF `artist_credit` ON `tracks` 
+    WHEN NEW.artist_credit != OLD.artist_credit
+    BEGIN
+        DELETE FROM artist_credits WHERE artist_credits.id = OLD.artist_credit;
     END;
 CREATE TRIGGER `trigger_after_delete_release_groups` AFTER DELETE ON `release_groups` BEGIN
             -- Clean full update date
@@ -633,7 +647,12 @@ CREATE TRIGGER `trigger_after_insert_release_groups` AFTER INSERT ON `release_gr
     INSERT INTO release_groups_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
 CREATE TRIGGER `trigger_after_delete_release_groups_artist_credits` AFTER DELETE ON `release_groups` BEGIN
-        DELETE FROM artist_credits WHERE artist_credit.id = OLD.artist_credit;
+        DELETE FROM artist_credits WHERE artist_credits.id = OLD.artist_credit;
+    END;
+CREATE TRIGGER `trigger_after_update_release_groups_artist_credit` AFTER UPDATE OF `artist_credit` ON `release_groups` 
+    WHEN NEW.artist_credit != OLD.artist_credit
+    BEGIN
+        DELETE FROM artist_credits WHERE artist_credits.id = OLD.artist_credit;
     END;
 CREATE TRIGGER `trigger_after_insert_labels` AFTER INSERT ON `labels` FOR EACH ROW BEGIN
     INSERT INTO labels_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;

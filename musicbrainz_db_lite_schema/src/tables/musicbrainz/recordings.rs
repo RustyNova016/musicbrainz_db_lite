@@ -1,6 +1,6 @@
 use sqlx::SqliteConnection;
 
-use crate::tables::triggers::after_delete_table_artist_credits::after_delete_table_artist_credits;
+use crate::tables::triggers::after_delete_table_artist_credits::after_update_delete_table_artist_credits;
 
 use super::gid_redirect_tables::generate_redirect_table;
 
@@ -22,7 +22,7 @@ pub(super) async fn create_recordings_tables(
             `full_update_date` INTEGER CHECK(`full_update_date` > 0),
 
             -- Foreign keys
-            `artist_credit` INTEGER REFERENCES `artist_credits`(`id`)
+            `artist_credit` INTEGER REFERENCES `artist_credits`(`id`) ON DELETE SET NULL
         ) STRICT;
 "#,
     )
@@ -33,7 +33,7 @@ pub(super) async fn create_recordings_tables(
         .execute(&mut *conn)
         .await?;
 
-    after_delete_table_artist_credits(conn, "recordings").await?;
+    after_update_delete_table_artist_credits(conn, "recordings").await?;
 
     Ok(())
 }

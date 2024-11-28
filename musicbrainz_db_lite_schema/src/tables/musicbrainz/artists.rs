@@ -34,7 +34,6 @@ pub(super) async fn create_artist_tables(conn: &mut SqliteConnection) -> Result<
         UPDATE `recordings` SET full_update_date = NULL WHERE recordings.artist_credit = OLD.id;
         UPDATE `release_groups` SET full_update_date = NULL WHERE release_groups.artist_credit = OLD.id;
         UPDATE `releases` SET full_update_date = NULL WHERE releases.artist_credit = OLD.id;
-        UPDATE `tracks` SET full_update_date = NULL WHERE tracks.artist_credit = OLD.id;
     END;
 
 "#,
