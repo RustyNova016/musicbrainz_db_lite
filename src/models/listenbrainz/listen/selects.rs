@@ -195,4 +195,30 @@ impl Listen {
         .fetch_all(conn)
         .await
     }
+
+    /// Fetch the listen using its unique triplet (listened_at, msid, username)
+    pub async fn get_by_unique_triplet(
+        conn: &mut sqlx::SqliteConnection,
+        listened_at: i64,
+        msid: &str,
+        username: &str,
+    ) -> Result<Option<Listen>, crate::Error> {
+        Ok(sqlx::query_as!(
+            Listen,
+            "
+                    SELECT
+                        *
+                    FROM
+                        listens
+                    WHERE
+                        listened_at = ?
+                        AND recording_msid = ?
+                        AND user = ?;",
+            listened_at,
+            msid,
+            username
+        )
+        .fetch_optional(conn)
+        .await?)
+    }
 }

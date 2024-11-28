@@ -54,4 +54,77 @@ impl Listen {
             Err(err) => Err(err)?,
         }
     }
+
+    /// Fetch a listen by it's id (listened_at, username, msid)
+    pub async fn fetch_listen_by_id(
+        conn: &mut sqlx::SqliteConnection,
+        lb_client: &Client,
+
+        listened_at: i64,
+        user: &str,
+        msid: &str,
+
+        max_count: i64,
+    ) -> Result<Option<Listen>, crate::Error> {
+        let mut fetch_count = max_count;
+
+        while fetch_count != 0 {
+            let dump = lb_client.user_listens(
+                user,
+                None,
+                Some(listened_at + 1),
+                Some(fetch_count.try_into().unwrap()),
+            );
+
+            match dump {
+                Ok(results) => {
+                    // Save the listens
+                    results
+                        .payload
+                        .save_listen_payload_in_transaction(conn, listened_at + 1, fetch_count.try_into().unwrap())
+                        .await?;
+
+                    return Listen::get_by_unique_triplet(conn, listened_at, msid, user).await;
+                }
+
+                #[cfg(feature = "timeout_continue")]
+                Err(listenbrainz::Error::Http(_err)) => fetch_count = fetch_count.div_euclid(2),
+
+                #[cfg(not(feature = "timeout_continue"))]
+                Err(listenbrainz::Error::Http(_err)) => Err(crate::Error::ListenFetchingTimeout)?,
+
+                Err(err) => Err(err)?,
+            }
+        }
+
+        Err(crate::Error::ListenFetchingTimeout)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use listenbrainz::raw::Client;
+
+    use crate::database::client::DBClient;
+    use crate::models::listenbrainz::listen::Listen;
+
+    #[tokio::test]
+    #[serial_test::serial]
+    async fn should_fetch_listen_by_triplet() {
+        let client = DBClient::connect_in_memory_and_create().await.unwrap();
+        let conn = &mut *client.connection.acquire().await.unwrap();
+        let lb_client = Client::new();
+
+        // Test values. Feel free to add edge cases here
+        // (Recording MBID, Release MBID)
+        let test_values = vec![(
+            1732782032,
+            "RustyNova",
+            "346532b6-dbec-4685-b20d-56a0257b351c"
+        )];
+
+        for (listened_at, user, msid) in test_values {
+            Listen::fetch_listen_by_id(conn, &lb_client, listened_at, user, msid, 100).await.unwrap().unwrap();
+        }
+    }
 }
