@@ -24,7 +24,6 @@ impl MessybrainzSubmission {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use listenbrainz::raw::Client;
@@ -44,13 +43,22 @@ mod tests {
         let test_values = vec![(
             1732782032,
             "RustyNova",
-            "346532b6-dbec-4685-b20d-56a0257b351c"
+            "346532b6-dbec-4685-b20d-56a0257b351c",
         )];
 
         for (listened_at, user, msid) in test_values {
-            let base_listen = Listen::fetch_listen_by_id(conn, &lb_client, listened_at, user, msid, 100).await.unwrap().unwrap();
-            
-            let listens = MessybrainzSubmission::get_listens_of_msid(conn, "346532b6-dbec-4685-b20d-56a0257b351c").await.unwrap();
+            let base_listen =
+                Listen::fetch_listen_by_id(conn, &lb_client, listened_at, user, msid, 100)
+                    .await
+                    .unwrap()
+                    .unwrap();
+
+            let listens = MessybrainzSubmission::get_listens_of_msid(
+                conn,
+                "346532b6-dbec-4685-b20d-56a0257b351c",
+            )
+            .await
+            .unwrap();
 
             assert!(listens.contains(&base_listen));
         }

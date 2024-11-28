@@ -10,7 +10,7 @@ use crate::Error;
 #[ext(name = SaveListenPayload)]
 pub impl UserListensPayload {
     /// Save the listens received from the api. Handles deleting the listens, and overlapping ends.
-    /// 
+    ///
     /// `max_ts` __must__ be the same as the one used to queery the api
     ///
     /// ⚠️ May not insert all the listens if the recieved count is equal to the asked count ⚠️
