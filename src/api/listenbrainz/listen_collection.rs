@@ -11,6 +11,8 @@ use crate::Error;
 pub impl UserListensPayload {
     /// Save the listens received from the api. Handles deleting the listens, and overlapping ends.
     ///
+    /// `max_ts` __must__ be the same as the one used to queery the api
+    ///
     /// ⚠️ May not insert all the listens if the recieved count is equal to the asked count ⚠️
     ///
     /// Return the timestamp for the next fetch in sequence
@@ -95,7 +97,7 @@ pub impl UserListensPayload {
 /// Returns a tuple of `(higher bound, lower bound)`
 fn get_deletion_range_for_limit(res: &UserListensPayload, max_ts: i64) -> (i64, i64) {
     (
-        max_ts - 1,
+        max_ts,
         res.listens.iter().map(|l| l.listened_at).min().unwrap_or(0),
     )
 }
@@ -104,7 +106,7 @@ fn get_deletion_range_for_limit(res: &UserListensPayload, max_ts: i64) -> (i64, 
 /// Returns a tuple of `(higher bound, lower bound)`
 fn get_deletion_range_for_part(res: &UserListensPayload, max_ts: i64) -> (i64, i64) {
     (
-        max_ts - 1,
+        max_ts,
         res.listens.iter().map(|l| l.listened_at).min().unwrap_or(0) + 1,
     )
 }

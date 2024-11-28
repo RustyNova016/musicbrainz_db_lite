@@ -1,7 +1,9 @@
-pub mod selects;
 use macon::Builder;
 use sqlx::prelude::FromRow;
 use sqlx::{Executor, Sqlite};
+
+pub mod relations;
+pub mod selects;
 
 /// The fingerprint that identify a listened recording. This is the data scrobblers send to LB to tell that the user listened to a recording
 #[derive(Debug, Builder, FromRow, Clone)]

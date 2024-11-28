@@ -22,4 +22,8 @@ pub enum Error {
     // Temporary errors
     #[error("Tried to insert a relation that is not yet implemented")]
     RelationNotImplemented, //TODO: Remove when all relations are implemented
+
+    // Fetching Errors
+    #[error("Fetching a listen from Listenbrainz resulted in timeout")]
+    ListenFetchingTimeout,
 }
