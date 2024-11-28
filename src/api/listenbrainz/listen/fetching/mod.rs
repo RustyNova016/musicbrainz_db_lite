@@ -116,7 +116,6 @@ mod tests {
         let lb_client = Client::new();
 
         // Test values. Feel free to add edge cases here
-        // (Recording MBID, Release MBID)
         let test_values = vec![(
             1732782032,
             "RustyNova",
