@@ -1,3 +1,4 @@
+use crate::models::shared_traits::HasMBID;
 use crate::RowId;
 
 use super::artist::Artist;
@@ -7,12 +8,21 @@ use super::release::Release;
 use super::work::Work;
 
 /// Contain any of the main entities
+#[derive(Debug, PartialEq, Eq)]
 pub enum MainEntity {
     Artist(Artist),
     Label(Label),
     Recording(Recording),
     Release(Release),
     Work(Work),
+}
+
+impl MainEntity {
+    /// Return true if the two enums have the same discriminant and the same MBID
+    pub fn is_equal_by_mbid(&self, other: &Self) -> bool {
+        std::mem::discriminant(self) == std::mem::discriminant(other)
+            && self.get_mbid() == other.get_mbid()
+    }
 }
 
 impl RowId for MainEntity {
@@ -23,6 +33,18 @@ impl RowId for MainEntity {
             Self::Recording(val) => val.get_row_id(),
             Self::Release(val) => val.get_row_id(),
             Self::Work(val) => val.get_row_id(),
+        }
+    }
+}
+
+impl HasMBID for MainEntity {
+    fn get_mbid(&self) -> &str {
+        match self {
+            Self::Artist(val) => val.get_mbid(),
+            Self::Label(val) => val.get_mbid(),
+            Self::Recording(val) => val.get_mbid(),
+            Self::Release(val) => val.get_mbid(),
+            Self::Work(val) => val.get_mbid(),
         }
     }
 }
