@@ -29,6 +29,12 @@ pub fn derive_main_entity_impl(item: TokenStream) -> TokenStream {
 
                     #selects
                 }
+
+                impl crate::models::shared_traits::HasMBID for #struct_identifier {
+                    fn get_mbid(&self) -> &str {
+                        &self.mbid
+                    }
+                }
             }
         }
         _ => unimplemented!(),

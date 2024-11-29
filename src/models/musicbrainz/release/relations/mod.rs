@@ -1,3 +1,4 @@
+pub mod recording;
 use sqlx::SqliteConnection;
 
 use super::{LabelInfo, Media, Release};
