@@ -14,9 +14,9 @@ pub(super) async fn create_release_group_tables(
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
                 `title` TEXT NOT NULL,
                 `mbid` TEXT UNIQUE NOT NULL,
+                `disambiguation` TEXT NOT NULL,
                 `primary_type_id` TEXT,
                 `first_release_date` INTEGER,
-                `disambiguation` TEXT,
                 `annotation` TEXT,
 
                 -- Foreign Keys
