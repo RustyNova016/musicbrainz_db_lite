@@ -21,7 +21,7 @@ pub(super) async fn create_release_tables(conn: &mut SqliteConnection) -> Result
                 `packaging` TEXT,
                 `annotation` TEXT,
 
-                `full_update_date` INTEGER,
+                `full_update_date` INTEGER CHECK(`full_update_date` > 0),
 
                 -- Foreign Keys
                 `artist_credit` INTEGER REFERENCES `artist_credits`(`id`) ON DELETE SET NULL,

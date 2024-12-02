@@ -59,7 +59,7 @@ CREATE TABLE `releases` (
                 `packaging` TEXT,
                 `annotation` TEXT,
 
-                `full_update_date` INTEGER,
+                `full_update_date` INTEGER CHECK(`full_update_date` > 0),
 
                 -- Foreign Keys
                 `artist_credit` INTEGER REFERENCES `artist_credits`(`id`) ON DELETE SET NULL,
@@ -105,9 +105,9 @@ CREATE TABLE `release_groups` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
                 `title` TEXT NOT NULL,
                 `mbid` TEXT UNIQUE NOT NULL,
+                `disambiguation` TEXT NOT NULL,
                 `primary_type_id` TEXT,
                 `first_release_date` INTEGER,
-                `disambiguation` TEXT,
                 `annotation` TEXT,
 
                 -- Foreign Keys
