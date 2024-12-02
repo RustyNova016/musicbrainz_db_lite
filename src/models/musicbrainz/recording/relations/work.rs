@@ -23,7 +23,7 @@ impl Recording {
                     works.*
                 FROM
                     works
-                    INNER JOIN l_releases_works as rel ON works.id = rel.entity1
+                    INNER JOIN l_recordings_works as rel ON works.id = rel.entity1
                     INNER JOIN recordings ON rel.entity0 = recordings.id
                 WHERE
                     recordings.id = ?"#,
@@ -68,5 +68,47 @@ impl Recording {
         .await?;
 
         Ok(JoinCollection::from(joins).into_hashmap(recordings, |id, value| &value.id == id))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::database::client::DBClient;
+    use crate::models::musicbrainz::recording::Recording;
+    use crate::utils::tests::RelationAssertion;
+
+    #[tokio::test]
+    #[serial_test::serial]
+    async fn should_get_recordings_from_release() {
+        let client = DBClient::connect_in_memory_and_create().await.unwrap();
+        let conn = &mut *client.connection.acquire().await.unwrap();
+
+        // Test values. Feel free to add edge cases here
+        // (Release, Recording)
+        let test_values = vec![RelationAssertion {
+            left_id: "0e12c33d-20f8-4daa-97ac-5ec21411c1b0",
+            right_id: "2dceb174-32cc-471c-ac0a-fc237bb9f257",
+        }];
+
+        for assertion in &test_values {
+            let value = Recording::get_or_fetch(conn, assertion.left_id)
+                .await
+                .expect("Error during fetch")
+                .expect("The recording should exists");
+
+            let right_values = value
+                .get_works_or_fetch(conn)
+                .await
+                .expect("Error during fetching");
+
+            assertion.assert_has_element_with_mbid(&right_values);
+
+            let var_name = vec![&value];
+            let right_values = Recording::get_works_as_batch(conn, &var_name)
+                .await
+                .expect("Error during fetching");
+
+            RelationAssertion::assert_batch_join_has_relation(&test_values, &right_values);
+        }
     }
 }
