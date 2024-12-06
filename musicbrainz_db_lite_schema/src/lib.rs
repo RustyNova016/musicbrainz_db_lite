@@ -79,9 +79,12 @@ mod tests {
         create_and_migrate(&mut conn).await.unwrap();
 
         // Database has been migrated. Let's check that it's up to par with the main one
-        // ... But first, we need to drop _sqlx_migrations. While migrating this table is auotmatically created, 
+        // ... But first, we need to drop _sqlx_migrations. While migrating this table is auotmatically created,
         // but we don't want it in our public schema
-        sqlx::query("DROP TABLE _sqlx_migrations").execute(&mut *conn).await.unwrap();
+        sqlx::query("DROP TABLE _sqlx_migrations")
+            .execute(&mut *conn)
+            .await
+            .unwrap();
         let schema = get_database_schema("./migration_test.db");
 
         let main_schema = load_schema_sql(PathBuf::from_str("./schema.sql").unwrap());
