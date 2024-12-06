@@ -13,16 +13,19 @@ pub struct DBClient {
 }
 
 impl DBClient {
+    /// Connect to a database file. It will also create/migrate the schema on load
     pub async fn connect(path: &str) -> Result<DBClient, Error> {
         let optconn = SqliteConnectOptions::from_str(&format!("sqlite:{}", path))?
             .journal_mode(SqliteJournalMode::Wal)
             .busy_timeout(Duration::from_millis(60000));
 
-        Ok(Self {
-            connection: SqlitePoolOptions::new()
-                .acquire_timeout(Duration::from_millis(60000))
-                .connect_lazy_with(optconn),
-        })
+        let connection = SqlitePoolOptions::new()
+            .acquire_timeout(Duration::from_millis(60000))
+            .connect_lazy_with(optconn);
+
+        musicbrainz_db_lite_schema::create_and_migrate(&mut *connection.acquire().await?).await?;
+
+        Ok(Self { connection })
     }
 
     /// Create the database file and the database

@@ -24,16 +24,6 @@ CREATE TABLE IF NOT EXISTS `messybrainz_submission` (
     `duration` INTEGER
 ) STRICT;
 
-
-
-
-
-CREATE TABLE IF NOT EXISTS `metadata` (
-    schema_version INTEGER NOT NULL
-) STRICT;
-
---INSERT INTO `metadata` VALUES (1); 
-
 PRAGMA foreign_keys = ON;"#,
     )
     .execute(conn)
