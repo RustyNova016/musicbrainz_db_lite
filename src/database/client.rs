@@ -35,7 +35,8 @@ impl DBClient {
     }
 
     pub async fn create_database(&self) -> Result<(), Error> {
-        musicbrainz_db_lite_schema::create_database(&mut *self.connection.acquire().await?).await?;
+        musicbrainz_db_lite_schema::create_and_migrate(&mut *self.connection.acquire().await?)
+            .await?;
 
         Ok(())
     }

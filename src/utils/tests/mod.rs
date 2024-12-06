@@ -26,7 +26,7 @@ impl RelationAssertion<'_> {
                 continue;
             };
 
-            assertion.assert_has_element_with_mbid(&right);
+            assertion.assert_has_element_with_mbid(right);
         }
     }
 }

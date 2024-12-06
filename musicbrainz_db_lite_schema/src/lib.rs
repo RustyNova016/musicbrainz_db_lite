@@ -15,6 +15,7 @@ pub async fn create_and_migrate(conn: &mut sqlx::SqliteConnection) -> Result<(),
 /// Create the latest version of the database, and isn't meant to be used for production.
 ///
 /// See `create_and_migrate` to create the database / update it when needed
+#[allow(dead_code)] // It cannot see that it is used in the test below
 async fn create_latest_database(conn: &mut sqlx::SqliteConnection) -> Result<(), sqlx::Error> {
     let mut trans: sqlx::Transaction<'_, sqlx::Sqlite> = conn.begin().await?;
 
