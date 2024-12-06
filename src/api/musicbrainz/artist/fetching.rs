@@ -57,7 +57,7 @@ impl Artist {
 
 #[cfg(test)]
 mod tests {
-    use musicbrainz_db_lite_schema::create_database;
+    use musicbrainz_db_lite_schema::create_and_migrate;
 
     use crate::database::client::DBClient;
     use crate::models::musicbrainz::artist::Artist;
@@ -67,7 +67,7 @@ mod tests {
     async fn should_insert_artist() {
         let client = DBClient::connect_in_memory().await.unwrap();
         let conn = &mut *client.connection.acquire().await.unwrap();
-        create_database(conn).await.unwrap();
+        create_and_migrate(conn).await.unwrap();
 
         // Test values. Feel free to add edge cases here
         let test_values = vec![

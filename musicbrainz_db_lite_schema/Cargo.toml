@@ -1,6 +1,6 @@
 [package]
 name = "musicbrainz_db_lite_schema"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Schema generator for musicbrainz_db_lite"
 rust-version = "1.81.0"
@@ -12,3 +12,4 @@ tokio = { version = "1.40.0", features = ["full"] }
 
 [dev-dependencies]
 serial_test = "3.1.1"
+text-diff = "0.4.0"

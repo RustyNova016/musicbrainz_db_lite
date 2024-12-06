@@ -16,6 +16,9 @@ pub enum Error {
     #[error(transparent)]
     SerdeJsonError(#[from] serde_json::Error),
 
+    #[error(transparent)]
+    MigrationError(#[from] sqlx::migrate::MigrateError),
+
     #[error("The MBID {0} wasn't found in Musicbrainz, but found in the local database. Hint: The upstream MBID might have been deleted")]
     UnknownUpstream(String),
 
