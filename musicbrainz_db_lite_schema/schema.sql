@@ -547,9 +547,6 @@ CREATE TABLE `messybrainz_submission` (
     `track_number` TEXT,
     `duration` INTEGER
 ) STRICT;
-CREATE TABLE `metadata` (
-    schema_version INTEGER NOT NULL
-) STRICT;
 CREATE TABLE IF NOT EXISTS "msid_mapping" (
             `id` INTEGER PRIMARY KEY NOT NULL,
 

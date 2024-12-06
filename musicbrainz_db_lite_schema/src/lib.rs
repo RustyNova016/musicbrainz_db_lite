@@ -42,8 +42,6 @@ mod tests {
     use crate::testing::load_schema_sql;
     use crate::testing::setup_database_file;
 
-    #[tokio::test]
-    #[serial_test::serial]
     async fn should_generate_schema() {
         // Set up db file
         setup_database_file("./schema.db");
@@ -71,6 +69,9 @@ mod tests {
     #[tokio::test]
     #[serial_test::serial]
     async fn should_migrate_schema() {
+        // Test generation first
+        should_generate_schema().await;
+
         // Set up db file
         setup_database_file("./migration_test.db");
         let db = sqlx::SqlitePool::connect_lazy("sqlite:./migration_test.db").unwrap();
