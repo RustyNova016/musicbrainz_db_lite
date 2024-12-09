@@ -37,10 +37,10 @@ pub fn setup_database_file(path: &str) {
 
 pub fn get_schema_diff(dba_path: &str, dbb_path: &str) -> String {
     let out = Command::new("sqldiff")
-    .arg(dba_path)
-    .arg(dbb_path)
-    .output()
-    .unwrap();
+        .arg(dba_path)
+        .arg(dbb_path)
+        .output()
+        .unwrap();
 
-String::from_utf8(out.stdout).unwrap()
+    String::from_utf8(out.stdout).unwrap()
 }

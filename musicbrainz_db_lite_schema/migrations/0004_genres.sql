@@ -64,3 +64,10 @@ CREATE TABLE `works_genre` (
                 `work` INTEGER NOT NULL REFERENCES `works`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
             ) STRICT;
 CREATE UNIQUE INDEX `unique_genre_for_work` ON `works_genre` (`name`, `work`);
+
+UPDATE `artists` SET `full_update_date` = NULL;
+UPDATE `labels` SET `full_update_date` = NULL;
+UPDATE `recordings` SET `full_update_date` = NULL;
+UPDATE `releases` SET `full_update_date` = NULL;
+UPDATE `release_groups` SET `full_update_date` = NULL;
+UPDATE `works` SET `full_update_date` = NULL;

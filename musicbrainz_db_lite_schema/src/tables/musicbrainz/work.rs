@@ -29,8 +29,8 @@ pub(super) async fn create_work_tables(conn: &mut SqliteConnection) -> Result<()
         .execute(&mut *conn)
         .await?;
 
-        create_tag_tables(conn, "work", "works").await?;
-        create_genre_tables(conn, "work", "works").await?;
+    create_tag_tables(conn, "work", "works").await?;
+    create_genre_tables(conn, "work", "works").await?;
 
     Ok(())
 }

@@ -1,7 +1,7 @@
 pub(super) async fn create_tag_tables(
     conn: &mut sqlx::SqliteConnection,
     field_name: &str,
-    parent_table_name: &str, 
+    parent_table_name: &str,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         &format!(r#"

@@ -79,13 +79,13 @@ mod tests {
         // Database has been migrated. Let's check that it's up to par with the main one
         // ... But first, we need to drop _sqlx_migrations. While migrating this table is automatically created,
         // but we don't want it in our public schema
-        sqlx::query("DROP TABLE _sqlx_migrations") 
+        sqlx::query("DROP TABLE _sqlx_migrations")
             .execute(&mut *conn)
             .await
             .unwrap();
 
-            let migrated_schema = get_database_schema("./migration_test.db");
-        
+        let migrated_schema = get_database_schema("./migration_test.db");
+
         let diffs = get_schema_diff("./migration_test.db", "./schema.db");
 
         if !diffs.is_empty() {
@@ -94,7 +94,6 @@ mod tests {
             write!(file, "{}", migrated_schema).unwrap();
 
             panic!("\nThe migration schema hasn't been updated properly! SQLDiff output (Missing in migration): \n\n{}", diffs)
-
         }
     }
 }
