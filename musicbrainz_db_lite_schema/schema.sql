@@ -156,6 +156,19 @@ CREATE TABLE `works_gid_redirect` (
     `new_id` TEXT REFERENCES `works`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
+CREATE TABLE `tag` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER
+            ) STRICT;
+CREATE TABLE `genre` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `mbid` TEXT,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER
+            ) STRICT;
 CREATE TABLE `l_artists_artists` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
         `type_id` TEXT NOT NULL,
@@ -657,6 +670,8 @@ END;
 CREATE TRIGGER `trigger_after_insert_works` AFTER INSERT ON `works` FOR EACH ROW BEGIN
     INSERT INTO works_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
+CREATE INDEX `idx_tag` ON `tag` (`name`);
+CREATE INDEX `idx_genre` ON `genre` (`name`);
 CREATE UNIQUE INDEX `msid_mapping_unique_mapping` ON `msid_mapping` (`recording_msid`, `user`);
 CREATE UNIQUE INDEX `idx_listens` ON `listens` (`listened_at`, `user`, `recording_msid`);
 COMMIT;
