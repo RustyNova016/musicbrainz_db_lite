@@ -52,6 +52,7 @@ macro_rules! impl_reverse_has_relation {
 pub(crate) use impl_reverse_has_relation;
 
 use crate::models::musicbrainz::artist::Artist;
+use crate::models::musicbrainz::genre::Genre;
 use crate::models::musicbrainz::label::Label;
 use crate::models::musicbrainz::recording::Recording;
 use crate::models::musicbrainz::release::Release;
@@ -60,6 +61,8 @@ use crate::models::musicbrainz::work::Work;
 use crate::RowId;
 
 impl_has_relation!(Artist, Artist, "l_artists_artists");
+impl_has_relation!(Artist, Genre, "l_artists_genres");
+impl_reverse_has_relation!(Artist, Genre, "l_artists_genres");
 impl_has_relation!(Artist, Label, "l_artists_labels");
 impl_reverse_has_relation!(Artist, Label, "l_artists_labels");
 impl_has_relation!(Artist, Recording, "l_artists_recordings");
@@ -70,6 +73,18 @@ impl_has_relation!(Artist, ReleaseGroup, "l_artists_release_groups");
 impl_reverse_has_relation!(Artist, ReleaseGroup, "l_artists_release_groups");
 impl_has_relation!(Artist, Work, "l_artists_works");
 impl_reverse_has_relation!(Artist, Work, "l_artists_works");
+
+impl_has_relation!(Genre, Genre, "l_genres_genres");
+impl_has_relation!(Genre, Label, "l_genres_labels");
+impl_reverse_has_relation!(Genre, Label, "l_genres_labels");
+impl_has_relation!(Genre, Recording, "l_genres_recordings");
+impl_reverse_has_relation!(Genre, Recording, "l_genres_recordings");
+impl_has_relation!(Genre, Release, "l_genres_releases");
+impl_reverse_has_relation!(Genre, Release, "l_genres_releases");
+impl_has_relation!(Genre, ReleaseGroup, "l_genres_release_groups");
+impl_reverse_has_relation!(Genre, ReleaseGroup, "l_genres_release_groups");
+impl_has_relation!(Genre, Work, "l_genres_works");
+impl_reverse_has_relation!(Genre, Work, "l_genres_works");
 
 impl_has_relation!(Label, Label, "l_labels_labels");
 impl_has_relation!(Label, Recording, "l_labels_recordings");

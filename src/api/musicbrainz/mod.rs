@@ -1,5 +1,6 @@
 pub mod artist;
 pub mod artist_credits;
+pub mod genre;
 pub mod label;
 pub mod recording;
 pub mod relation;

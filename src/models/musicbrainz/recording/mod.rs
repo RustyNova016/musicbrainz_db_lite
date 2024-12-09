@@ -4,6 +4,7 @@ use serde::Deserialize;
 use serde::Serialize;
 use sqlx::prelude::FromRow;
 
+use crate::models::shared_traits::has_genre::HasGenres;
 use crate::models::shared_traits::has_table::HasTable;
 use crate::models::shared_traits::has_tags::HasTags;
 use crate::utils::macros::{
@@ -60,3 +61,4 @@ impl HasTable for Recording {
 }
 
 impl HasTags for Recording {}
+impl HasGenres for Recording {}

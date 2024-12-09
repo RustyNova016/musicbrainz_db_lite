@@ -18,6 +18,21 @@ macro_rules! impl_save_relation {
                         )
                         .await?;
                     }
+                    // musicbrainz_rs does not support genre relations yet. TODO!
+                    // musicbrainz_rs_nova::entity::relations::RelationContent::Genre(value) => {
+                    //     let entity1 = crate::models::musicbrainz::genre::Genre::save_api_response(
+                    //         conn, *value,
+                    //     )
+                    //     .await?;
+
+                    //     crate::models::musicbrainz::relations::Relation::save_api_response_inner(
+                    //         conn,
+                    //         api_relation,
+                    //         self,
+                    //         &entity1,
+                    //     )
+                    //     .await?;
+                    // }
                     musicbrainz_rs_nova::entity::relations::RelationContent::Label(value) => {
                         let entity1 = crate::models::musicbrainz::label::Label::save_api_response(
                             conn, *value,

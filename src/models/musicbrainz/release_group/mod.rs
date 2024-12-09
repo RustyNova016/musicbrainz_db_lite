@@ -2,6 +2,7 @@ pub mod relations;
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use sqlx::FromRow;
 
+use crate::models::shared_traits::has_genre::HasGenres;
 use crate::models::shared_traits::has_table::HasTable;
 use crate::models::shared_traits::has_tags::HasTags;
 use crate::utils::macros::artist_credits::impl_artist_credits;
@@ -45,3 +46,4 @@ impl HasTable for ReleaseGroup {
 }
 
 impl HasTags for ReleaseGroup {}
+impl HasGenres for ReleaseGroup {}

@@ -1,3 +1,4 @@
+use genre::create_genre_table;
 use release_groups::create_release_group_tables;
 use sqlx::SqliteConnection;
 
@@ -23,6 +24,7 @@ pub(super) async fn generate_musicbrainz_database(
     conn: &mut SqliteConnection,
 ) -> Result<(), sqlx::Error> {
     create_artist_tables(conn).await?;
+    create_genre_table(conn).await?;
     create_recordings_tables(conn).await?;
     create_release_tables(conn).await?;
     create_release_group_tables(conn).await?;

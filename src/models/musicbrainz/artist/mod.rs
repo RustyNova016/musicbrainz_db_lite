@@ -1,6 +1,7 @@
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use sqlx::prelude::FromRow;
 
+use crate::models::shared_traits::has_genre::HasGenres;
 use crate::models::shared_traits::has_table::HasTable;
 use crate::models::shared_traits::has_tags::HasTags;
 use crate::utils::macros::{get_and_fetch::impl_get_and_fetch, impl_redirections};
@@ -39,3 +40,4 @@ impl HasTable for Artist {
 }
 
 impl HasTags for Artist {}
+impl HasGenres for Artist {}

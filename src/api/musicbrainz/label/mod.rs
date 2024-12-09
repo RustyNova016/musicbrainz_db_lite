@@ -1,5 +1,7 @@
 pub mod fetching;
 
+use crate::models::musicbrainz::genre::genre_tag::GenreTag;
+use crate::models::musicbrainz::tags::Tag;
 use crate::models::musicbrainz::{label::Label, release::Release};
 use crate::Error;
 use musicbrainz_rs_nova::entity::label::Label as MBLabel;
@@ -59,6 +61,18 @@ impl Label {
                         Err(err)?;
                     }
                 }
+            }
+        }
+
+        if let Some(tags) = value.tags {
+            for tag in tags {
+                Tag::save_api_response::<Self>(conn, tag, &new_value).await?;
+            }
+        }
+
+        if let Some(genres) = value.genres {
+            for genre in genres {
+                GenreTag::save_api_response::<Self>(conn, genre, &new_value).await?;
             }
         }
 

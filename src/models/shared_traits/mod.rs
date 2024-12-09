@@ -1,3 +1,4 @@
+pub mod has_genre;
 pub mod has_table;
 pub mod has_tags;
 

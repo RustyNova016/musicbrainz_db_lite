@@ -1,57 +1,47 @@
-use sqlx::prelude::FromRow;
+use sqlx::FromRow;
 
-use crate::models::shared_traits::has_tags::HasTags;
-use crate::RowId;
+use crate::models::shared_traits::has_genre::HasGenres;
 
 #[derive(PartialEq, Eq, Debug, Clone, FromRow)]
-pub struct Tag {
+pub struct GenreTag {
     pub id: i64,
-    pub name: String,
     pub count: Option<i64>,
-    pub score: Option<i64>,
+
+    pub genre: i64,
 }
 
-impl Tag {
-    pub async fn upsert<T: HasTags>(
+impl GenreTag {
+    pub async fn upsert<T: HasGenres>(
         &mut self,
         conn: &mut sqlx::SqliteConnection,
         foreign_key: i64,
     ) -> Result<(), crate::Error> {
-        let returned: Tag = sqlx::query_as(&format!(
+        let returned = sqlx::query_as(&format!(
             "
         INSERT INTO
-            `{}_tag` (
-                `name`,
+            `{}_genre` (
                 `count`,
-                `score`,
-                `{}`
+                `{}`,
+                `genre`
             )
         VALUES
-            (?, ?, ?, ?)
+            (?, ?, ?)
         ON CONFLICT DO
         UPDATE
         SET
-            `count` = excluded.`count`,
-            `score` = excluded.`score`
+            `count` = excluded.`count`
         RETURNING *;",
             T::TABLE_NAME,
             T::FOREIGN_FIELD_NAME
         ))
-        .bind(&self.name)
         .bind(self.count)
-        .bind(self.score)
         .bind(foreign_key)
+        .bind(self.genre)
         .fetch_one(conn)
         .await?;
 
         *self = returned;
 
         Ok(())
-    }
-}
-
-impl RowId for Tag {
-    fn get_row_id(&self) -> i64 {
-        self.id
     }
 }

@@ -2,6 +2,7 @@ use musicbrainz_rs_nova::entity::release::Release as MBRelease;
 use sqlx::SqliteConnection;
 
 use crate::models::musicbrainz::artist_credit::ArtistCredits;
+use crate::models::musicbrainz::genre::genre_tag::GenreTag;
 use crate::models::musicbrainz::release::LabelInfo;
 use crate::models::musicbrainz::release::Media;
 use crate::models::musicbrainz::release::Release;
@@ -92,6 +93,12 @@ impl Release {
         if let Some(tags) = value.tags {
             for tag in tags {
                 Tag::save_api_response::<Self>(conn, tag, &new_value).await?;
+            }
+        }
+
+        if let Some(genres) = value.genres {
+            for genre in genres {
+                GenreTag::save_api_response::<Self>(conn, genre, &new_value).await?;
             }
         }
 

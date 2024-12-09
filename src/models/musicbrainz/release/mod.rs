@@ -5,6 +5,7 @@ use sqlx::FromRow;
 
 pub mod relations;
 
+use crate::models::shared_traits::has_genre::HasGenres;
 use crate::models::shared_traits::has_table::HasTable;
 use crate::models::shared_traits::has_tags::HasTags;
 use crate::utils::macros::{
@@ -127,3 +128,4 @@ impl HasTable for Release {
 }
 
 impl HasTags for Release {}
+impl HasGenres for Release {}
