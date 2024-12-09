@@ -5,6 +5,8 @@ use sqlx::FromRow;
 
 pub mod relations;
 
+use crate::models::shared_traits::has_table::HasTable;
+use crate::models::shared_traits::has_tags::HasTags;
 use crate::utils::macros::{
     artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections,
 };
@@ -118,3 +120,10 @@ impl crate::RowId for LabelInfo {
         self.id
     }
 }
+
+impl HasTable for Release {
+    const TABLE_NAME: &str = "releases";
+    const FOREIGN_FIELD_NAME: &str = "release";
+}
+
+impl HasTags for Release {}

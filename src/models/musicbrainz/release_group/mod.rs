@@ -2,6 +2,8 @@ pub mod relations;
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use sqlx::FromRow;
 
+use crate::models::shared_traits::has_table::HasTable;
+use crate::models::shared_traits::has_tags::HasTags;
 use crate::utils::macros::artist_credits::impl_artist_credits;
 use crate::utils::macros::get_and_fetch::impl_get_and_fetch;
 use crate::utils::macros::impl_redirections;
@@ -36,3 +38,10 @@ impl crate::RowId for ReleaseGroup {
         self.id
     }
 }
+
+impl HasTable for ReleaseGroup {
+    const TABLE_NAME: &str = "release_groups";
+    const FOREIGN_FIELD_NAME: &str = "release_group";
+}
+
+impl HasTags for ReleaseGroup {}

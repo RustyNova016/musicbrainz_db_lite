@@ -6,6 +6,7 @@ use crate::models::musicbrainz::release::LabelInfo;
 use crate::models::musicbrainz::release::Media;
 use crate::models::musicbrainz::release::Release;
 use crate::models::musicbrainz::release_group::ReleaseGroup;
+use crate::models::musicbrainz::tags::Tag;
 use crate::utils::date_utils::date_to_timestamp;
 use crate::Error;
 
@@ -54,31 +55,31 @@ impl Release {
         conn: &mut SqliteConnection,
         value: MBRelease,
     ) -> Result<Self, crate::Error> {
-        let mut new_release = Release::save_api_response(conn, value.clone()).await?;
+        let mut new_value = Release::save_api_response(conn, value.clone()).await?;
 
         // Save relations
         if let Some(artist_credits) = value.artist_credit.clone() {
             let credits = ArtistCredits::save_api_response(conn, artist_credits).await?;
-            new_release.set_artist_credits(conn, credits.0).await?;
+            new_value.set_artist_credits(conn, credits.0).await?;
         }
 
         if let Some(values) = value.media.clone() {
-            Media::save_api_response(conn, values, new_release.id).await?;
+            Media::save_api_response(conn, values, new_value.id).await?;
         }
 
         if let Some(values) = value.label_info {
-            LabelInfo::save_api_response(conn, values, new_release.id).await?;
+            LabelInfo::save_api_response(conn, values, new_value.id).await?;
         }
 
         if let Some(release_group) = value.release_group.clone() {
             let release_group = ReleaseGroup::save_api_response(conn, release_group).await?;
-            new_release.release_group = Some(release_group.id);
-            new_release.upsert(conn).await?;
+            new_value.release_group = Some(release_group.id);
+            new_value.upsert(conn).await?;
         }
 
         if let Some(relations) = value.relations {
             for rel in relations {
-                match new_release.save_relation(conn, rel).await {
+                match new_value.save_relation(conn, rel).await {
                     Ok(_) => {}
                     Err(Error::RelationNotImplemented) => {}
                     Err(err) => {
@@ -88,6 +89,12 @@ impl Release {
             }
         }
 
-        Ok(new_release)
+        if let Some(tags) = value.tags {
+            for tag in tags {
+                Tag::save_api_response::<Self>(conn, tag, &new_value).await?;
+            }
+        }
+
+        Ok(new_value)
     }
 }

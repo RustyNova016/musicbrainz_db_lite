@@ -1,3 +1,6 @@
+pub mod has_table;
+pub mod has_tags;
+
 pub trait RowId {
     /// Returns an unique i64 number that identify the row
     fn get_row_id(&self) -> i64;

@@ -3,6 +3,7 @@ use musicbrainz_rs_nova::entity::release_group::ReleaseGroup as MBReleaseGroup;
 use crate::models::musicbrainz::artist_credit::ArtistCredits;
 use crate::models::musicbrainz::release::Release;
 use crate::models::musicbrainz::release_group::ReleaseGroup;
+use crate::models::musicbrainz::tags::Tag;
 use crate::utils::date_utils::date_to_timestamp;
 use crate::Error;
 
@@ -69,6 +70,12 @@ impl ReleaseGroup {
                         Err(err)?;
                     }
                 }
+            }
+        }
+
+        if let Some(tags) = value.tags {
+            for tag in tags {
+                Tag::save_api_response::<Self>(conn, tag, &new_value).await?;
             }
         }
 

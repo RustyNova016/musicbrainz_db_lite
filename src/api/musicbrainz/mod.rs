@@ -5,4 +5,5 @@ pub mod recording;
 pub mod relation;
 pub mod release;
 pub mod release_group;
+pub mod tags;
 pub mod work;

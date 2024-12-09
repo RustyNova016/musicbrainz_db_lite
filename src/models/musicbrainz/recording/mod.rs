@@ -4,6 +4,8 @@ use serde::Deserialize;
 use serde::Serialize;
 use sqlx::prelude::FromRow;
 
+use crate::models::shared_traits::has_table::HasTable;
+use crate::models::shared_traits::has_tags::HasTags;
 use crate::utils::macros::{
     artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections,
 };
@@ -51,3 +53,10 @@ impl Recording {
         })
     }
 }
+
+impl HasTable for Recording {
+    const TABLE_NAME: &str = "recordings";
+    const FOREIGN_FIELD_NAME: &str = "recording";
+}
+
+impl HasTags for Recording {}

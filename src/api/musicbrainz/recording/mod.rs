@@ -1,4 +1,5 @@
 pub mod fetching;
+use crate::models::musicbrainz::tags::Tag;
 use crate::Error;
 use crate::{
     api::SaveToDatabase,
@@ -51,12 +52,12 @@ impl Recording {
         value: MBRecording,
     ) -> Result<Self, crate::Error> {
         // Save the recording
-        let mut recording = Recording::save_api_response(&mut *conn, value.clone()).await?;
+        let mut new_value = Recording::save_api_response(&mut *conn, value.clone()).await?;
 
         // Save relations
         if let Some(artist_credits) = value.artist_credit.clone() {
             let credits = ArtistCredits::save_api_response(conn, artist_credits).await?;
-            recording.set_artist_credits(conn, credits.0).await?;
+            new_value.set_artist_credits(conn, credits.0).await?;
         }
 
         if let Some(releases) = value.releases.clone() {
@@ -66,14 +67,14 @@ impl Recording {
 
                 for gid in gids {
                     //TODO: Improve flow to prevent updating after insert, thus making `tracks`.`recording` non optional
-                    Track::set_recording_id_from_gid(conn, recording.id, &gid).await?;
+                    Track::set_recording_id_from_gid(conn, new_value.id, &gid).await?;
                 }
             }
         }
 
         if let Some(relations) = value.relations {
             for rel in relations {
-                match recording.save_relation(conn, rel).await {
+                match new_value.save_relation(conn, rel).await {
                     Ok(_) => {}
                     Err(Error::RelationNotImplemented) => {}
                     Err(err) => {
@@ -83,7 +84,13 @@ impl Recording {
             }
         }
 
-        Ok(recording)
+        if let Some(tags) = value.tags {
+            for tag in tags {
+                Tag::save_api_response::<Self>(conn, tag, &new_value).await?;
+            }
+        }
+
+        Ok(new_value)
     }
 }
 

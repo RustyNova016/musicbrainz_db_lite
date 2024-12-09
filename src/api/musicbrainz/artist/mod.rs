@@ -3,6 +3,7 @@ use sqlx::SqliteConnection;
 
 use crate::api::SaveToDatabase;
 use crate::models::musicbrainz::artist::Artist;
+use crate::models::musicbrainz::tags::Tag;
 use crate::Error;
 
 pub mod browse;
@@ -40,11 +41,11 @@ impl Artist {
         conn: &mut SqliteConnection,
         value: MBArtist,
     ) -> Result<Self, crate::Error> {
-        let artist = Artist::save_api_response(&mut *conn, value.clone()).await?;
+        let new_value = Artist::save_api_response(&mut *conn, value.clone()).await?;
 
         if let Some(relations) = value.relations {
             for rel in relations {
-                match artist.save_relation(conn, rel).await {
+                match new_value.save_relation(conn, rel).await {
                     Ok(_) => {}
                     Err(Error::RelationNotImplemented) => {}
                     Err(err) => {
@@ -54,7 +55,13 @@ impl Artist {
             }
         }
 
-        Ok(artist)
+        if let Some(tags) = value.tags {
+            for tag in tags {
+                Tag::save_api_response::<Self>(conn, tag, &new_value).await?;
+            }
+        }
+
+        Ok(new_value)
     }
 }
 
