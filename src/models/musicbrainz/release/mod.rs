@@ -29,6 +29,12 @@ pub struct Release {
     pub country: Option<String>,
     pub quality: Option<String>,
     pub status: Option<String>,
+
+    /// Barcode of the release.
+    ///
+    /// "" means "This release does not have a barcode" has been checked
+    ///
+    /// `None` means that the barcode is an empty string
     pub barcode: Option<String>,
     pub disambiguation: Option<String>,
     pub packaging: Option<String>,

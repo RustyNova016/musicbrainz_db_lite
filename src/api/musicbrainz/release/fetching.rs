@@ -71,12 +71,13 @@ mod tests {
     use musicbrainz_db_lite_schema::create_and_migrate;
 
     use crate::database::client::DBClient;
+    use crate::models::musicbrainz::recording::Recording;
     use crate::models::musicbrainz::release::Release;
 
     #[tokio::test]
     #[serial_test::serial]
     async fn should_insert_release() {
-        let client = DBClient::connect_in_memory().await.unwrap();
+        let client = DBClient::connect_in_memory_and_create().await.unwrap();
         let conn = &mut *client.connection.acquire().await.unwrap();
         create_and_migrate(conn).await.unwrap();
 
@@ -87,6 +88,36 @@ mod tests {
             let value = Release::get_or_fetch(conn, test).await.unwrap();
 
             assert!(value.is_some_and(|r| r.full_update_date.is_some()))
+        }
+    }
+
+    #[tokio::test]
+    #[serial_test::serial]
+    async fn should_full_insert_release() {
+        let client = DBClient::connect_in_memory_and_create().await.unwrap();
+        let conn = &mut *client.connection.acquire().await.unwrap();
+
+        // Test values. Feel free to add edge cases here
+        // (Recording, Release)
+        let test_values = vec![(
+            "c6f1752b-a8b6-45a8-bdef-16fa9c859c81",
+            "daf6e333-b491-490a-9444-8888cb08b141",
+        )];
+
+        for (recording_id, release_id) in test_values {
+            // Get the recording to partially pull release info
+            Recording::fetch_and_save(conn, recording_id).await.unwrap();
+
+            let mut release = Release::get_or_fetch(conn, release_id)
+                .await
+                .unwrap()
+                .unwrap();
+
+            assert!(release.full_update_date.is_none());
+
+            release.refetch_and_load(conn).await.unwrap();
+
+            assert!(release.full_update_date.is_some());
         }
     }
 }
