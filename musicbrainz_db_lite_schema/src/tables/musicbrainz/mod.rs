@@ -1,4 +1,3 @@
-pub mod release_groups;
 use release_groups::create_release_group_tables;
 use sqlx::SqliteConnection;
 
@@ -10,11 +9,14 @@ use releases::create_release_tables;
 use work::create_work_tables;
 
 pub mod artists;
+pub mod genre;
 pub mod gid_redirect_tables;
 pub mod label;
 pub mod recordings;
 pub mod relations;
+pub mod release_groups;
 pub mod releases;
+pub mod tag;
 pub mod work;
 
 pub(super) async fn generate_musicbrainz_database(

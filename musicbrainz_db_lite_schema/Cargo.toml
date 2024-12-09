@@ -6,10 +6,9 @@ description = "Schema generator for musicbrainz_db_lite"
 rust-version = "1.81.0"
 
 [dependencies]
-dotenvy = "0.15.7"
 sqlx = { version = "0.8.2", features = ["runtime-tokio", "macros", "sqlite"] }
-tokio = { version = "1.40.0", features = ["full"] }
+
 
 [dev-dependencies]
 serial_test = "3.1.1"
-text-diff = "0.4.0"
+tokio = { version = "1.40.0", features = ["full"] }
