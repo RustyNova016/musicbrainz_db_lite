@@ -2,7 +2,9 @@ use sqlx::SqliteConnection;
 
 use crate::tables::triggers::after_delete_table_artist_credits::after_update_delete_table_artist_credits;
 
+use super::genre::create_genre_tables;
 use super::gid_redirect_tables::generate_redirect_table;
+use super::tag::create_tag_tables;
 
 pub(super) async fn create_release_tables(conn: &mut SqliteConnection) -> Result<(), sqlx::Error> {
     sqlx::query(
@@ -108,6 +110,9 @@ pub(super) async fn create_release_tables(conn: &mut SqliteConnection) -> Result
     after_update_delete_table_artist_credits(&mut *conn, "releases").await?;
 
     after_update_delete_table_artist_credits(conn, "tracks").await?;
+
+    create_tag_tables(conn, "release", "releases").await?;
+    create_genre_tables(conn, "release", "releases").await?;
 
     Ok(())
 }

@@ -1,6 +1,8 @@
 use sqlx::SqliteConnection;
 
+use super::genre::create_genre_tables;
 use super::gid_redirect_tables::generate_redirect_table;
+use super::tag::create_tag_tables;
 
 pub(super) async fn create_artist_tables(conn: &mut SqliteConnection) -> Result<(), sqlx::Error> {
     sqlx::query(
@@ -42,8 +44,11 @@ pub(super) async fn create_artist_tables(conn: &mut SqliteConnection) -> Result<
     .await?;
 
     sqlx::query(&generate_redirect_table("artists"))
-        .execute(conn)
+        .execute(&mut *conn)
         .await?;
+
+    create_tag_tables(conn, "artist", "artists").await?;
+    create_genre_tables(conn, "artist", "artists").await?;
 
     Ok(())
 }

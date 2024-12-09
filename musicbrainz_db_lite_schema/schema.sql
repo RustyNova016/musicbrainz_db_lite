@@ -26,6 +26,25 @@ CREATE TABLE `artists_gid_redirect` (
     `new_id` TEXT REFERENCES `artists`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
+CREATE TABLE `artists_tag` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER,
+
+                -- Foreign keys
+                `artist` INTEGER NOT NULL REFERENCES `artists`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+            ) STRICT;
+CREATE TABLE `artists_genre` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `mbid` TEXT,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER,
+
+                -- Foreign keys
+                `artist` INTEGER NOT NULL REFERENCES `artists`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+            ) STRICT;
 CREATE TABLE `recordings` (
             `id` INTEGER PRIMARY KEY NOT NULL, 
             `mbid` TEXT UNIQUE NOT NULL, 
@@ -46,6 +65,25 @@ CREATE TABLE `recordings_gid_redirect` (
     `new_id` TEXT REFERENCES `recordings`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
+CREATE TABLE `recordings_tag` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER,
+
+                -- Foreign keys
+                `recording` INTEGER NOT NULL REFERENCES `recordings`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+            ) STRICT;
+CREATE TABLE `recordings_genre` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `mbid` TEXT,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER,
+
+                -- Foreign keys
+                `recording` INTEGER NOT NULL REFERENCES `recordings`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+            ) STRICT;
 CREATE TABLE `releases` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT,
                 `mbid` TEXT UNIQUE NOT NULL,
@@ -101,6 +139,25 @@ CREATE TABLE `releases_gid_redirect` (
     `new_id` TEXT REFERENCES `releases`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
+CREATE TABLE `releases_tag` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER,
+
+                -- Foreign keys
+                `release` INTEGER NOT NULL REFERENCES `releases`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+            ) STRICT;
+CREATE TABLE `releases_genre` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `mbid` TEXT,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER,
+
+                -- Foreign keys
+                `release` INTEGER NOT NULL REFERENCES `releases`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+            ) STRICT;
 CREATE TABLE `release_groups` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
                 `title` TEXT NOT NULL,
@@ -121,6 +178,25 @@ CREATE TABLE `release_groups_gid_redirect` (
     `new_id` TEXT REFERENCES `release_groups`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
+CREATE TABLE `release_groups_tag` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER,
+
+                -- Foreign keys
+                `release_group` INTEGER NOT NULL REFERENCES `release_groups`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+            ) STRICT;
+CREATE TABLE `release_groups_genre` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `mbid` TEXT,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER,
+
+                -- Foreign keys
+                `release_group` INTEGER NOT NULL REFERENCES `release_groups`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+            ) STRICT;
 CREATE TABLE `labels` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
                 `mbid` TEXT UNIQUE NOT NULL,
@@ -140,6 +216,25 @@ CREATE TABLE `labels_gid_redirect` (
     `new_id` TEXT REFERENCES `labels`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
+CREATE TABLE `labels_tag` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER,
+
+                -- Foreign keys
+                `label` INTEGER NOT NULL REFERENCES `labels`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+            ) STRICT;
+CREATE TABLE `labels_genre` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                `mbid` TEXT,
+                `name` TEXT NOT NULL,
+                `count` INTEGER,
+                `score` INTEGER,
+
+                -- Foreign keys
+                `label` INTEGER NOT NULL REFERENCES `labels`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+            ) STRICT;
 CREATE TABLE `works` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
                 `mbid` TEXT UNIQUE NOT NULL,
@@ -156,18 +251,24 @@ CREATE TABLE `works_gid_redirect` (
     `new_id` TEXT REFERENCES `works`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
     `deleted` INTEGER DEFAULT 0 NOT NULL
 ) STRICT;
-CREATE TABLE `tag` (
+CREATE TABLE `works_tag` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
                 `name` TEXT NOT NULL,
                 `count` INTEGER,
-                `score` INTEGER
+                `score` INTEGER,
+
+                -- Foreign keys
+                `work` INTEGER NOT NULL REFERENCES `works`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
             ) STRICT;
-CREATE TABLE `genre` (
+CREATE TABLE `works_genre` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
                 `mbid` TEXT,
                 `name` TEXT NOT NULL,
                 `count` INTEGER,
-                `score` INTEGER
+                `score` INTEGER,
+
+                -- Foreign keys
+                `work` INTEGER NOT NULL REFERENCES `works`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
             ) STRICT;
 CREATE TABLE `l_artists_artists` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
@@ -589,6 +690,8 @@ CREATE TRIGGER `trigger_after_delete_artist_credits` AFTER DELETE ON `artist_cre
 CREATE TRIGGER `trigger_after_insert_artists` AFTER INSERT ON `artists` FOR EACH ROW BEGIN
     INSERT INTO artists_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
+CREATE UNIQUE INDEX `unique_tag_for_artist` ON `artists_tag` (`name`, `artist`);
+CREATE UNIQUE INDEX `unique_genre_for_artist` ON `artists_genre` (`name`, `artist`);
 CREATE TRIGGER `trigger_after_insert_recordings` AFTER INSERT ON `recordings` FOR EACH ROW BEGIN
     INSERT INTO recordings_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
@@ -600,6 +703,8 @@ CREATE TRIGGER `trigger_after_update_recordings_artist_credit` AFTER UPDATE OF `
     BEGIN
         DELETE FROM artist_credits WHERE artist_credits.id = OLD.artist_credit;
     END;
+CREATE UNIQUE INDEX `unique_tag_for_recording` ON `recordings_tag` (`name`, `recording`);
+CREATE UNIQUE INDEX `unique_genre_for_recording` ON `recordings_genre` (`name`, `recording`);
 CREATE TRIGGER `trigger_after_delete_releases` AFTER DELETE ON `releases` BEGIN
             -- Clean full update date
             UPDATE `release_groups` SET `full_update_date` = NULL WHERE id = OLD.`release_group`;
@@ -645,6 +750,8 @@ CREATE TRIGGER `trigger_after_update_tracks_artist_credit` AFTER UPDATE OF `arti
     BEGIN
         DELETE FROM artist_credits WHERE artist_credits.id = OLD.artist_credit;
     END;
+CREATE UNIQUE INDEX `unique_tag_for_release` ON `releases_tag` (`name`, `release`);
+CREATE UNIQUE INDEX `unique_genre_for_release` ON `releases_genre` (`name`, `release`);
 CREATE TRIGGER `trigger_after_delete_release_groups` AFTER DELETE ON `release_groups` BEGIN
             -- Clean full update date
             UPDATE `releases` SET `full_update_date` = NULL WHERE `release_group` = OLD.id;
@@ -664,14 +771,18 @@ CREATE TRIGGER `trigger_after_update_release_groups_artist_credit` AFTER UPDATE 
     BEGIN
         DELETE FROM artist_credits WHERE artist_credits.id = OLD.artist_credit;
     END;
+CREATE UNIQUE INDEX `unique_tag_for_release_group` ON `release_groups_tag` (`name`, `release_group`);
+CREATE UNIQUE INDEX `unique_genre_for_release_group` ON `release_groups_genre` (`name`, `release_group`);
 CREATE TRIGGER `trigger_after_insert_labels` AFTER INSERT ON `labels` FOR EACH ROW BEGIN
     INSERT INTO labels_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
+CREATE UNIQUE INDEX `unique_tag_for_label` ON `labels_tag` (`name`, `label`);
+CREATE UNIQUE INDEX `unique_genre_for_label` ON `labels_genre` (`name`, `label`);
 CREATE TRIGGER `trigger_after_insert_works` AFTER INSERT ON `works` FOR EACH ROW BEGIN
     INSERT INTO works_gid_redirect VALUES (new.mbid, new.id, 0) ON CONFLICT DO UPDATE SET new_id = new.id;
 END;
-CREATE INDEX `idx_tag` ON `tag` (`name`);
-CREATE INDEX `idx_genre` ON `genre` (`name`);
+CREATE UNIQUE INDEX `unique_tag_for_work` ON `works_tag` (`name`, `work`);
+CREATE UNIQUE INDEX `unique_genre_for_work` ON `works_genre` (`name`, `work`);
 CREATE UNIQUE INDEX `msid_mapping_unique_mapping` ON `msid_mapping` (`recording_msid`, `user`);
 CREATE UNIQUE INDEX `idx_listens` ON `listens` (`listened_at`, `user`, `recording_msid`);
 COMMIT;

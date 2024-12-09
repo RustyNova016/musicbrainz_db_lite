@@ -1,6 +1,8 @@
 use sqlx::SqliteConnection;
 
+use super::genre::create_genre_tables;
 use super::gid_redirect_tables::generate_redirect_table;
+use super::tag::create_tag_tables;
 
 pub(super) async fn create_label_tables(conn: &mut SqliteConnection) -> Result<(), sqlx::Error> {
     sqlx::query(
@@ -27,8 +29,11 @@ pub(super) async fn create_label_tables(conn: &mut SqliteConnection) -> Result<(
     .await?;
 
     sqlx::query(&generate_redirect_table("labels"))
-        .execute(conn)
+        .execute(&mut *conn)
         .await?;
+
+        create_tag_tables(conn, "label", "labels").await?;
+        create_genre_tables(conn, "label", "labels").await?;
 
     Ok(())
 }
