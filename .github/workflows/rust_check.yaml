@@ -34,7 +34,7 @@ jobs:
           key: "(${{ matrix.os }})"
 
       - name: Install sqldiff
-        run: apt install sqlite3-tools
+        run: sudo apt install sqlite3-tools -y
 
       - uses: taiki-e/install-action@cargo-hack
         
@@ -129,4 +129,6 @@ jobs:
     - uses: Swatinem/rust-cache@v2
     - uses: taiki-e/install-action@cargo-hack
     - uses: taiki-e/install-action@cargo-minimal-versions
+    - name: Install sqldiff
+      run: sudo apt install sqlite3-tools -y
     - run: cargo minimal-versions test --direct
