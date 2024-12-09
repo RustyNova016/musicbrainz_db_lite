@@ -1,6 +1,8 @@
 pub mod fetching;
 use musicbrainz_rs_nova::entity::work::Work as MBWork;
 
+use crate::models::musicbrainz::genre::genre_tag::GenreTag;
+use crate::models::musicbrainz::tags::Tag;
 use crate::models::musicbrainz::work::Work;
 use crate::Error;
 
@@ -53,6 +55,18 @@ impl Work {
                         Err(err)?;
                     }
                 }
+            }
+        }
+
+        if let Some(tags) = value.tags {
+            for tag in tags {
+                Tag::save_api_response::<Self>(conn, tag, &new_value).await?;
+            }
+        }
+
+        if let Some(genres) = value.genres {
+            for genre in genres {
+                GenreTag::save_api_response::<Self>(conn, genre, &new_value).await?;
             }
         }
 

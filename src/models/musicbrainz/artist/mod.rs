@@ -1,6 +1,9 @@
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use sqlx::prelude::FromRow;
 
+use crate::models::shared_traits::has_genre::HasGenres;
+use crate::models::shared_traits::has_table::HasTable;
+use crate::models::shared_traits::has_tags::HasTags;
 use crate::utils::macros::{get_and_fetch::impl_get_and_fetch, impl_redirections};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, FromRow, Upsert, MainEntity)]
@@ -30,3 +33,11 @@ impl crate::RowId for Artist {
         self.id
     }
 }
+
+impl HasTable for Artist {
+    const TABLE_NAME: &str = "artists";
+    const FOREIGN_FIELD_NAME: &str = "artist";
+}
+
+impl HasTags for Artist {}
+impl HasGenres for Artist {}

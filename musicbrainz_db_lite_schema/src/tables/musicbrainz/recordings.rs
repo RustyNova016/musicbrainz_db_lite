@@ -2,7 +2,7 @@ use sqlx::SqliteConnection;
 
 use crate::tables::triggers::after_delete_table_artist_credits::after_update_delete_table_artist_credits;
 
-use super::genre::create_genre_tables;
+use super::genre::create_genre_score_tables;
 use super::gid_redirect_tables::generate_redirect_table;
 use super::tag::create_tag_tables;
 
@@ -38,7 +38,7 @@ pub(super) async fn create_recordings_tables(
     after_update_delete_table_artist_credits(conn, "recordings").await?;
 
     create_tag_tables(conn, "recording", "recordings").await?;
-    create_genre_tables(conn, "recording", "recordings").await?;
+    create_genre_score_tables(conn, "recording", "recordings").await?;
 
     Ok(())
 }
