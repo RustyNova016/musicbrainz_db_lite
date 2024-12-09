@@ -29,17 +29,14 @@ async fn create_latest_database(conn: &mut sqlx::SqliteConnection) -> Result<(),
 
 #[cfg(test)]
 mod tests {
-    use core::str::FromStr;
     use std::fs::File;
     use std::io::Write;
-    use std::path::PathBuf;
     use std::process::Command;
-    use text_diff::print_diff;
 
     use crate::create_and_migrate;
     use crate::create_latest_database;
     use crate::testing::get_database_schema;
-    use crate::testing::load_schema_sql;
+    use crate::testing::get_schema_diff;
     use crate::testing::setup_database_file;
 
     async fn should_generate_schema() {
@@ -80,24 +77,24 @@ mod tests {
         create_and_migrate(&mut conn).await.unwrap();
 
         // Database has been migrated. Let's check that it's up to par with the main one
-        // ... But first, we need to drop _sqlx_migrations. While migrating this table is auotmatically created,
+        // ... But first, we need to drop _sqlx_migrations. While migrating this table is automatically created,
         // but we don't want it in our public schema
         sqlx::query("DROP TABLE _sqlx_migrations")
             .execute(&mut *conn)
             .await
             .unwrap();
-        let schema = get_database_schema("./migration_test.db");
 
-        let main_schema = load_schema_sql(PathBuf::from_str("./schema.sql").unwrap());
+            let migrated_schema = get_database_schema("./migration_test.db");
+        
+        let diffs = get_schema_diff("./schema.db", "./migration_test.db");
 
-        if schema != main_schema {
+        if !diffs.is_empty() {
             let mut file = File::create("./migration_test_schema.sql").unwrap();
 
-            write!(file, "{}", schema).unwrap();
+            write!(file, "{}", migrated_schema).unwrap();
 
-            print_diff(&main_schema, &schema, "\n");
+            panic!("\nThe migration schema hasn't been updated properly! SQLDiff output: \n\n{}", diffs)
 
-            panic!("The migration schema hasn't been updated properly!")
         }
     }
 }

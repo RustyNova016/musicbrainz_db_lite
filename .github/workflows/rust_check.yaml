@@ -33,6 +33,9 @@ jobs:
         with: 
           key: "(${{ matrix.os }})"
 
+      - name: Install sqldiff
+        run: apt install sqlite3-tools
+
       - uses: taiki-e/install-action@cargo-hack
         
       - name: Run tests
