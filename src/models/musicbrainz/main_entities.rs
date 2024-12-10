@@ -23,6 +23,21 @@ impl MainEntity {
         std::mem::discriminant(self) == std::mem::discriminant(other)
             && self.get_mbid() == other.get_mbid()
     }
+
+    pub async fn refetch_and_load(
+        &mut self,
+        conn: &mut sqlx::SqliteConnection,
+    ) -> Result<(), crate::Error> {
+        match self {
+            MainEntity::Artist(val) => val.refetch_and_load(conn).await?,
+            MainEntity::Label(val) => val.refetch_and_load(conn).await?,
+            MainEntity::Recording(val) => val.refetch_and_load(conn).await?,
+            MainEntity::Release(val) => val.refetch_and_load(conn).await?,
+            MainEntity::Work(val) => val.refetch_and_load(conn).await?,
+        }
+
+        Ok(())
+    }
 }
 
 impl RowId for MainEntity {
