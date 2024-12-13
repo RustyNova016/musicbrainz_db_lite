@@ -1,3 +1,4 @@
+
 use core::marker::PhantomData;
 
 use sqlx::prelude::FromRow;
@@ -6,6 +7,8 @@ use traits::HasRelation;
 use crate::RowId;
 
 pub mod traits;
+#[expect(clippy::module_inception)]
+pub mod relations;
 
 #[derive(Debug, FromRow, Default, PartialEq, Eq, Clone)]
 pub struct Relation<T, U> {
