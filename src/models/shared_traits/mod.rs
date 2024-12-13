@@ -1,3 +1,5 @@
+pub mod find_by;
+pub mod find_by_rowid;
 pub mod has_genre;
 pub mod has_table;
 pub mod has_tags;
