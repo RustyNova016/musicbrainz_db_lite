@@ -1,3 +1,4 @@
+pub mod finds;
 pub mod genre_tag;
 use sqlx::prelude::FromRow;
 

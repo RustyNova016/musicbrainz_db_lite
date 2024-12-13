@@ -64,9 +64,15 @@ mod tests {
         ];
 
         for test in test_values {
-            let value = Recording::get_or_fetch(conn, test).await.unwrap();
+            let value = Recording::get_or_fetch(conn, test)
+                .await
+                .unwrap()
+                .expect("The recording should be there");
 
-            assert!(value.is_some_and(|r| r.full_update_date.is_some()))
+            assert!(value.full_update_date.is_some());
+
+            let credits = value.get_artist_credits_or_fetch(conn).await.unwrap();
+            assert!(!credits.1.is_empty())
         }
     }
 }
