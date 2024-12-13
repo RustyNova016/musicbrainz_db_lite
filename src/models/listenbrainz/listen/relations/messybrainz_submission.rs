@@ -12,7 +12,7 @@ impl Listen {
     pub async fn get_messybrainz_data(
         &self,
         conn: &mut sqlx::SqliteConnection,
-    ) -> Result<Vec<MessybrainzSubmission>, crate::Error> {
+    ) -> Result<MessybrainzSubmission, crate::Error> {
         Ok(sqlx::query_as(
                     r#"
                     SELECT
@@ -24,7 +24,7 @@ impl Listen {
                         listens.id = ?"#,
                 )
                 .bind(self.id)
-                .fetch_all(conn)
+                .fetch_one(conn)
                 .await?)
     }
 

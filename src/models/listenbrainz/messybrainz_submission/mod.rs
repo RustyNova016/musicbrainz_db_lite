@@ -2,6 +2,9 @@ use macon::Builder;
 use sqlx::prelude::FromRow;
 use sqlx::{Executor, Sqlite};
 
+use crate::RowId;
+
+pub mod finds;
 pub mod relations;
 pub mod selects;
 
@@ -9,7 +12,7 @@ pub mod selects;
 #[derive(Debug, Builder, FromRow, Clone)]
 #[builder(Default=!)]
 pub struct MessybrainzSubmission {
-    pub id: i32,
+    pub id: i64,
 
     #[builder(Default=!)]
     pub msid: String,
@@ -27,7 +30,7 @@ pub struct MessybrainzSubmission {
     pub track_number: Option<String>,
 
     #[builder(Default=!)]
-    pub duration: Option<i32>,
+    pub duration: Option<i64>,
 }
 
 impl MessybrainzSubmission {
@@ -47,5 +50,11 @@ impl MessybrainzSubmission {
         .execute(client)
         .await?;
         Ok(())
+    }
+}
+
+impl RowId for MessybrainzSubmission {
+    fn get_row_id(&self) -> i64 {
+        self.id
     }
 }
