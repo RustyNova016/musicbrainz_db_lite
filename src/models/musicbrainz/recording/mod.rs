@@ -1,3 +1,4 @@
+pub mod finds;
 use chrono::Duration;
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use serde::Deserialize;
