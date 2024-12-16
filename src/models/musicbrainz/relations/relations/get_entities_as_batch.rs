@@ -65,7 +65,7 @@ where
     ) -> Result<HashMap<i64, (&'r &'r Self, Vec<U>)>, crate::Error> {
         Self::get_entity_as_batch_inner(conn, left_entities, "0").await
     }
-    
+
     pub async fn get_entity_1_as_left_batch<'r>(
         conn: &mut sqlx::SqliteConnection,
         left_entities: &'r [&'r Self],

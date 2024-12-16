@@ -6,6 +6,7 @@ use sqlx::FromRow;
 
 pub mod relations;
 
+use crate::models::musicbrainz::relations::impl_relations::impl_relations;
 use crate::models::shared_traits::has_genre::HasGenres;
 use crate::models::shared_traits::has_table::HasTable;
 use crate::models::shared_traits::has_tags::HasTags;
@@ -49,6 +50,7 @@ pub struct Release {
 impl_redirections!(Release, "releases");
 impl_artist_credits!(Release, "releases");
 impl_get_and_fetch!(Release);
+impl_relations!(Release);
 
 impl crate::RowId for Release {
     fn get_row_id(&self) -> i64 {

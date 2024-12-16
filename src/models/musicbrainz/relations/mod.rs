@@ -1,3 +1,4 @@
+pub mod impl_relations;
 
 use core::marker::PhantomData;
 
@@ -6,9 +7,9 @@ use traits::HasRelation;
 
 use crate::RowId;
 
-pub mod traits;
 #[expect(clippy::module_inception)]
 pub mod relations;
+pub mod traits;
 
 #[derive(Debug, FromRow, Default, PartialEq, Eq, Clone)]
 pub struct Relation<T, U> {

@@ -18,9 +18,22 @@ impl Recording {
             .with_ratings()
             .with_releases()
             .with_tags()
+            // relations
+            .with_area_relations()
+            .with_artist_relations()
+            .with_event_relations()
+            .with_genre_relations()
+            .with_instrument_relations()
+            .with_label_relations()
+            .with_place_relations()
+            .with_recording_relations()
+            .with_recording_relations()
+            .with_release_relations()
+            .with_series_relations()
             .with_url_relations()
-            .with_work_level_relations()
             .with_work_relations()
+            // Extra relations
+            .with_work_level_relations()
             .with_medias()
             .execute()
             .await;

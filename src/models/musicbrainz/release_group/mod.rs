@@ -10,6 +10,8 @@ use crate::utils::macros::artist_credits::impl_artist_credits;
 use crate::utils::macros::get_and_fetch::impl_get_and_fetch;
 use crate::utils::macros::impl_redirections;
 
+use super::relations::impl_relations::impl_relations;
+
 #[derive(Debug, Default, PartialEq, Eq, Clone, FromRow, Upsert, MainEntity)]
 #[database(
     table = "release_groups",
@@ -34,6 +36,7 @@ pub struct ReleaseGroup {
 impl_redirections!(ReleaseGroup, "release_groups");
 impl_get_and_fetch!(ReleaseGroup);
 impl_artist_credits!(ReleaseGroup, "release_groups");
+impl_relations!(ReleaseGroup);
 
 impl crate::RowId for ReleaseGroup {
     fn get_row_id(&self) -> i64 {

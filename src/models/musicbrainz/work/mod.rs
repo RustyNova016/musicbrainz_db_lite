@@ -1,11 +1,13 @@
-pub mod finds;
 use musicbrainz_db_lite_macros::{MainEntity, Upsert};
 use sqlx::FromRow;
 
+use crate::models::musicbrainz::relations::impl_relations::impl_relations;
 use crate::models::shared_traits::has_genre::HasGenres;
 use crate::models::shared_traits::has_table::HasTable;
 use crate::models::shared_traits::has_tags::HasTags;
 use crate::utils::macros::{get_and_fetch::impl_get_and_fetch, impl_redirections};
+
+pub mod finds;
 
 #[derive(Debug, Default, PartialEq, Eq, Clone, FromRow, Upsert, MainEntity)]
 #[database(
@@ -27,6 +29,7 @@ pub struct Work {
 
 impl_redirections!(Work, "Works");
 impl_get_and_fetch!(Work);
+impl_relations!(Work);
 
 impl crate::RowId for Work {
     fn get_row_id(&self) -> i64 {

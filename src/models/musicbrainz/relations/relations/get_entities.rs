@@ -14,7 +14,7 @@ where
         &self,
         conn: &mut sqlx::SqliteConnection,
         entity_num: &str,
-    ) -> Result<Vec<V>, crate::Error>
+    ) -> Result<V, crate::Error>
     where
         V: for<'a> FromRow<'a, SqliteRow> + Send + Unpin,
     {
@@ -30,35 +30,39 @@ where
             right_table = U::TABLE_NAME
         ))
         .bind(self.id)
-        .fetch_all(conn)
+        .fetch_one(conn)
         .await?)
     }
 
+    /// Get the entity0 of the relation, infering it as a T type
     pub async fn get_entity_0_as_left(
         &self,
         conn: &mut sqlx::SqliteConnection,
-    ) -> Result<Vec<T>, crate::Error> {
+    ) -> Result<T, crate::Error> {
         self.get_entity_inner(conn, "0").await
     }
 
+    /// Get the entity0 of the relation, infering it as a U type
     pub async fn get_entity_0_as_right(
         &self,
         conn: &mut sqlx::SqliteConnection,
-    ) -> Result<Vec<U>, crate::Error> {
+    ) -> Result<U, crate::Error> {
         self.get_entity_inner(conn, "0").await
     }
 
+    /// Get the entity1 of the relation, infering it as a T type
     pub async fn get_entity_1_as_left(
         &self,
         conn: &mut sqlx::SqliteConnection,
-    ) -> Result<Vec<T>, crate::Error> {
+    ) -> Result<T, crate::Error> {
         self.get_entity_inner(conn, "1").await
     }
 
+    /// Get the entity1 of the relation, infering it as a U type
     pub async fn get_entity_1_as_right(
         &self,
         conn: &mut sqlx::SqliteConnection,
-    ) -> Result<Vec<U>, crate::Error> {
+    ) -> Result<U, crate::Error> {
         self.get_entity_inner(conn, "1").await
     }
 }
