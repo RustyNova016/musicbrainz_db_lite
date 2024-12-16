@@ -114,4 +114,41 @@ mod tests {
                 .expect("There should have a release matching the recording");
         }
     }
+
+    #[tokio::test]
+    #[serial_test::serial]
+    async fn should_get_original_mix_from_remix() {
+        let client = DBClient::connect_in_memory_and_create().await.unwrap();
+        let conn = &mut *client.connection.acquire().await.unwrap();
+
+        // Test values. Feel free to add edge cases here
+        // (Remix Recording MBID, Original Recording MBID)
+        let test_values = vec![(
+            "be4ac8b9-37eb-45cb-a2eb-d74f9f2ebc88",
+            "497b48ed-0ec9-4ba2-822a-0fbed83dac36",
+        )];
+
+        for (left, right) in test_values {
+            let value = Recording::get_or_fetch(conn, left)
+                .await
+                .expect("Error during fetch")
+                .expect("The release should exists");
+
+            let right_value = value
+                .get_recording_relations(conn)
+                .await
+                .expect("Error during fetching");
+
+            let mut found = false;
+            for relation in right_value {
+                let related = relation.get_entity_1_as_left(conn).await.unwrap();
+                println!("{:#?}", related);
+                if related.mbid == right {
+                    found = true
+                }
+            }
+
+            assert!(found);
+        }
+    }
 }

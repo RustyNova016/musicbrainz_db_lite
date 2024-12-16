@@ -7,6 +7,8 @@ use crate::models::shared_traits::has_table::HasTable;
 use crate::models::shared_traits::has_tags::HasTags;
 use crate::utils::macros::{get_and_fetch::impl_get_and_fetch, impl_redirections};
 
+use super::relations::impl_relations::impl_relations;
+
 #[derive(Debug, Default, Clone, PartialEq, Eq, FromRow, Upsert, MainEntity)]
 #[database(
     table = "artists",
@@ -28,6 +30,7 @@ pub struct Artist {
 
 impl_redirections!(Artist, "artists");
 impl_get_and_fetch!(Artist);
+impl_relations!(Artist);
 
 impl crate::RowId for Artist {
     fn get_row_id(&self) -> i64 {

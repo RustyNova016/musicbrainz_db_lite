@@ -12,6 +12,8 @@ use crate::utils::macros::{
     artist_credits::impl_artist_credits, get_and_fetch::impl_get_and_fetch, impl_redirections,
 };
 
+use super::relations::impl_relations::impl_relations;
+
 pub mod relations;
 
 #[derive(
@@ -41,6 +43,7 @@ pub struct Recording {
 impl_redirections!(Recording, "recordings");
 impl_artist_credits!(Recording, "recordings");
 impl_get_and_fetch!(Recording);
+impl_relations!(Recording);
 
 impl crate::RowId for Recording {
     fn get_row_id(&self) -> i64 {

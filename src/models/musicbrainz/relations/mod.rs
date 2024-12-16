@@ -1,3 +1,5 @@
+pub mod impl_relations;
+
 use core::marker::PhantomData;
 
 use sqlx::prelude::FromRow;
@@ -5,6 +7,8 @@ use traits::HasRelation;
 
 use crate::RowId;
 
+#[expect(clippy::module_inception)]
+pub mod relations;
 pub mod traits;
 
 #[derive(Debug, FromRow, Default, PartialEq, Eq, Clone)]
