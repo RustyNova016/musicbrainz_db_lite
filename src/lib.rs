@@ -6,3 +6,4 @@ pub mod utils;
 
 pub use crate::error::Error;
 pub use crate::models::shared_traits::RowId;
+pub use musicbrainz_rs_nova::*;
