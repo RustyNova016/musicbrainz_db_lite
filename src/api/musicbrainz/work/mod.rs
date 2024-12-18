@@ -4,6 +4,7 @@ use musicbrainz_rs_nova::entity::work::Work as MBWork;
 use crate::models::musicbrainz::genre::genre_tag::GenreTag;
 use crate::models::musicbrainz::tags::Tag;
 use crate::models::musicbrainz::work::Work;
+use crate::utils::strip_quotes;
 use crate::Error;
 
 impl Work {
@@ -31,7 +32,11 @@ impl Work {
             disambiguation: new.disambiguation.or(self.disambiguation),
             work_type: new
                 .work_type
-                .map(|w| serde_json::to_string(&w).expect("The enum should be serializable"))
+                .map(|w| {
+                    strip_quotes(
+                        serde_json::to_string(&w).expect("The enum should be serializable"),
+                    )
+                })
                 .or(self.work_type),
             full_update_date: self.full_update_date,
         }
