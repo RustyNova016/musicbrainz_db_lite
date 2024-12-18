@@ -122,6 +122,39 @@ where
     ) -> impl std::future::Future<
         Output = Result<HashMap<i64, (&'r &'r Self, Vec<Relation<Self, U>>)>, crate::Error>,
     > + Send;
+
+    fn delete_relations_inner(
+        &self,
+        conn: &mut sqlx::SqliteConnection,
+        entity0: bool,
+        entity1: bool,
+    ) -> impl std::future::Future<Output = Result<(), crate::Error>> + Send {
+        async move {
+            let where_clause = if entity0 && entity1 {
+                "t.entity0 = $1 OR t.entity1 = $1"
+            } else if entity0 {
+                "t.entity0 = $1"
+            } else if entity1 {
+                "t.entity1 = $1"
+            } else {
+                panic!("No join has been specified!")
+            };
+
+            sqlx::query(&format!(
+                "DELETE FROM `{}` as t WHERE {where_clause}",
+                Self::RELATION_TABLE
+            ))
+            .bind(self.get_row_id())
+            .execute(conn)
+            .await?;
+            Ok(())
+        }
+    }
+
+    fn delete_relations(
+        &self,
+        conn: &mut sqlx::SqliteConnection,
+    ) -> impl std::future::Future<Output = Result<(), crate::Error>> + Send;
 }
 
 macro_rules! impl_has_relation {
@@ -165,6 +198,16 @@ macro_rules! impl_has_relation {
                 >>::get_entity_relations_as_batch_inner(conn, left_entities, true, false)
                 .await
             }
+
+            async fn delete_relations(
+                &self,
+                conn: &mut sqlx::SqliteConnection,
+            ) -> Result<(), crate::Error> {
+                <Self as crate::models::musicbrainz::relations::traits::HasRelation<
+                    $right_entity,
+                >>::delete_relations_inner(self, conn, true, false)
+                .await
+            }
         }
     };
 }
@@ -200,6 +243,16 @@ macro_rules! impl_reverse_has_relation {
                 left_entities: &'r [&'r Self],
             ) -> Result<HashMap<i64, (&'r &'r Self, Vec<Relation<Self, $left_entity>>)>, crate::Error> {
                 <Self as crate::models::musicbrainz::relations::traits::HasRelation<$left_entity>>::get_entity_relations_as_batch_inner(conn, left_entities, false, true).await
+            }
+
+            async fn delete_relations(
+                &self,
+                conn: &mut sqlx::SqliteConnection,
+            ) -> Result<(), crate::Error> {
+                <Self as crate::models::musicbrainz::relations::traits::HasRelation<
+                    $right_entity,
+                >>::delete_relations_inner(self, conn, false, true)
+                .await
             }
         }
     };
@@ -244,6 +297,16 @@ macro_rules! impl_has_self_relation {
                 <Self as crate::models::musicbrainz::relations::traits::HasRelation<
                     $right_entity,
                 >>::get_entity_relations_as_batch_inner(conn, left_entities, true, true)
+                .await
+            }
+
+            async fn delete_relations(
+                &self,
+                conn: &mut sqlx::SqliteConnection,
+            ) -> Result<(), crate::Error> {
+                <Self as crate::models::musicbrainz::relations::traits::HasRelation<
+                    $right_entity,
+                >>::delete_relations_inner(self, conn, true, true)
                 .await
             }
         }

@@ -3,6 +3,7 @@ use musicbrainz_rs_nova::{entity::label::Label as MBLabel, Fetch};
 use crate::{api::SaveToDatabase, models::musicbrainz::label::Label};
 
 impl Label {
+    // TODO: #51 Fix missing relations
     pub async fn fetch_and_save(
         conn: &mut sqlx::SqliteConnection,
         mbid: &str,

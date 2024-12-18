@@ -45,6 +45,8 @@ impl Artist {
         let new_value = Artist::save_api_response(&mut *conn, value.clone()).await?;
 
         if let Some(relations) = value.relations {
+            // Remove all the old relations
+            new_value.delete_all_relations(conn).await?;
             for rel in relations {
                 match new_value.save_relation(conn, rel).await {
                     Ok(_) => {}
