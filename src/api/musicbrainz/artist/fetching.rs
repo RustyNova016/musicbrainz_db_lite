@@ -14,6 +14,7 @@ impl Artist {
     ) -> Result<Option<Self>, Error> {
         debug!(mbid = mbid);
 
+        // TODO: #51 Fix missing relations
         let data = MBArtist::fetch()
             .id(mbid)
             .with_aliases()
