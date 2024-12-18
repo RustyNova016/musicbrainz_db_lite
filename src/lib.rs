@@ -2,6 +2,8 @@ pub mod api;
 pub mod database;
 pub mod error;
 pub mod models;
+#[cfg(test)]
+pub mod testing;
 pub mod utils;
 
 pub use crate::error::Error;
