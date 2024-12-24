@@ -1,11 +1,11 @@
+use crate::ClientConnection;
 use crate::{api::SaveToDatabase, models::musicbrainz::recording::Recording, Error};
 use musicbrainz_rs_nova::{entity::recording::Recording as MSRecording, Fetch};
-use sqlx::SqliteConnection;
 
 impl Recording {
     /// Fetch a recording with all relationships. Then save to the db
-    pub async fn fetch_and_save(
-        conn: &mut SqliteConnection,
+    pub async fn fetch_and_save<'l>(
+        conn: &'l mut ClientConnection<'l>,
         mbid: &str,
     ) -> Result<Option<Recording>, Error> {
         let data = MSRecording::fetch()
@@ -35,8 +35,10 @@ impl Recording {
             // Extra relations
             .with_work_level_relations()
             .with_medias()
-            .execute()
+            .execute_with_client(conn.get_mb_client())
             .await;
+
+        let conn = conn.as_sqlx_connection();
 
         match data {
             Ok(data) => {

@@ -3,11 +3,12 @@ use musicbrainz_rs_nova::Fetch;
 
 use crate::api::SaveToDatabase;
 use crate::models::musicbrainz::work::Work;
+use crate::ClientConnection;
 use crate::Error;
 
 impl Work {
-    pub async fn fetch_and_save(
-        conn: &mut sqlx::SqliteConnection,
+    pub async fn fetch_and_save<'l>(
+        conn: &'l mut ClientConnection<'l>,
         mbid: &str,
     ) -> Result<Option<Self>, Error> {
         let data = MBWork::fetch()
@@ -22,9 +23,11 @@ impl Work {
             .with_work_relations()
             .with_label_relations()
             .with_recording_relations()
-            .execute()
+            .execute_with_client(conn.get_mb_client())
             .await;
 
+        let conn = conn.as_sqlx_connection();
+        
         match data {
             Ok(data) => {
                 let mut data = data.save(conn).await?;

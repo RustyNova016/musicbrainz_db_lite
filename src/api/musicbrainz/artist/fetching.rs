@@ -1,15 +1,15 @@
 use musicbrainz_rs_nova::entity::artist::Artist as MBArtist;
 use musicbrainz_rs_nova::Fetch;
-use sqlx::SqliteConnection;
 use tracing::debug;
 
 use crate::api::SaveToDatabase;
+use crate::database::client::client_connection::ClientConnection;
 use crate::models::musicbrainz::artist::Artist;
 use crate::Error;
 
 impl Artist {
-    pub async fn fetch_and_save(
-        conn: &mut SqliteConnection,
+    pub async fn fetch_and_save<'l>(
+        conn: &'l mut ClientConnection<'l>,
         mbid: &str,
     ) -> Result<Option<Self>, Error> {
         debug!(mbid = mbid);
@@ -34,8 +34,10 @@ impl Artist {
             .with_work_relations()
             .with_works()
             .with_medias()
-            .execute()
+            .execute_with_client(conn.get_mb_client())
             .await;
+
+        let conn = conn.as_sqlx_connection();
 
         match data {
             Ok(data) => {

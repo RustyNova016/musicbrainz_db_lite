@@ -1,15 +1,17 @@
-use crate::{
-    api::SaveToDatabase,
-    models::musicbrainz::release::{Release, Track},
-    Error,
-};
-use musicbrainz_rs_nova::{entity::release::Release as MBRelease, Fetch};
-use sqlx::Connection;
+use musicbrainz_rs_nova::entity::release::Release as MBRelease;
+use musicbrainz_rs_nova::Fetch as _;
+use sqlx::Acquire as _;
 use sqlx::SqliteConnection;
 
+use crate::api::SaveToDatabase;
+use crate::models::musicbrainz::release::Release;
+use crate::models::musicbrainz::release::Track;
+use crate::ClientConnection;
+use crate::Error;
+
 impl Release {
-    pub async fn fetch_and_save(
-        conn: &mut SqliteConnection,
+    pub async fn fetch_and_save<'l>(
+        conn: &'l mut ClientConnection<'l>,
         mbid: &str,
     ) -> Result<Option<Self>, Error> {
         let data = MBRelease::fetch()
@@ -29,8 +31,10 @@ impl Release {
             .with_url_relations()
             .with_work_level_relations()
             .with_work_relations()
-            .execute()
+            .execute_with_client(conn.get_mb_client())
             .await;
+
+        let conn = conn.as_sqlx_connection();
 
         match data {
             Ok(data) => {

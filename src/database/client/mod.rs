@@ -1,15 +1,24 @@
 use core::str::FromStr;
 
 use std::fs::File;
+use std::sync::Arc;
 
+use musicbrainz_rs_nova::client::MusicBrainzClient;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions};
-use sqlx::{Pool, Sqlite};
+use sqlx::Connection as _;
+use sqlx::SqliteConnection;
+use tokio::sync::RwLock;
 use std::time::Duration;
 
+use crate::ClientConnection;
 use crate::Error;
 
+pub mod client_connection;
+
 pub struct DBClient {
-    pub connection: Pool<Sqlite>,
+    pub connection: Arc<RwLock<SqliteConnection>>,
+
+    pub musicbrainz_client: MusicBrainzClient,
 }
 
 impl DBClient {
@@ -19,13 +28,18 @@ impl DBClient {
             .journal_mode(SqliteJournalMode::Wal)
             .busy_timeout(Duration::from_millis(60000));
 
-        let connection = SqlitePoolOptions::new()
-            .acquire_timeout(Duration::from_millis(60000))
-            .connect_lazy_with(optconn);
+        let mut connection = SqliteConnection::connect_with(&optconn).await?;
 
-        musicbrainz_db_lite_schema::create_and_migrate(&mut *connection.acquire().await?).await?;
+        musicbrainz_db_lite_schema::create_and_migrate(&mut connection).await?;
 
-        Ok(Self { connection })
+        Ok(Self {
+            connection: Arc::new(RwLock::new(connection)),
+            musicbrainz_client: Default::default(),
+        })
+    }
+
+    pub async fn a(&self) {
+        self.connection.write().await.begin().await.unwrap()
     }
 
     /// Create the database file and the database
@@ -38,7 +52,7 @@ impl DBClient {
     }
 
     pub async fn create_database(&self) -> Result<(), Error> {
-        musicbrainz_db_lite_schema::create_and_migrate(&mut *self.connection.acquire().await?)
+        musicbrainz_db_lite_schema::create_and_migrate(&mut self.connection)
             .await?;
 
         Ok(())
@@ -53,6 +67,7 @@ impl DBClient {
             connection: SqlitePoolOptions::new()
                 .acquire_timeout(Duration::from_millis(60000))
                 .connect_lazy_with(optconn),
+            musicbrainz_client: Default::default(),
         })
     }
 
@@ -63,6 +78,21 @@ impl DBClient {
     }
 }
 
+pub trait Client {
+    async fn acquire<'l>(&mut  self) -> Result<&mut sqlx::SqliteConnection, crate::Error>;
+
+    fn get_mb_client(&self) -> &MusicBrainzClient;
+}
+
+impl Client for DBClient {
+    async fn acquire<'l>(& mut self) -> Result<&mut sqlx::SqliteConnection, crate::Error> {
+        Ok(self.connection.write().await.acquire().await?)
+    }
+
+    fn get_mb_client(&self) -> &MusicBrainzClient {
+        &self.musicbrainz_client
+    }
+}
 mod tests {
     use chrono::Utc;
 

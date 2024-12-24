@@ -1,3 +1,4 @@
+pub mod connection;
 pub mod date_utils;
 pub mod extensions;
 pub mod macros;

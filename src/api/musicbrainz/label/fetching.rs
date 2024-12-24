@@ -1,10 +1,11 @@
 use musicbrainz_rs_nova::{entity::label::Label as MBLabel, Fetch};
 
+use crate::ClientConnection;
 use crate::{api::SaveToDatabase, models::musicbrainz::label::Label};
 
 impl Label {
-    pub async fn fetch_and_save(
-        conn: &mut sqlx::SqliteConnection,
+    pub async fn fetch_and_save<'l>(
+        conn: &'l mut ClientConnection<'l>,
         mbid: &str,
     ) -> Result<Option<Self>, crate::Error> {
         let data = MBLabel::fetch()
@@ -21,8 +22,10 @@ impl Label {
             .with_releases()
             .with_tags()
             .with_url_relations()
-            .execute()
+            .execute_with_client(conn.get_mb_client())
             .await;
+
+        let conn = conn.as_sqlx_connection();
 
         match data {
             Ok(data) => {
