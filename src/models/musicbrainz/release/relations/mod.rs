@@ -1,8 +1,11 @@
-pub mod recording;
+pub mod label_infos;
 use sqlx::SqliteConnection;
 
-use super::{LabelInfo, Media, Release};
+use super::Media;
+use super::Release;
 
+pub mod labels;
+pub mod recording;
 pub mod release_group;
 
 impl Release {
@@ -28,29 +31,4 @@ impl Release {
         .fetch_all(conn)
         .await?)
     }
-
-    pub async fn get_label_infos_or_fetch(
-        &self,
-        conn: &mut SqliteConnection,
-    ) -> Result<Vec<LabelInfo>, crate::Error> {
-        // First, make sure all the data of the entity is in the database
-        let id = self.get_or_fetch_as_complete(conn).await?.id;
-
-        // Next, get all the children
-        Ok(sqlx::query_as!(
-            LabelInfo,
-            "SELECT
-                    label_infos.*
-                FROM 
-                    releases
-                    INNER JOIN label_infos ON releases.id = label_infos.release
-                WHERE
-                    releases.id = ?",
-            id
-        )
-        .fetch_all(conn)
-        .await?)
-    }
 }
-
-impl Media {}
