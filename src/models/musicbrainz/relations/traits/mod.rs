@@ -1,3 +1,4 @@
+pub mod self_relation;
 pub trait HasRelation<U>
 where
     Self: RowId + HasTable + Sized + Send + Unpin + Clone + Sync,
@@ -258,65 +259,11 @@ macro_rules! impl_reverse_has_relation {
     };
 }
 
-macro_rules! impl_has_self_relation {
-    ($left_entity: ty, $right_entity: ty) => {
-        impl crate::models::musicbrainz::relations::traits::HasRelation<$right_entity>
-            for $left_entity
-        {
-            const RELATION_TABLE: &str = const_format::formatcp!(
-                "l_{}_{}",
-                <$left_entity>::TABLE_NAME,
-                <$right_entity>::TABLE_NAME
-            );
-
-            fn get_entity0_id(&self, _other: &$right_entity) -> i64 {
-                self.get_row_id()
-            }
-
-            fn get_entity1_id(&self, other: &$right_entity) -> i64 {
-                other.get_row_id()
-            }
-
-            async fn get_entity_relations(
-                &self,
-                conn: &mut sqlx::SqliteConnection,
-            ) -> Result<Vec<Relation<Self, $right_entity>>, crate::Error> {
-                <Self as crate::models::musicbrainz::relations::traits::HasRelation<
-                    $right_entity,
-                >>::get_entity_relations_inner(self, conn, true, true)
-                .await
-            }
-
-            async fn get_entity_relations_as_batch<'r>(
-                conn: &mut sqlx::SqliteConnection,
-                left_entities: &'r [&'r Self],
-            ) -> Result<
-                HashMap<i64, (&'r &'r Self, Vec<Relation<Self, $right_entity>>)>,
-                crate::Error,
-            > {
-                <Self as crate::models::musicbrainz::relations::traits::HasRelation<
-                    $right_entity,
-                >>::get_entity_relations_as_batch_inner(conn, left_entities, true, true)
-                .await
-            }
-
-            async fn delete_relations(
-                &self,
-                conn: &mut sqlx::SqliteConnection,
-            ) -> Result<(), crate::Error> {
-                <Self as crate::models::musicbrainz::relations::traits::HasRelation<
-                    $right_entity,
-                >>::delete_relations_inner(self, conn, true, true)
-                .await
-            }
-        }
-    };
-}
-
 use std::collections::HashMap;
 
 pub(crate) use impl_reverse_has_relation;
 use itertools::Itertools as _;
+use self_relation::impl_has_self_relation;
 
 use crate::models::musicbrainz::artist::Artist;
 use crate::models::musicbrainz::genre::Genre;

@@ -66,3 +66,21 @@ where
         self.get_entity_inner(conn, "1").await
     }
 }
+
+impl<T> Relation<T, T>
+where
+    T: for<'a> FromRow<'a, SqliteRow> + Send + Unpin + HasRelation<T>,
+{
+    /// The other entity of the relationship
+    pub async fn get_other_entity(
+        &self,
+        conn: &mut sqlx::SqliteConnection,
+        id: i64,
+    ) -> Result<T, crate::Error> {
+        if self.entity0 == id {
+            self.get_entity_1_as_left(conn).await
+        } else {
+            self.get_entity_0_as_left(conn).await
+        }
+    }
+}
