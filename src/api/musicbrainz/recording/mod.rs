@@ -16,16 +16,17 @@ use musicbrainz_rs_nova::entity::release::Release as MBRelease;
 use sqlx::SqliteConnection;
 
 impl Recording {
-    pub async fn save_api_response(
-        conn: &mut SqliteConnection,
+    pub async fn save_api_response<'e, E>(
+        conn: E,
         value: MBRecording,
-    ) -> Result<Self, crate::Error> {
-        Recording::add_redirect_mbid(conn, &value.id).await?;
-        Recording::find_by_mbid(conn, &value.id) // Get old data
+    ) -> Result<Self, crate::Error>  where E: sqlx::Acquire<'e> {
+        let mut conn = conn.acquire().await?;
+        Recording::add_redirect_mbid(&mut conn, &value.id).await?;
+        Recording::find_by_mbid(&mut conn, &value.id) // Get old data
             .await?
             .unwrap_or_else(Recording::default) // Or create new
             .merge_api_data(value.clone()) // Merge new data if it exists
-            .upsert(conn) // Upsert the new data
+            .upsert(&mut conn) // Upsert the new data
             .await
     }
 

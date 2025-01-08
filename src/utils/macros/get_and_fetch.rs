@@ -3,14 +3,14 @@ macro_rules! impl_get_and_fetch {
         impl $row_struct {
             /// Get the entity from its MBID, and if it isn't cached in the database, fetch it
             pub async fn get_or_fetch<'l>(
-                conn: &'l mut crate::ClientConnection<'l>,
+                client: &crate::DBClient,
                 mbid: &str,
             ) -> Result<Option<Self>, crate::Error> {
-                let data = Self::find_by_mbid(conn.connection, mbid).await?;
+                let data = Self::find_by_mbid(client.acquire().await, mbid).await?;
 
                 match data {
                     Some(val) => Ok(Some(val)),
-                    None => Self::fetch_and_save(conn, mbid).await,
+                    None => Self::fetch_and_save(client, mbid).await,
                 }
             }
         }

@@ -4,10 +4,10 @@ macro_rules! impl_redirections {
     ($row_struct: ty, $entity_table_name: expr) => {
         impl $row_struct {
             /// Add an mbid in the redirect pool if it isn't in yet.
-            pub async fn add_redirect_mbid(
-                conn: &mut sqlx::SqliteConnection,
+            pub async fn add_redirect_mbid<'e, E>(
+                conn: E,
                 mbid: &str,
-            ) -> Result<(), sqlx::Error> {
+            ) -> Result<(), sqlx::Error> where E: sqlx::SqliteExecutor<'e>{
                 sqlx::query(concat!(
                     "INSERT OR IGNORE INTO `",
                     $entity_table_name,
@@ -38,10 +38,10 @@ macro_rules! impl_redirections {
                 Ok(())
             }
 
-            pub async fn find_by_mbid(
-                conn: &mut sqlx::SqliteConnection,
+            pub async fn find_by_mbid<'e, E>(
+                conn: E,
                 mbid: &str,
-            ) -> Result<Option<$row_struct>, sqlx::Error> {
+            ) -> Result<Option<$row_struct>, sqlx::Error> where E: sqlx::SqliteExecutor<'e> {
                 sqlx::query_as(&format!(
                     r#"
                     SELECT

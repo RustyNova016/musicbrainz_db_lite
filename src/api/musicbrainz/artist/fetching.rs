@@ -4,14 +4,12 @@ use tracing::debug;
 
 use crate::api::SaveToDatabase;
 use crate::database::client::client_connection::ClientConnection;
+use crate::database::client::DBClient;
 use crate::models::musicbrainz::artist::Artist;
 use crate::Error;
 
 impl Artist {
-    pub async fn fetch_and_save<'l>(
-        conn: &'l mut ClientConnection<'l>,
-        mbid: &str,
-    ) -> Result<Option<Self>, Error> {
+    pub async fn fetch_and_save<'l>(conn: &DBClient, mbid: &str) -> Result<Option<Self>, Error> {
         debug!(mbid = mbid);
 
         let data = MBArtist::fetch()
@@ -34,10 +32,10 @@ impl Artist {
             .with_work_relations()
             .with_works()
             .with_medias()
-            .execute_with_client(conn.get_mb_client())
+            .execute_with_client(&conn.musicbrainz_client)
             .await;
 
-        let conn = conn.as_sqlx_connection();
+        let conn = &mut *conn.acquire().await;
 
         match data {
             Ok(data) => {
@@ -57,19 +55,17 @@ impl Artist {
     }
 }
 
+
+
 #[cfg(test)]
 mod tests {
-    use musicbrainz_db_lite_schema::create_and_migrate;
-
     use crate::database::client::DBClient;
     use crate::models::musicbrainz::artist::Artist;
 
     #[tokio::test]
     #[serial_test::serial]
     async fn should_insert_artist() {
-        let client = DBClient::connect_in_memory().await.unwrap();
-        let conn = &mut *client.connection.acquire().await.unwrap();
-        create_and_migrate(conn).await.unwrap();
+        let client = DBClient::test_client().await.unwrap();
 
         // Test values. Feel free to add edge cases here
         let test_values = vec![
@@ -78,7 +74,7 @@ mod tests {
         ];
 
         for test in test_values {
-            let value = Artist::get_or_fetch(conn, test).await.unwrap();
+            let value = Artist::get_or_fetch(&client, test).await.unwrap();
 
             assert!(value.is_some_and(|r| r.full_update_date.is_some()))
         }

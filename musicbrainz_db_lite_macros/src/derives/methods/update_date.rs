@@ -52,9 +52,10 @@ pub fn impl_update_date(struct_name: &Ident, table_name: &str, pk: &str) -> Toke
         }
 
         /// Get from the database and perform an update if the data isn't fully present
-        pub async fn get_or_fetch_as_complete_from_mbid(conn: &mut sqlx::SqliteConnection, mbid: &str) -> Result<Option<Self>, crate::Error> {
-            match Self::find_by_mbid(conn, mbid).await? {
+        pub async fn get_or_fetch_as_complete_from_mbid(client: &crate::DBClient, mbid: &str) -> Result<Option<Self>, crate::Error> {
+            match Self::find_by_mbid(&client, mbid).await? {
                 Some(data) => {
+                    let conn = &mut *client.acquire().await;
                     if data.full_update_date.is_none() {
                         return Ok(Some(data.refetch(conn).await?))
                     }

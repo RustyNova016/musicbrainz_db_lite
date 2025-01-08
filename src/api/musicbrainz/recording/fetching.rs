@@ -1,11 +1,11 @@
-use crate::ClientConnection;
+use crate::DBClient;
 use crate::{api::SaveToDatabase, models::musicbrainz::recording::Recording, Error};
 use musicbrainz_rs_nova::{entity::recording::Recording as MSRecording, Fetch};
 
 impl Recording {
     /// Fetch a recording with all relationships. Then save to the db
     pub async fn fetch_and_save<'l>(
-        conn: &'l mut ClientConnection<'l>,
+        conn: &DBClient,
         mbid: &str,
     ) -> Result<Option<Recording>, Error> {
         let data = MSRecording::fetch()
@@ -35,10 +35,10 @@ impl Recording {
             // Extra relations
             .with_work_level_relations()
             .with_medias()
-            .execute_with_client(conn.get_mb_client())
+            .execute_with_client(&conn.musicbrainz_client)
             .await;
 
-        let conn = conn.as_sqlx_connection();
+        let conn = &mut *conn.acquire().await;
 
         match data {
             Ok(data) => {
@@ -68,9 +68,7 @@ mod tests {
     #[tokio::test]
     #[serial_test::serial]
     async fn should_insert_recording() {
-        let client = DBClient::connect_in_memory().await.unwrap();
-        let conn = &mut *client.connection.acquire().await.unwrap();
-        create_and_migrate(conn).await.unwrap();
+        let client = DBClient::test_client().await.unwrap();
 
         // Test values. Feel free to add edge cases here
         let test_values = vec![
@@ -79,14 +77,14 @@ mod tests {
         ];
 
         for test in test_values {
-            let value = Recording::get_or_fetch(conn, test)
+            let value = Recording::get_or_fetch(&client, test)
                 .await
                 .unwrap()
                 .expect("The recording should be there");
 
             assert!(value.full_update_date.is_some());
 
-            let credits = value.get_artist_credits_or_fetch(conn).await.unwrap();
+            let credits = value.get_artist_credits_or_fetch(&mut *client.acquire().await).await.unwrap();
             assert!(!credits.1.is_empty())
         }
     }

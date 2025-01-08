@@ -1,12 +1,14 @@
 use core::ops::Deref;
 
+use sqlx::SqliteExecutor;
+
 use super::find_by::FindBy;
 
 pub trait FindByMBID: Sized {
-    fn find_by_mbid(
-        conn: &mut sqlx::SqliteConnection,
+    fn find_by_mbid<E>(
+        conn: E,
         id: &str,
-    ) -> impl std::future::Future<Output = Result<Option<Self>, crate::Error>> + Send;
+    )   -> impl std::future::Future<Output = Result<Option<Self>, crate::Error>> + Send where E: for<'e> SqliteExecutor<'e>;
 }
 
 pub struct MBID(String);

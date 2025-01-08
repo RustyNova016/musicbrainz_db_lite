@@ -14,7 +14,7 @@ macro_rules! impl_artist_credits {
 
             pub async fn get_artist_credits_or_fetch(
                 &self,
-                conn: &mut sqlx::SqliteConnection,
+                conn: &mut sqlx::SqliteConnection, 
             ) -> Result<crate::models::musicbrainz::artist_credit::ArtistCredits, crate::Error> {
 
                 match self.artist_credit {

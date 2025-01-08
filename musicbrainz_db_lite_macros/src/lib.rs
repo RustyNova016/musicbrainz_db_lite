@@ -57,7 +57,7 @@ pub fn derive_upsert(item: TokenStream) -> TokenStream {
             quote! {
                 #[automatically_derived]
                 impl #struct_identifier {
-                    pub async fn upsert(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error> {
+                    pub async fn upsert<'e, E>(&self, conn: E) -> Result<Self, crate::Error> where E: sqlx::SqliteExecutor<'e> {
                         let mut query = sqlx::query_as(#sql_statement);
                         #binds
 

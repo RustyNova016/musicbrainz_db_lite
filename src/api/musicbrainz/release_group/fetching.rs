@@ -3,12 +3,12 @@ use musicbrainz_rs_nova::Fetch;
 
 use crate::api::SaveToDatabase;
 use crate::models::musicbrainz::release_group::ReleaseGroup;
-use crate::ClientConnection;
+use crate::DBClient;
 use crate::Error;
 
 impl ReleaseGroup {
     pub async fn fetch_and_save<'l>(
-        conn: &'l mut ClientConnection<'l>,
+        conn: &DBClient,
         mbid: &str,
     ) -> Result<Option<Self>, Error> {
         let data = MBReleaseGroup::fetch()
@@ -24,10 +24,10 @@ impl ReleaseGroup {
             .with_series_relations()
             .with_tags()
             .with_url_relations()
-            .execute_with_client(conn.get_mb_client())
+            .execute_with_client(&conn.musicbrainz_client)
             .await;
 
-        let conn = conn.as_sqlx_connection();
+        let conn = &mut *conn.acquire().await;
 
         match data {
             Ok(data) => {
@@ -68,9 +68,7 @@ mod tests {
     #[tokio::test]
     #[serial_test::serial]
     async fn should_insert_work() {
-        let client = DBClient::connect_in_memory().await.unwrap();
-        let conn = &mut *client.connection.acquire().await.unwrap();
-        create_and_migrate(conn).await.unwrap();
+        let client = DBClient::test_client().await.unwrap();
 
         // Test values. Feel free to add edge cases here
         let test_values = vec![
@@ -78,7 +76,7 @@ mod tests {
         ];
 
         for test in test_values {
-            let value = ReleaseGroup::get_or_fetch(conn, test).await.unwrap();
+            let value = ReleaseGroup::get_or_fetch(&client, test).await.unwrap();
 
             assert!(value.is_some_and(|r| r.full_update_date.is_some()))
         }

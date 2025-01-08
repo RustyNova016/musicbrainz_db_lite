@@ -6,14 +6,11 @@ use sqlx::SqliteConnection;
 use crate::api::SaveToDatabase;
 use crate::models::musicbrainz::release::Release;
 use crate::models::musicbrainz::release::Track;
-use crate::ClientConnection;
+use crate::DBClient;
 use crate::Error;
 
 impl Release {
-    pub async fn fetch_and_save<'l>(
-        conn: &'l mut ClientConnection<'l>,
-        mbid: &str,
-    ) -> Result<Option<Self>, Error> {
+    pub async fn fetch_and_save<'l>(conn: &DBClient, mbid: &str) -> Result<Option<Self>, Error> {
         let data = MBRelease::fetch()
             .id(mbid)
             .with_aliases()
@@ -31,10 +28,10 @@ impl Release {
             .with_url_relations()
             .with_work_level_relations()
             .with_work_relations()
-            .execute_with_client(conn.get_mb_client())
+            .execute_with_client(&conn.musicbrainz_client)
             .await;
 
-        let conn = conn.as_sqlx_connection();
+        let conn = &mut *conn.acquire().await;
 
         match data {
             Ok(data) => {
@@ -81,15 +78,13 @@ mod tests {
     #[tokio::test]
     #[serial_test::serial]
     async fn should_insert_release() {
-        let client = DBClient::connect_in_memory_and_create().await.unwrap();
-        let conn = &mut *client.connection.acquire().await.unwrap();
-        create_and_migrate(conn).await.unwrap();
+        let client = DBClient::test_client().await.unwrap();
 
         // Test values. Feel free to add edge cases here
         let test_values = vec!["daf6e333-b491-490a-9444-8888cb08b141"];
 
         for test in test_values {
-            let value = Release::get_or_fetch(conn, test).await.unwrap();
+            let value = Release::get_or_fetch(&client, test).await.unwrap();
 
             assert!(value.is_some_and(|r| r.full_update_date.is_some()))
         }
@@ -98,8 +93,7 @@ mod tests {
     #[tokio::test]
     #[serial_test::serial]
     async fn should_full_insert_release() {
-        let client = DBClient::connect_in_memory_and_create().await.unwrap();
-        let conn = &mut *client.connection.acquire().await.unwrap();
+        let client = DBClient::test_client().await.unwrap();
 
         // Test values. Feel free to add edge cases here
         // (Recording, Release)
@@ -110,16 +104,21 @@ mod tests {
 
         for (recording_id, release_id) in test_values {
             // Get the recording to partially pull release info
-            Recording::fetch_and_save(conn, recording_id).await.unwrap();
+            Recording::fetch_and_save(&client, recording_id)
+                .await
+                .unwrap();
 
-            let mut release = Release::get_or_fetch(conn, release_id)
+            let mut release = Release::get_or_fetch(&client, release_id)
                 .await
                 .unwrap()
                 .unwrap();
 
             assert!(release.full_update_date.is_none());
 
-            release.refetch_and_load(conn).await.unwrap();
+            release
+                .refetch_and_load(&mut *client.acquire().await)
+                .await
+                .unwrap();
 
             assert!(release.full_update_date.is_some());
         }

@@ -1,13 +1,19 @@
+use core::future::ready;
+use core::future::Ready;
 use std::sync::Arc;
 
 use async_fn_stream::try_fn_stream;
+use futures::future::BoxFuture;
 use futures::TryStreamExt as _;
 use musicbrainz_rs_nova::client::MusicBrainzClient;
 use sqlx::Acquire;
+use sqlx::Connection;
 use sqlx::Executor;
 use sqlx::Sqlite;
 use sqlx::Transaction;
 use tokio::sync::RwLock;
+
+use super::sqlx_utils::AcquireExec;
 
 /// A database client holding a transaction
 pub struct TransactionClient<'l> {
@@ -41,12 +47,20 @@ impl<'l> TransactionClient<'l> {
 pub struct DbConnection(Arc<RwLock<sqlx::SqliteConnection>>);
 
 impl DbConnection {
-    pub async fn aquire(&self) -> tokio::sync::RwLockWriteGuard<'_, sqlx::SqliteConnection> {
+    pub fn new(connection: sqlx::SqliteConnection) -> Self {
+        Self(Arc::new(RwLock::new(connection)))
+    }
+
+    pub async fn acquire_guarded(
+        &self,
+    ) -> tokio::sync::RwLockWriteGuard<'_, sqlx::SqliteConnection> {
         self.0.write().await
     }
 }
 
-impl<'c> Executor<'c> for &'c DbConnection {
+
+
+impl<'c> Executor<'c> for DbConnection {
     type Database = Sqlite;
 
     fn fetch_many<'e, 'q: 'e, E>(
@@ -103,7 +117,7 @@ impl<'c> Executor<'c> for &'c DbConnection {
     where
         'c: 'e,
     {
-        todo!()
+        Box::pin(async move { self.0.write().await.prepare_with(sql, parameters).await })
     }
 
     fn describe<'e, 'q: 'e>(
@@ -113,6 +127,6 @@ impl<'c> Executor<'c> for &'c DbConnection {
     where
         'c: 'e,
     {
-        todo!()
+        Box::pin(async move { self.0.write().await.describe(sql).await })
     }
 }
