@@ -17,11 +17,11 @@ use sqlx::SqliteConnection;
 
 impl Recording {
     pub async fn save_api_response<'e, E>(
-        conn: E,
+        conn: &'e mut E,
         value: MBRecording,
-    ) -> Result<Self, crate::Error>  where E: sqlx::Acquire<'e> {
-        let mut conn = conn.acquire().await?;
-        Recording::add_redirect_mbid(&mut conn, &value.id).await?;
+    ) -> Result<Self, crate::Error>  where &'e mut E: sqlx::Acquire<'e> + 'e {
+        conn.acquire();
+        Recording::add_redirect_mbid(&mut *conn, &value.id).await?;
         Recording::find_by_mbid(&mut conn, &value.id) // Get old data
             .await?
             .unwrap_or_else(Recording::default) // Or create new
