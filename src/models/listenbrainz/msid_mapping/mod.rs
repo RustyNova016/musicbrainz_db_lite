@@ -1,3 +1,4 @@
+use sqlx::QueryBuilder;
 use sqlx::{Executor, Sqlite, SqliteConnection};
 
 #[derive(Debug, Clone)]
@@ -31,12 +32,13 @@ impl MsidMapping {
 
     /// Set the MBID mapping for an msid for user
     pub async fn set_user_mapping(
-        client: impl Executor<'_, Database = Sqlite>,
+        client: impl sqlx::Acquire<'_, Database = Sqlite>,
         user_id: i64,
         msid: String,
         mbid: String,
     ) -> Result<(), sqlx::Error> {
         //println!("mapping {} to {}", msid, mbid);
+
 
         sqlx::query!("INSERT INTO `msid_mapping` VALUES (NULL, ?, ?, ?, NULL) ON CONFLICT DO UPDATE SET `recording_mbid` = ?", msid, mbid, user_id, mbid).execute(client).await?;
         Ok(())

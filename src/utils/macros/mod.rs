@@ -5,16 +5,16 @@ macro_rules! impl_redirections {
         impl $row_struct {
             /// Add an mbid in the redirect pool if it isn't in yet.
             pub async fn add_redirect_mbid<'e, E>(
-                conn: &mut E,
+                conn: &'e E,
                 mbid: &str,
-            ) -> Result<(), sqlx::Error> where &'e mut E: sqlx::Acquire<'e> + 'e{
+            ) -> Result<(), sqlx::Error> where &'e E: sqlx::SqliteExecutor<'e>{
                 sqlx::query(concat!(
                     "INSERT OR IGNORE INTO `",
                     $entity_table_name,
                     "_gid_redirect` VALUES (?, NULL, 0)"
                 ))
                 .bind(mbid)
-                .execute(&mut *sqlx::Acquire::acquire(conn).await?)
+                .execute(conn)
                 .await?;
                 Ok(())
             }

@@ -13,8 +13,6 @@ use sqlx::Sqlite;
 use sqlx::Transaction;
 use tokio::sync::RwLock;
 
-use super::sqlx_utils::AcquireExec;
-
 /// A database client holding a transaction
 pub struct TransactionClient<'l> {
     connection: Transaction<'l, Sqlite>,

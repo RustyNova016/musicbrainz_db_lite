@@ -7,12 +7,9 @@ pub mod join_map;
 //pub mod query_builder;
 pub mod entity_relations;
 
-/// Trait for structs that implement a way to acquire a executor, but does **not already** implement executor themselves.
-pub trait AcquireExec<'c> {
-    fn acquire_exec<'e>(self) -> BoxFuture<'static, Result<impl SqliteExecutor<'e>, sqlx::Error>>;
-}
+pub trait ExecutorRef<'e> where &'e Self: SqliteExecutor<'e> + 'e {}
 
-
+pub trait 
 
 // impl<'l, 'c, T> Executor<'l> for T
 // where

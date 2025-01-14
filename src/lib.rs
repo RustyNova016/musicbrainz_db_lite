@@ -7,6 +7,7 @@ pub mod utils;
 pub use crate::database::client::DBClient;
 pub use crate::error::Error;
 pub use crate::models::shared_traits::RowId;
+pub use crate::utils::sqlx_utils::ExecutorRef;
 
 pub mod musicbrainz {
     pub use musicbrainz_rs_nova::*;
