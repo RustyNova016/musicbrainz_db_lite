@@ -4,9 +4,21 @@ use std::sync::RwLock;
 use musicbrainz_rs_nova::client::MusicBrainzClient;
 use sqlx::{Pool, Sqlite};
 
+use crate::database::client_like::ClientLike;
+
 pub struct DBClient {
     pub connection: Pool<Sqlite>,
-    pub musicbrainz_rs: Arc<RwLock<MusicBrainzClient>>,
+    pub musicbrainz_rs: Arc<MusicBrainzClient>,
+}
+
+impl ClientLike for DBClient {
+    fn get_mb_client(&self) -> &MusicBrainzClient {
+        &self.musicbrainz_rs
+    }
+
+    fn get_executor(&self) -> impl sqlx::SqliteExecutor {
+        self.connection.
+    }
 }
 
 mod tests {
