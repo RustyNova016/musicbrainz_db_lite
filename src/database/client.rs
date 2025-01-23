@@ -2,22 +2,22 @@ use std::sync::Arc;
 use std::sync::RwLock;
 
 use musicbrainz_rs_nova::client::MusicBrainzClient;
-use sqlx::{Pool, Sqlite};
 
 use crate::database::client_like::ClientLike;
+use crate::utils::sqlx_utils::db_connection::DbConnection;
 
 pub struct DBClient {
-    pub connection: Pool<Sqlite>,
+    pub connection: sqlx::SqliteConnection,
     pub musicbrainz_rs: Arc<MusicBrainzClient>,
 }
 
-impl ClientLike for DBClient {
-    fn get_mb_client(&self) -> &MusicBrainzClient {
+impl<'c> ClientLike<'c> for &'c mut DBClient {
+    fn get_mb_client(self) -> &'c MusicBrainzClient {
         &self.musicbrainz_rs
     }
 
-    fn get_executor(&self) -> impl sqlx::SqliteExecutor {
-        self.connection.
+    async fn get_executor(self) -> Result<impl sqlx::SqliteExecutor<'c>, crate::Error> {
+        Ok(DbConnection::new(&mut self.connection))
     }
 }
 
@@ -36,7 +36,7 @@ mod tests {
             client.set_musicbrainz_client(Default::default());
             let path = format!("./tests/results/data_{}.db", Utc::now().timestamp());
             client.create_database_if_missing(Path::new(&path))?;
-            client.read_database(&path)?;
+            client.read_database(&path).await?;
             client.migrate_database().await?;
 
             client.build()
@@ -47,7 +47,7 @@ mod tests {
             client.set_musicbrainz_client(Default::default());
             let path = ":memory:".to_string();
             client.create_database_if_missing(Path::new(&path))?;
-            client.read_database(&path)?;
+            client.read_database(&path).await?;
             client.migrate_database().await?;
 
             client.build()
