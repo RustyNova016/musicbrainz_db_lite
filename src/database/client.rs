@@ -1,80 +1,44 @@
-use core::str::FromStr;
+use std::sync::Arc;
+use std::sync::RwLock;
 
-use std::fs::File;
-
-use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions};
+use musicbrainz_rs_nova::client::MusicBrainzClient;
 use sqlx::{Pool, Sqlite};
-use std::time::Duration;
-
-use crate::Error;
 
 pub struct DBClient {
     pub connection: Pool<Sqlite>,
-}
-
-impl DBClient {
-    /// Connect to a database file. It will also create/migrate the schema on load
-    pub async fn connect(path: &str) -> Result<DBClient, Error> {
-        let optconn = SqliteConnectOptions::from_str(&format!("sqlite:{}", path))?
-            .journal_mode(SqliteJournalMode::Wal)
-            .busy_timeout(Duration::from_millis(60000));
-
-        let connection = SqlitePoolOptions::new()
-            .acquire_timeout(Duration::from_millis(60000))
-            .connect_lazy_with(optconn);
-
-        musicbrainz_db_lite_schema::create_and_migrate(&mut *connection.acquire().await?).await?;
-
-        Ok(Self { connection })
-    }
-
-    /// Create the database file and the database
-    pub async fn create_database_file(path: &str) -> Result<Self, Error> {
-        File::create_new(path).unwrap();
-        let new = Self::connect(path).await?;
-        new.create_database().await?;
-
-        Ok(new)
-    }
-
-    pub async fn create_database(&self) -> Result<(), Error> {
-        musicbrainz_db_lite_schema::create_and_migrate(&mut *self.connection.acquire().await?)
-            .await?;
-
-        Ok(())
-    }
-
-    pub async fn connect_in_memory() -> Result<DBClient, Error> {
-        let optconn = SqliteConnectOptions::from_str("sqlite::memory:")?
-            .journal_mode(SqliteJournalMode::Wal)
-            .busy_timeout(Duration::from_millis(60000));
-
-        Ok(Self {
-            connection: SqlitePoolOptions::new()
-                .acquire_timeout(Duration::from_millis(60000))
-                .connect_lazy_with(optconn),
-        })
-    }
-
-    pub async fn connect_in_memory_and_create() -> Result<DBClient, Error> {
-        let client = Self::connect_in_memory().await?;
-        client.create_database().await?;
-        Ok(client)
-    }
+    pub musicbrainz_rs: Arc<RwLock<MusicBrainzClient>>,
 }
 
 mod tests {
+    use std::path::Path;
+
     use chrono::Utc;
+
+    use crate::database::builder::DBClientBuilder;
 
     use super::DBClient;
 
     impl DBClient {
         pub async fn create_test_file_database() -> Result<Self, crate::Error> {
-            Self::create_database_file(&format!(
-                "./tests/results/data_{}.db",
-                Utc::now().timestamp()
-            ))
-            .await
+            let mut client = DBClientBuilder::default();
+            client.set_musicbrainz_client(Default::default());
+            let path = format!("./tests/results/data_{}.db", Utc::now().timestamp());
+            client.create_database_if_missing(Path::new(&path))?;
+            client.read_database(&path)?;
+            client.migrate_database().await?;
+
+            client.build()
+        }
+
+        pub async fn connect_in_memory_and_create() -> Result<Self, crate::Error> {
+            let mut client = DBClientBuilder::default();
+            client.set_musicbrainz_client(Default::default());
+            let path = ":memory:".to_string();
+            client.create_database_if_missing(Path::new(&path))?;
+            client.read_database(&path)?;
+            client.migrate_database().await?;
+
+            client.build()
         }
     }
 }

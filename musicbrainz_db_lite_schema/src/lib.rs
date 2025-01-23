@@ -1,5 +1,6 @@
 use sqlx::migrate::MigrateError;
-use sqlx::Connection;
+use sqlx::Acquire;
+use sqlx::Sqlite;
 use tables::create_listenbrainz_tables;
 use tables::create_musicbrainz_tables;
 use tables::listenbrainz::generate_listenbrainz_database;
@@ -8,7 +9,10 @@ pub mod tables;
 #[cfg(test)]
 pub mod testing;
 
-pub async fn create_and_migrate(conn: &mut sqlx::SqliteConnection) -> Result<(), MigrateError> {
+pub async fn create_and_migrate<'a, A>(conn: A) -> Result<(), MigrateError>
+where
+    A: Acquire<'a, Database = Sqlite>,
+{
     sqlx::migrate!("./migrations").run(conn).await
 }
 
@@ -16,7 +20,10 @@ pub async fn create_and_migrate(conn: &mut sqlx::SqliteConnection) -> Result<(),
 ///
 /// See `create_and_migrate` to create the database / update it when needed
 #[allow(dead_code)] // It cannot see that it is used in the test below
-async fn create_latest_database(conn: &mut sqlx::SqliteConnection) -> Result<(), sqlx::Error> {
+async fn create_latest_database<'a, A>(conn: A) -> Result<(), sqlx::Error>
+where
+    A: Acquire<'a, Database = Sqlite>,
+{
     let mut trans: sqlx::Transaction<'_, sqlx::Sqlite> = conn.begin().await?;
 
     create_musicbrainz_tables(&mut trans).await?;

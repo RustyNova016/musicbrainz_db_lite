@@ -1,3 +1,5 @@
+use std::io;
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -29,4 +31,10 @@ pub enum Error {
     // Fetching Errors
     #[error("Fetching a listen from Listenbrainz resulted in timeout")]
     ListenFetchingTimeout,
+
+    #[error("The client is missing: {0}")]
+    ClientBuildingError(String),
+
+    #[error(transparent)]
+    IOError(#[from] io::Error),
 }

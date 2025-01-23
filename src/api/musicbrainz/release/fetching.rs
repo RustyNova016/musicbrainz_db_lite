@@ -68,8 +68,6 @@ impl Track {
 
 #[cfg(test)]
 mod tests {
-    use musicbrainz_db_lite_schema::create_and_migrate;
-
     use crate::database::client::DBClient;
     use crate::models::musicbrainz::recording::Recording;
     use crate::models::musicbrainz::release::Release;
@@ -79,7 +77,6 @@ mod tests {
     async fn should_insert_release() {
         let client = DBClient::connect_in_memory_and_create().await.unwrap();
         let conn = &mut *client.connection.acquire().await.unwrap();
-        create_and_migrate(conn).await.unwrap();
 
         // Test values. Feel free to add edge cases here
         let test_values = vec!["daf6e333-b491-490a-9444-8888cb08b141"];

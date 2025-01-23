@@ -56,17 +56,14 @@ impl SaveToDatabase for MBLabel {
 
 #[cfg(test)]
 mod tests {
-    use musicbrainz_db_lite_schema::create_and_migrate;
-
     use crate::database::client::DBClient;
     use crate::models::musicbrainz::label::Label;
 
     #[tokio::test]
     #[serial_test::serial]
     async fn should_insert_label() {
-        let client = DBClient::connect_in_memory().await.unwrap();
+        let client = DBClient::connect_in_memory_and_create().await.unwrap();
         let conn = &mut *client.connection.acquire().await.unwrap();
-        create_and_migrate(conn).await.unwrap();
 
         // Test values. Feel free to add edge cases here
         let test_values = vec![
