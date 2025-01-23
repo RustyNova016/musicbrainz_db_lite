@@ -4,12 +4,13 @@ use sqlx::SqliteConnection;
 use tracing::debug;
 
 use crate::api::SaveToDatabase;
+use crate::database::client_like::ClientLike;
 use crate::models::musicbrainz::artist::Artist;
 use crate::Error;
 
 impl Artist {
     pub async fn fetch_and_save(
-        conn: &mut SqliteConnection,
+        client: impl ClientLike<'_>,
         mbid: &str,
     ) -> Result<Option<Self>, Error> {
         debug!(mbid = mbid);
@@ -35,7 +36,7 @@ impl Artist {
             .with_work_relations()
             .with_works()
             .with_medias()
-            .execute()
+            .execute_with_client(client.get_mb_client())
             .await;
 
         match data {

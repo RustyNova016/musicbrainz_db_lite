@@ -5,6 +5,7 @@ use musicbrainz_rs_nova::client::MusicBrainzClient;
 
 use crate::database::client_like::ClientLike;
 use crate::utils::sqlx_utils::db_connection::DbConnection;
+use crate::utils::sqlx_utils::get_exec::GetExecutor;
 
 pub struct DBClient {
     pub connection: sqlx::SqliteConnection,
@@ -15,7 +16,9 @@ impl<'c> ClientLike<'c> for &'c mut DBClient {
     fn get_mb_client(self) -> &'c MusicBrainzClient {
         &self.musicbrainz_rs
     }
+}
 
+impl<'c> GetExecutor<'c> for &'c mut DBClient  {
     async fn get_executor(self) -> Result<impl sqlx::SqliteExecutor<'c>, crate::Error> {
         Ok(DbConnection::new(&mut self.connection))
     }

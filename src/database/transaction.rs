@@ -8,6 +8,7 @@ use sqlx::Transaction as SqlxTransaction;
 use crate::database::client::DBClient;
 use crate::database::client_like::ClientLike;
 use crate::utils::sqlx_utils::db_connection::DbConnection;
+use crate::utils::sqlx_utils::get_exec::GetExecutor;
 
 pub struct Transaction<'c> {
     pub connection: SqlxTransaction<'c, Sqlite>,
@@ -18,7 +19,9 @@ impl<'c> ClientLike<'c> for &'c mut Transaction<'c> {
     fn get_mb_client(self) -> &'c MusicBrainzClient {
         &self.musicbrainz_rs
     }
+}
 
+impl<'c> GetExecutor<'c> for &'c mut Transaction<'c> {
     async fn get_executor(self) -> Result<impl sqlx::SqliteExecutor<'c>, crate::Error> {
         Ok(DbConnection::new(self.connection.acquire().await?))
     }

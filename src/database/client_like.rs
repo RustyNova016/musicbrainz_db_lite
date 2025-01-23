@@ -2,8 +2,8 @@ use musicbrainz_rs_nova::client::MusicBrainzClient;
 use sqlx::Executor;
 use sqlx::SqliteExecutor;
 
-pub trait ClientLike<'c> {
-    fn get_mb_client(self) -> &'c MusicBrainzClient;
+use crate::utils::sqlx_utils::get_exec::GetExecutor;
 
-    async fn get_executor(self) -> Result<impl sqlx::SqliteExecutor<'c>, crate::Error>;
+pub trait ClientLike<'c>: GetExecutor<'c> {
+    fn get_mb_client(self) -> &'c MusicBrainzClient;
 }
