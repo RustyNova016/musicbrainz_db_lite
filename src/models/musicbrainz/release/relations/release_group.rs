@@ -70,17 +70,14 @@ impl Release {
 
 #[cfg(test)]
 mod tests {
-    use musicbrainz_db_lite_schema::create_and_migrate;
-
     use crate::database::client::DBClient;
     use crate::models::musicbrainz::release::Release;
 
     #[tokio::test]
     #[serial_test::serial]
     async fn should_get_release_group_from_release() {
-        let client = DBClient::connect_in_memory().await.unwrap();
-        let conn = &mut *client.connection.acquire().await.unwrap();
-        create_and_migrate(conn).await.unwrap();
+        let client = DBClient::connect_in_memory_and_create().await.unwrap();
+        let conn = &mut *client.connection.acquire_guarded().await;
 
         // Test values. Feel free to add edge cases here
         // (Release MBID, RG MBID)

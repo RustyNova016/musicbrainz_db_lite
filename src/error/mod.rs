@@ -29,4 +29,7 @@ pub enum Error {
     // Fetching Errors
     #[error("Fetching a listen from Listenbrainz resulted in timeout")]
     ListenFetchingTimeout,
+
+    #[error(transparent)]
+    IOError(#[from] std::io::Error),
 }

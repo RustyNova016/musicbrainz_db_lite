@@ -36,7 +36,7 @@ mod tests {
     #[serial_test::serial]
     async fn should_get_listens_of_msid() {
         let client = DBClient::connect_in_memory_and_create().await.unwrap();
-        let conn = &mut *client.connection.acquire().await.unwrap();
+        let conn = &mut *client.connection.acquire_guarded().await;
         let lb_client = Client::new();
 
         // Test values. Feel free to add edge cases here
