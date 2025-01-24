@@ -15,12 +15,13 @@ macro_rules! impl_artist_credits {
             pub async fn get_artist_credits_or_fetch(
                 &self,
                 conn: &mut sqlx::SqliteConnection,
+                client: &crate::DBClient
             ) -> Result<crate::models::musicbrainz::artist_credit::ArtistCredits, crate::Error> {
 
                 match self.artist_credit {
                     Some(id) => Ok(crate::models::musicbrainz::artist_credit::ArtistCredits::find_by_id(conn, id).await?),
                     None => {
-                        let new_self = self.refetch(conn).await?;
+                        let new_self = self.refetch(conn, client).await?;
                         Ok(crate::models::musicbrainz::artist_credit::ArtistCredits::find_by_id(conn, new_self.artist_credit.expect("The artist creadits should be loaded after fetching")).await?)
                     },
                 }
@@ -48,8 +49,9 @@ macro_rules! impl_artist_credits {
             pub async fn format_with_credits(
                 &self,
                 conn: &mut sqlx::SqliteConnection,
+                client: &crate::DBClient
             ) -> Result<String, crate::Error> {
-                let credit = self.get_artist_credits_or_fetch(conn).await?.to_string();
+                let credit = self.get_artist_credits_or_fetch(conn, client).await?.to_string();
                 Ok(format!("{} by {}", self.title, credit))
             }
         }

@@ -13,6 +13,7 @@ impl Listen {
     pub async fn get_recording_or_fetch(
         &self,
         conn: &mut SqliteConnection,
+        client: &crate::DBClient,
     ) -> Result<Option<Recording>, crate::Error> {
         // TODO: Convert to one SQL query
         let user = User::find_by_name(conn, &self.user)
@@ -24,7 +25,7 @@ impl Listen {
 
         match recording_mbid {
             None => Ok(None),
-            Some(mapping) => Recording::get_or_fetch(conn, &mapping.recording_mbid).await,
+            Some(mapping) => Recording::get_or_fetch(conn, client, &mapping.recording_mbid).await,
         }
     }
 

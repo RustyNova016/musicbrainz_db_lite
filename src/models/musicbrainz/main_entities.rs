@@ -27,13 +27,14 @@ impl MainEntity {
     pub async fn refetch_and_load(
         &mut self,
         conn: &mut sqlx::SqliteConnection,
+        client: &crate::DBClient,
     ) -> Result<(), crate::Error> {
         match self {
-            MainEntity::Artist(val) => val.refetch_and_load(conn).await?,
-            MainEntity::Label(val) => val.refetch_and_load(conn).await?,
-            MainEntity::Recording(val) => val.refetch_and_load(conn).await?,
-            MainEntity::Release(val) => val.refetch_and_load(conn).await?,
-            MainEntity::Work(val) => val.refetch_and_load(conn).await?,
+            MainEntity::Artist(val) => val.refetch_and_load(conn, client).await?,
+            MainEntity::Label(val) => val.refetch_and_load(conn, client).await?,
+            MainEntity::Recording(val) => val.refetch_and_load(conn, client).await?,
+            MainEntity::Release(val) => val.refetch_and_load(conn, client).await?,
+            MainEntity::Work(val) => val.refetch_and_load(conn, client).await?,
         }
 
         Ok(())

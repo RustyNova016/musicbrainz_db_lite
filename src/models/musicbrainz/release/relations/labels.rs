@@ -12,9 +12,10 @@ impl Release {
     pub async fn get_labels_or_fetch(
         &self,
         conn: &mut SqliteConnection,
+        client: &crate::DBClient,
     ) -> Result<Vec<Label>, crate::Error> {
         // First, make sure all the data of the entity is in the database
-        let id = self.get_or_fetch_as_complete(conn).await?.id;
+        let id = self.get_or_fetch_as_complete(conn, client).await?.id;
 
         // Next, get all the children
         Ok(sqlx::query_as!(
@@ -80,7 +81,6 @@ mod tests {
     async fn should_get_labels_from_release() {
         let client = DBClient::connect_in_memory_and_create().await.unwrap();
         let conn = &mut *client.connection.acquire_guarded().await;
-        
 
         // Test values. Feel free to add edge cases here
         // (Release MBID, RG MBID)
@@ -90,13 +90,13 @@ mod tests {
         )];
 
         for (left, right) in test_values {
-            let value = Release::get_or_fetch(conn, left)
+            let value = Release::get_or_fetch(conn, &client, left)
                 .await
                 .expect("Error during fetch")
                 .expect("The release should exists");
 
             let right_value = value
-                .get_labels_or_fetch(conn)
+                .get_labels_or_fetch(conn, &client)
                 .await
                 .expect("Error during fetching")
                 .pop()

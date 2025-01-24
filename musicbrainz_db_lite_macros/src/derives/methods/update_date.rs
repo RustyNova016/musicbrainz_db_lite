@@ -19,10 +19,10 @@ pub fn impl_update_date(struct_name: &Ident, table_name: &str, pk: &str) -> Toke
         }
 
         /// Get from the database and perform an update if the data isn't fully present
-        pub async fn get_or_fetch_as_complete(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error> {
+        pub async fn get_or_fetch_as_complete(&self, conn: &mut sqlx::SqliteConnection, client: &crate::DBClient) -> Result<Self, crate::Error> {
             match self.full_update_date {
                 Some(_) => Ok(self.clone()),
-                None => self.refetch(conn).await
+                None => self.refetch(conn, client).await
             }
         }
 
@@ -44,34 +44,35 @@ pub fn impl_update_date(struct_name: &Ident, table_name: &str, pk: &str) -> Toke
         pub async fn fetch_if_incomplete(
             &self,
             conn: &mut sqlx::SqliteConnection,
+            client: &crate::DBClient
         ) -> Result<(), crate::Error> {
             if self.full_update_date.is_none() {
-                self.refetch(conn).await?;
+                self.refetch(conn, client).await?;
             }
             Ok(())
         }
 
         /// Get from the database and perform an update if the data isn't fully present
-        pub async fn get_or_fetch_as_complete_from_mbid(conn: &mut sqlx::SqliteConnection, mbid: &str) -> Result<Option<Self>, crate::Error> {
+        pub async fn get_or_fetch_as_complete_from_mbid(conn: &mut sqlx::SqliteConnection, client: &crate::DBClient, mbid: &str) -> Result<Option<Self>, crate::Error> {
             match Self::find_by_mbid(conn, mbid).await? {
                 Some(data) => {
                     if data.full_update_date.is_none() {
-                        return Ok(Some(data.refetch(conn).await?))
+                        return Ok(Some(data.refetch(conn, client).await?))
                     }
                     Ok(Some(data))
                 },
-                None => Self::fetch_and_save(conn, mbid).await
+                None => Self::fetch_and_save(conn, client, mbid).await
             }
         }
 
         /// Refresh the data in the database by refetching the entity
-        pub async fn refetch(&self, conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error> {
-            Self::fetch_and_save(conn, &self.mbid).await?.ok_or(crate::Error::UnknownUpstream(self.mbid.clone()))
+        pub async fn refetch(&self, conn: &mut sqlx::SqliteConnection, client: &crate::DBClient) -> Result<Self, crate::Error> {
+            Self::fetch_and_save(conn, client, &self.mbid).await?.ok_or(crate::Error::UnknownUpstream(self.mbid.clone()))
         }
 
         /// Refetch the entity and replace the inner values with the new ones
-        pub async fn refetch_and_load(&mut self, conn: &mut sqlx::SqliteConnection) -> Result<(), crate::Error> {
-            *self = self.refetch(conn).await?;
+        pub async fn refetch_and_load(&mut self, conn: &mut sqlx::SqliteConnection, client: &crate::DBClient) -> Result<(), crate::Error> {
+            *self = self.refetch(conn, client).await?;
 
             Ok(())
         }

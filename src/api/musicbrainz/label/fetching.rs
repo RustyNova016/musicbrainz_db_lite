@@ -1,11 +1,13 @@
 use musicbrainz_rs_nova::{entity::label::Label as MBLabel, Fetch};
 
+use crate::database::client::DBClient;
 use crate::{api::SaveToDatabase, models::musicbrainz::label::Label};
 
 impl Label {
     // TODO: #51 Fix missing relations
     pub async fn fetch_and_save(
         conn: &mut sqlx::SqliteConnection,
+        client: &DBClient,
         mbid: &str,
     ) -> Result<Option<Self>, crate::Error> {
         let data = MBLabel::fetch()
@@ -22,7 +24,7 @@ impl Label {
             .with_releases()
             .with_tags()
             .with_url_relations()
-            .execute()
+            .execute_with_client(&client.musicbrainz_client)
             .await;
 
         match data {
@@ -57,7 +59,6 @@ impl SaveToDatabase for MBLabel {
 #[cfg(test)]
 mod tests {
 
-
     use crate::database::client::DBClient;
     use crate::models::musicbrainz::label::Label;
 
@@ -74,7 +75,7 @@ mod tests {
         ];
 
         for test in test_values {
-            let value = Label::get_or_fetch(conn, test).await.unwrap();
+            let value = Label::get_or_fetch(conn, &client, test).await.unwrap();
 
             assert!(value.is_some_and(|r| r.full_update_date.is_some()))
         }

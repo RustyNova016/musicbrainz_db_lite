@@ -13,9 +13,10 @@ impl Recording {
     pub async fn get_works_or_fetch(
         &self,
         conn: &mut SqliteConnection,
+        client: &crate::DBClient,
     ) -> Result<Vec<Work>, crate::Error> {
         // First, make sure all the work of the recording are in the database
-        self.fetch_if_incomplete(conn).await?;
+        self.fetch_if_incomplete(conn, client).await?;
 
         // Next, get all the works
         Ok(sqlx::query_as(
@@ -91,13 +92,13 @@ mod tests {
         }];
 
         for assertion in &test_values {
-            let value = Recording::get_or_fetch(conn, assertion.left_id)
+            let value = Recording::get_or_fetch(conn, &client, assertion.left_id)
                 .await
                 .expect("Error during fetch")
                 .expect("The recording should exists");
 
             let right_values = value
-                .get_works_or_fetch(conn)
+                .get_works_or_fetch(conn, &client)
                 .await
                 .expect("Error during fetching");
 
