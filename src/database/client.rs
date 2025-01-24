@@ -3,6 +3,7 @@ use std::sync::RwLock;
 
 use musicbrainz_rs_nova::client::MusicBrainzClient;
 
+use crate::database::client_connection::ClientConnection;
 use crate::database::client_like::ClientLike;
 use crate::utils::sqlx_utils::db_connection::DbConnection;
 use crate::utils::sqlx_utils::get_exec::GetExecutor;
@@ -12,15 +13,12 @@ pub struct DBClient {
     pub musicbrainz_rs: Arc<MusicBrainzClient>,
 }
 
-impl<'c> ClientLike<'c> for &'c mut DBClient {
-    fn get_mb_client(self) -> &'c MusicBrainzClient {
-        &self.musicbrainz_rs
-    }
-}
-
-impl<'c> GetExecutor<'c> for &'c mut DBClient  {
-    async fn get_executor(self) -> Result<impl sqlx::SqliteExecutor<'c>, crate::Error> {
-        Ok(DbConnection::new(&mut self.connection))
+impl DBClient {
+    pub fn acquire<'c>(&'c mut self) -> ClientConnection<'c> {
+        ClientConnection {
+            musicbrainz_rs: self.musicbrainz_rs.as_ref(),
+            connection: DbConnection::new(&mut self.connection),
+        }
     }
 }
 

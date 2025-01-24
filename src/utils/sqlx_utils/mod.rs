@@ -1,3 +1,4 @@
+pub mod db_owned_connection;
 pub mod get_exec;
 pub mod acquire_db_conn;
 pub mod db_connection;

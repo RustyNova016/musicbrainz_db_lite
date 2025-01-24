@@ -1,18 +1,18 @@
-use sqlx::Executor;
-use sqlx::Sqlite;
+// use sqlx::Executor;
+// use sqlx::Sqlite;
 
-use crate::database::client::DBClient;
-use crate::utils::sqlx_utils::db_connection::DbConnection;
+// use crate::database::client::DBClient;
+// use crate::utils::sqlx_utils::db_connection::DbConnection;
 
-pub trait AcquireDbConnection<'c> {
-    async fn acquire(self) -> Result<DbConnection<'c>, crate::Error>;
-}
-
-// impl<'c> AcquireDbConnection<'c> for DBClient {
-//     async fn acquire(self) -> Result<DbConnection<'c>, crate::Error> {
-//         Ok(DbConnection::new(&mut *self.connection.acquire().await?))
-//     }
+// pub trait AcquireDbConnection<'c> {
+//     async fn acquire(self) -> Result<DbConnection<'c>, crate::Error>;
 // }
+
+// // impl<'c> AcquireDbConnection<'c> for DBClient {
+// //     async fn acquire(self) -> Result<DbConnection<'c>, crate::Error> {
+// //         Ok(DbConnection::new(&mut *self.connection.acquire().await?))
+// //     }
+// // }
 
 // impl<'c> Executor<'c> for DBClient {
 //     type Database = Sqlite;

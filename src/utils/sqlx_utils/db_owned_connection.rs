@@ -19,35 +19,23 @@ use tokio::sync::RwLock;
 /// This struct allow to change this order, by providing a first in, first out `RwLock`. This also prevent hitting write timeouts.
 /// This doesn't cover other application using the database at the same time, but it's better than nothing
 #[derive(Debug, Clone)]
-pub struct DbConnection<'c>(Arc<Mutex<&'c mut sqlx::SqliteConnection>>);
+pub struct DbConnectionOwned(Arc<Mutex<sqlx::SqliteConnection>>);
 
-impl<'c> DbConnection<'c> {
-    pub fn new(connection: &'c mut sqlx::SqliteConnection) -> Self {
+impl DbConnectionOwned {
+    pub fn new(connection: sqlx::SqliteConnection) -> Self {
         Self(Arc::new(Mutex::new(connection)))
     }
 
-    pub async fn acquire_guarded(
-        &self,
-    ) -> tokio::sync::MutexGuard<'_, &'c mut sqlx::SqliteConnection> {
+    pub async fn acquire_guarded(&self) -> tokio::sync::MutexGuard<'_, sqlx::SqliteConnection> {
         self.0.lock().await
     }
 
-    pub async fn acquire_owned(
-        &self,
-    ) -> tokio::sync::OwnedMutexGuard<&'c mut sqlx::SqliteConnection> {
+    pub async fn acquire_owned(&self) -> tokio::sync::OwnedMutexGuard<sqlx::SqliteConnection> {
         self.0.clone().lock_owned().await
     }
-
-//     pub async fn from_sqlx_transaction(
-//         trans: &'c mut Transaction<'c, Sqlite>,
-//     ) -> Result<Self, crate::Error> {
-//         let conn = trans.acquire().await?;
-//         Ok(Self::new(conn))
-//     }
-// }
 }
 
-impl<'c> Executor<'c> for &'c DbConnection<'c> {
+impl<'c> Executor<'c> for DbConnectionOwned {
     type Database = Sqlite;
 
     fn fetch_many<'e, 'q: 'e, E>(
