@@ -1,3 +1,4 @@
+use crate::database::client::DBClient;
 use crate::{
     api::SaveToDatabase,
     models::musicbrainz::release::{Release, Track},
@@ -10,6 +11,7 @@ use sqlx::SqliteConnection;
 impl Release {
     pub async fn fetch_and_save(
         conn: &mut SqliteConnection,
+        client: &DBClient,
         mbid: &str,
     ) -> Result<Option<Self>, Error> {
         let data = MBRelease::fetch()
@@ -29,7 +31,7 @@ impl Release {
             .with_url_relations()
             .with_work_level_relations()
             .with_work_relations()
-            .execute()
+            .execute_with_client(&client.musicbrainz_client)
             .await;
 
         match data {
@@ -61,7 +63,11 @@ impl SaveToDatabase for MBRelease {
 }
 
 impl Track {
-    pub async fn refetch(&self, _conn: &mut sqlx::SqliteConnection) -> Result<Self, crate::Error> {
+    pub async fn refetch(
+        &self,
+        _conn: &mut sqlx::SqliteConnection,
+        _client: &crate::DBClient,
+    ) -> Result<Self, crate::Error> {
         todo!();
     }
 }
@@ -85,7 +91,7 @@ mod tests {
         let test_values = vec!["daf6e333-b491-490a-9444-8888cb08b141"];
 
         for test in test_values {
-            let value = Release::get_or_fetch(conn, test).await.unwrap();
+            let value = Release::get_or_fetch(conn, &client, test).await.unwrap();
 
             assert!(value.is_some_and(|r| r.full_update_date.is_some()))
         }
@@ -106,16 +112,18 @@ mod tests {
 
         for (recording_id, release_id) in test_values {
             // Get the recording to partially pull release info
-            Recording::fetch_and_save(conn, recording_id).await.unwrap();
+            Recording::fetch_and_save(conn, &client, recording_id)
+                .await
+                .unwrap();
 
-            let mut release = Release::get_or_fetch(conn, release_id)
+            let mut release = Release::get_or_fetch(conn, &client, release_id)
                 .await
                 .unwrap()
                 .unwrap();
 
             assert!(release.full_update_date.is_none());
 
-            release.refetch_and_load(conn).await.unwrap();
+            release.refetch_and_load(conn, &client).await.unwrap();
 
             assert!(release.full_update_date.is_some());
         }

@@ -12,9 +12,10 @@ impl Recording {
     pub async fn get_artists_or_fetch(
         &self,
         conn: &mut sqlx::SqliteConnection,
+        client: &crate::DBClient,
     ) -> Result<Vec<Artist>, crate::Error> {
         // First, make sure all the work of the recording are in the database
-        self.fetch_if_incomplete(conn).await?;
+        self.fetch_if_incomplete(conn, client).await?;
 
         // Next, get all the works
         Ok(sqlx::query_as(

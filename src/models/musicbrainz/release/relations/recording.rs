@@ -12,9 +12,10 @@ impl Release {
     pub async fn get_recordings_or_fetch(
         &self,
         conn: &mut sqlx::SqliteConnection,
+        client: &crate::DBClient,
     ) -> Result<Vec<Recording>, crate::Error> {
         // First, make sure the entity is in the database
-        self.fetch_if_incomplete(conn).await?;
+        self.fetch_if_incomplete(conn, client).await?;
 
         // Next, get all the works
         Ok(sqlx::query_as(
@@ -92,13 +93,13 @@ mod tests {
         }];
 
         for assertion in &test_values {
-            let value = Release::get_or_fetch(conn, assertion.left_id)
+            let value = Release::get_or_fetch(conn, &client, assertion.left_id)
                 .await
                 .expect("Error during fetch")
                 .expect("The release should exists");
 
             let right_values = value
-                .get_recordings_or_fetch(conn)
+                .get_recordings_or_fetch(conn, &client)
                 .await
                 .expect("Error during fetching");
 

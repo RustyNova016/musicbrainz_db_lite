@@ -2,12 +2,14 @@ use musicbrainz_rs_nova::entity::work::Work as MBWork;
 use musicbrainz_rs_nova::Fetch;
 
 use crate::api::SaveToDatabase;
+use crate::database::client::DBClient;
 use crate::models::musicbrainz::work::Work;
 use crate::Error;
 
 impl Work {
     pub async fn fetch_and_save(
         conn: &mut sqlx::SqliteConnection,
+        client: &DBClient,
         mbid: &str,
     ) -> Result<Option<Self>, Error> {
         let data = MBWork::fetch()
@@ -22,7 +24,7 @@ impl Work {
             .with_work_relations()
             .with_label_relations()
             .with_recording_relations()
-            .execute()
+            .execute_with_client(&client.musicbrainz_client)
             .await;
 
         match data {
@@ -57,7 +59,6 @@ impl SaveToDatabase for MBWork {
 #[cfg(test)]
 mod tests {
 
-
     use crate::database::client::DBClient;
     use crate::models::musicbrainz::work::Work;
 
@@ -74,7 +75,7 @@ mod tests {
         ];
 
         for test in test_values {
-            let value = Work::get_or_fetch(conn, test).await.unwrap();
+            let value = Work::get_or_fetch(conn, &client, test).await.unwrap();
 
             assert!(value.is_some_and(|r| r.full_update_date.is_some()))
         }

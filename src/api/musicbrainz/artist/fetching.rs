@@ -4,12 +4,14 @@ use sqlx::SqliteConnection;
 use tracing::debug;
 
 use crate::api::SaveToDatabase;
+use crate::database::client::DBClient;
 use crate::models::musicbrainz::artist::Artist;
 use crate::Error;
 
 impl Artist {
     pub async fn fetch_and_save(
         conn: &mut SqliteConnection,
+        client: &DBClient,
         mbid: &str,
     ) -> Result<Option<Self>, Error> {
         debug!(mbid = mbid);
@@ -35,7 +37,7 @@ impl Artist {
             .with_work_relations()
             .with_works()
             .with_medias()
-            .execute()
+            .execute_with_client(&client.musicbrainz_client)
             .await;
 
         match data {
@@ -59,7 +61,6 @@ impl Artist {
 #[cfg(test)]
 mod tests {
 
-
     use crate::database::client::DBClient;
     use crate::models::musicbrainz::artist::Artist;
 
@@ -76,7 +77,7 @@ mod tests {
         ];
 
         for test in test_values {
-            let value = Artist::get_or_fetch(conn, test).await.unwrap();
+            let value = Artist::get_or_fetch(conn, &client, test).await.unwrap();
 
             assert!(value.is_some_and(|r| r.full_update_date.is_some()))
         }

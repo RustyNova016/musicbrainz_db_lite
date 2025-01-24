@@ -1,3 +1,4 @@
+use crate::database::client::DBClient;
 use crate::{api::SaveToDatabase, models::musicbrainz::recording::Recording, Error};
 use musicbrainz_rs_nova::{entity::recording::Recording as MSRecording, Fetch};
 use sqlx::SqliteConnection;
@@ -6,6 +7,7 @@ impl Recording {
     /// Fetch a recording with all relationships. Then save to the db
     pub async fn fetch_and_save(
         conn: &mut SqliteConnection,
+        client: &DBClient,
         mbid: &str,
     ) -> Result<Option<Recording>, Error> {
         let data = MSRecording::fetch()
@@ -35,7 +37,7 @@ impl Recording {
             // Extra relations
             .with_work_level_relations()
             .with_medias()
-            .execute()
+            .execute_with_client(&client.musicbrainz_client)
             .await;
 
         match data {
@@ -59,7 +61,6 @@ impl Recording {
 #[cfg(test)]
 mod tests {
 
-
     use crate::database::client::DBClient;
     use crate::models::musicbrainz::recording::Recording;
 
@@ -76,14 +77,17 @@ mod tests {
         ];
 
         for test in test_values {
-            let value = Recording::get_or_fetch(conn, test)
+            let value = Recording::get_or_fetch(conn, &client, test)
                 .await
                 .unwrap()
                 .expect("The recording should be there");
 
             assert!(value.full_update_date.is_some());
 
-            let credits = value.get_artist_credits_or_fetch(conn).await.unwrap();
+            let credits = value
+                .get_artist_credits_or_fetch(conn, &client)
+                .await
+                .unwrap();
             assert!(!credits.1.is_empty())
         }
     }

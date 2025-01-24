@@ -16,9 +16,10 @@ impl Recording {
     pub async fn get_releases_or_fetch(
         &self,
         conn: &mut SqliteConnection,
+        client: &crate::DBClient,
     ) -> Result<Vec<Release>, crate::Error> {
         // First, make sure all the releases of the recording are in the database
-        self.fetch_if_incomplete(conn).await?;
+        self.fetch_if_incomplete(conn, client).await?;
 
         // Next, get all the releases
         Ok(sqlx::query_as(
@@ -96,13 +97,13 @@ mod tests {
         )];
 
         for (left, right) in test_values {
-            let value = Recording::get_or_fetch(conn, left)
+            let value = Recording::get_or_fetch(conn, &client, left)
                 .await
                 .expect("Error during fetch")
                 .expect("The release should exists");
 
             let right_value = value
-                .get_releases_or_fetch(conn)
+                .get_releases_or_fetch(conn, &client)
                 .await
                 .expect("Error during fetching");
 
@@ -129,7 +130,7 @@ mod tests {
         )];
 
         for (left, right) in test_values {
-            let value = Recording::get_or_fetch(conn, left)
+            let value = Recording::get_or_fetch(conn, &client, left)
                 .await
                 .expect("Error during fetch")
                 .expect("The release should exists");
