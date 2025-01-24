@@ -78,7 +78,7 @@ mod tests {
     #[serial_test::serial]
     async fn should_insert_release() {
         let client = DBClient::connect_in_memory_and_create().await.unwrap();
-        let conn = &mut *client.connection.acquire().await.unwrap();
+        let conn = &mut *client.connection.acquire_guarded().await;
         create_and_migrate(conn).await.unwrap();
 
         // Test values. Feel free to add edge cases here
@@ -95,7 +95,7 @@ mod tests {
     #[serial_test::serial]
     async fn should_full_insert_release() {
         let client = DBClient::connect_in_memory_and_create().await.unwrap();
-        let conn = &mut *client.connection.acquire().await.unwrap();
+        let conn = &mut *client.connection.acquire_guarded().await;
 
         // Test values. Feel free to add edge cases here
         // (Recording, Release)
