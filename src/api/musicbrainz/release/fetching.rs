@@ -6,12 +6,14 @@ use crate::{
 use musicbrainz_rs_nova::{entity::release::Release as MBRelease, Fetch};
 use sqlx::Connection;
 use sqlx::SqliteConnection;
+use tracing::trace;
 
 impl Release {
     pub async fn fetch_and_save(
         conn: &mut SqliteConnection,
         mbid: &str,
     ) -> Result<Option<Self>, Error> {
+        trace!("Fetching Release: {}", mbid);
         let data = MBRelease::fetch()
             .id(mbid)
             .with_aliases()

@@ -2,6 +2,7 @@ use musicbrainz_rs_nova::entity::artist::Artist as MBArtist;
 use musicbrainz_rs_nova::Fetch;
 use sqlx::SqliteConnection;
 use tracing::debug;
+use tracing::trace;
 
 use crate::api::SaveToDatabase;
 use crate::models::musicbrainz::artist::Artist;
@@ -15,6 +16,7 @@ impl Artist {
         debug!(mbid = mbid);
 
         // TODO: #51 Fix missing relations
+        trace!("Fetching Artist: {}", mbid);
         let data = MBArtist::fetch()
             .id(mbid)
             .with_aliases()

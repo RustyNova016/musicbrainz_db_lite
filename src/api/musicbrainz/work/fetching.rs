@@ -1,5 +1,6 @@
 use musicbrainz_rs_nova::entity::work::Work as MBWork;
 use musicbrainz_rs_nova::Fetch;
+use tracing::trace;
 
 use crate::api::SaveToDatabase;
 use crate::models::musicbrainz::work::Work;
@@ -10,6 +11,7 @@ impl Work {
         conn: &mut sqlx::SqliteConnection,
         mbid: &str,
     ) -> Result<Option<Self>, Error> {
+        trace!("Fetching Work: {}", mbid);
         let data = MBWork::fetch()
             .id(mbid)
             .with_aliases()

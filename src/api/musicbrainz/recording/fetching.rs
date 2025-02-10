@@ -1,6 +1,7 @@
 use crate::{api::SaveToDatabase, models::musicbrainz::recording::Recording, Error};
 use musicbrainz_rs_nova::{entity::recording::Recording as MSRecording, Fetch};
 use sqlx::SqliteConnection;
+use tracing::trace;
 
 impl Recording {
     /// Fetch a recording with all relationships. Then save to the db
@@ -8,6 +9,7 @@ impl Recording {
         conn: &mut SqliteConnection,
         mbid: &str,
     ) -> Result<Option<Recording>, Error> {
+        trace!("Fetching Recording: {}", mbid);
         let data = MSRecording::fetch()
             .id(mbid)
             .with_aliases()

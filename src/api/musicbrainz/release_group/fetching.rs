@@ -1,5 +1,6 @@
 use musicbrainz_rs_nova::entity::release_group::ReleaseGroup as MBReleaseGroup;
 use musicbrainz_rs_nova::Fetch;
+use tracing::trace;
 
 use crate::api::SaveToDatabase;
 use crate::models::musicbrainz::release_group::ReleaseGroup;
@@ -10,6 +11,7 @@ impl ReleaseGroup {
         conn: &mut sqlx::SqliteConnection,
         mbid: &str,
     ) -> Result<Option<Self>, Error> {
+        trace!("Fetching Release Group: {}", mbid);
         let data = MBReleaseGroup::fetch()
             .id(mbid)
             .with_aliases()

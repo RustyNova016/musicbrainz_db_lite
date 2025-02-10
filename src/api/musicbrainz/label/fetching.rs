@@ -1,4 +1,5 @@
 use musicbrainz_rs_nova::{entity::label::Label as MBLabel, Fetch};
+use tracing::trace;
 
 use crate::{api::SaveToDatabase, models::musicbrainz::label::Label};
 
@@ -8,6 +9,7 @@ impl Label {
         conn: &mut sqlx::SqliteConnection,
         mbid: &str,
     ) -> Result<Option<Self>, crate::Error> {
+        trace!("Fetching Label: {}", mbid);
         let data = MBLabel::fetch()
             .id(mbid)
             .with_aliases()
