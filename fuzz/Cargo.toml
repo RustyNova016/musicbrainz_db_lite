@@ -1,0 +1,20 @@
+[package]
+name = "musicbrainz_db_lite_schema_fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+musicbrainz-db-lite = {path = "../", features = ["arbitrary"]}
+tokio = "1.43.0"
+
+[[bin]]
+name = "recording_insert"
+path = "fuzz_targets/recording_insert.rs"
+test = false
+doc = false
+bench = false

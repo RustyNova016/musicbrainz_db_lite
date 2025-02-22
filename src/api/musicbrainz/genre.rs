@@ -13,7 +13,7 @@ impl Genre {
         let mut genre = Genre {
             mbid: value
                 .id
-                .expect("The mbid of the genre should always be present"),
+                .ok_or_else(|| crate::Error::MissingMBID("Genre".to_string()))?,
             disambiguation: value.disambiguation,
             name: value.name,
             id: Default::default(),

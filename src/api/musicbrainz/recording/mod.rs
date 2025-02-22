@@ -39,7 +39,7 @@ impl Recording {
             length: new.length.map(|n| n as i64).or(self.length),
             title: new.title,
             full_update_date: self.full_update_date,
-            video: new.video.map(|n| n as i64).or(self.video),
+            video: new.video.or(self.video),
             first_release_date: new
                 .first_release_date
                 .map(|date| date_to_timestamp(date).unwrap())

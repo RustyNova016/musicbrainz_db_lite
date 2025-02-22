@@ -17,7 +17,7 @@ impl DBClient {
         ClientBuilder::default()
     }
 
-    #[cfg(test)]
+    //#[cfg(test)]
     /// Create an in memory database with the default MB client
     pub async fn connect_in_memory_and_create() -> Result<Self, crate::Error> {
         Ok(Self::builder()

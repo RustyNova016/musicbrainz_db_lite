@@ -32,4 +32,7 @@ pub enum Error {
 
     #[error(transparent)]
     IOError(#[from] std::io::Error),
+
+    #[error("Missing an MBID for the entity `{0}`")]
+    MissingMBID(String)
 }

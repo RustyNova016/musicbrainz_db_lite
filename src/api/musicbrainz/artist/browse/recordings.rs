@@ -71,8 +71,7 @@ impl Artist {
     ) -> impl Stream<Item = Result<Recording, sqlx::Error>> + Send + use<'this, 'conn> {
         // Wrap the stream into an fn_stream to deal with lifetime issues.
         fn_stream(|emitter| async move {
-            let mut stream = sqlx::query_as!(
-                Recording,
+            let mut stream = sqlx::query_as(
                 "
                 SELECT
                     recordings.*
@@ -89,9 +88,9 @@ impl Artist {
                         WHERE
                             artists_gid_redirect.new_id = ?
                     )
-                ",
-                self.id
-            )
+                "
+                
+            ).bind(self.id)
             .fetch(conn);
 
             while let Some(data) = stream.next().await {
