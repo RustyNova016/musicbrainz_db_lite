@@ -12,11 +12,13 @@ musicbrainz_rs_nova = { version = "0.9.0", package = "musicbrainz_rs"  }
 #musicbrainz_rs_nova = { branch = "develop", git = "https://github.com/RustyNova016/musicbrainz_rs.git", package = "musicbrainz_rs" }
 #musicbrainz_rs_nova = { path = "../musicbrainz_rs_nova" }
 
+#listenbrainz = "0.8.1"
+listenbrainz = { branch = "alistral_version", git = "https://github.com/RustyNova016/listenbrainz-rs.git" }
+
 async-trait = "0.1.82"
 chrono = "0.4.38"
 extend = "1.2.0"
 futures = "0.3.30"
-listenbrainz = "0.8.0"
 macon = "1.2.0"
 serde_json = "1.0.128"
 sqlx = { version = "0.8.2", features = ["runtime-tokio", "macros", "sqlite"] }
